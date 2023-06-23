@@ -1,4 +1,4 @@
-Microsoft IntelliMouse utilities. Tested on Pro Intellimouse Shadow with `VendorID = 045E` (Microsoft) and `ProductID = 082A` (Pro IntelliMouse).
+Microsoft IntelliMouse utilities. Tested on Pro IntelliMouse Shadow with `VendorID = 045E` (Microsoft) and `ProductID = 082A` (Pro IntelliMouse).
 
 Tools:
 * `TailLight.exe`: Command-line utility for changing the tail-light color.
@@ -15,3 +15,12 @@ FeatureReport[3] = red;
 FeatureReport[4] = green;
 FeatureReport[5] = blue;
 ```
+
+## How to reverse-engineer the protocol
+It's possible to reverse-engineer the IntelliMouse USB HID protocol by installing [USBPcap](https://desowin.org/usbpcap/) and [Wireshark](https://www.wireshark.org/).
+
+Steps:
+1. Open Wireshark with USBPcap plugin.
+2. Open "Microsoft Mouse and Keyboard Center" app.
+3. Change tail-light color.
+4. Observe USB HID feature report request packages that adhere to the format described above. 
