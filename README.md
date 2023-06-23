@@ -8,7 +8,7 @@ Steps to update the tail-light:
 * Connect to mouse HID device with `Usage=0212` and `UsagePage=FF07`.
 * Send a *feature report* with the following header:
 ```
-FeatureReport[0] = 0x24; // Report ID 36
+FeatureReport[0] = 0x24; // ReportID 36
 FeatureReport[1] = 0xB2; // magic value
 FeatureReport[2] = 0x03; // magic value
 FeatureReport[3] = red;
