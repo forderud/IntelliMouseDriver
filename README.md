@@ -25,10 +25,9 @@ Steps:
 3. Change tail-light color.
 4. Observe USB HID feature report request packages that adhere to the format described above. 
 
+![USB capture](USB_capture.png)
 
 ## Driver development
 Relevant resources for getting started with driver development against IntelliMouse:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
 * [KMDF filter driver for a HID device](https://github.com/microsoft/windows-driver-samples/tree/main/hid/firefly) sample.
-
-![USB capture](USB_capture.png)
