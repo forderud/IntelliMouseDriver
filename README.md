@@ -27,6 +27,8 @@ Steps:
 
 ![USB capture](USB_capture.png)
 
+The feature report also contains a number of other non-zero bytes. I don't know if they carry a meaning or are just uninitialized memory.
+
 ## Driver development
 Relevant resources for getting started with driver development against IntelliMouse:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
