@@ -23,7 +23,7 @@ Steps:
 1. Open Wireshark with USBPcap plugin.
 2. Open "Microsoft Mouse and Keyboard Center" app.
 3. Change tail-light color.
-4. Observe USB HID feature report request packages that adhere to the format described above. 
+4. Observe `USBHID` `SET_REPORT Request` packages with `ReportID=36` and `ReportType=Feature` that adhere to the format described above. 
 
 ![USB capture](USB_capture.png)
 
