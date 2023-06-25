@@ -30,3 +30,5 @@ Steps:
 Relevant resources for getting started with driver development against IntelliMouse:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
 * [KMDF filter driver for a HID device](https://github.com/microsoft/windows-driver-samples/tree/main/hid/firefly) sample.
+
+![USB capture](USB_capture.png)
