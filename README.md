@@ -33,3 +33,25 @@ The feature report also contains a number of other non-zero bytes. I don't know 
 Relevant resources for getting started with driver development against IntelliMouse:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
 * [KMDF filter driver for a HID device](https://github.com/microsoft/windows-driver-samples/tree/main/hid/firefly) sample.
+
+### Target computer configuration
+Steps to configure the *target* computer for driver testing:
+* Disable Secure Boot in UEFI/BIOS.
+* Enable test-signed drivers: [`bcdedit /set testsigning on`](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/the-testsigning-boot-configuration-option).
+* Configuration of [kernel-mode debugging over a USB 3.0 cable](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-a-usb-3-0-debug-cable-connection) with a USB 3 crossover cable:
+  - `bcdedit /debug on`
+  - `bcdedit /dbgsettings usb targetname:KernelUSBConn`
+  - `bcdedit /set "{dbgsettings}" busparams <b.d.f>` (bus, device & function numbers for USB host controller)
+* From the host computer, connect with the WinDbg over USB to the `KernelUSBConn` target.
+* Restart the target computer.
+* WinDbg configuration to enable debug messages: `kd>ed nt!Kd_DEFAULT_Mask 0xff`.
+ 
+### Manual driver installation
+* Open "Device Manager"
+* Right-click on the relevant device, and select "Update driver".
+* Click on "Browse my computer for drivers".
+* Click on "Let me pick from a list...".
+* Click on "Have Disk..." and select the driver in the file system:
+![ManualDriverPick](ManualDriverPick.png)
+* Click on "Install this driver software anyway" when being warned about the publisher:
+![UnsignedDriverConfirm](UnsignedDriverConfirm.png)
