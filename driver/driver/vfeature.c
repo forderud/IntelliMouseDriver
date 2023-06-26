@@ -94,6 +94,8 @@ Return Value:
                                     &DeviceContext->PdoName,
                                     FILE_WRITE_ACCESS);
 
+    KdPrint(("Firefly: DeviceContext->PdoName: %wZ\n", DeviceContext->PdoName)); // outputs "\Device\00000083"
+
     //
     // We will let the framework to respond automatically to the pnp
     // state changes of the target by closing and opening the handle.
@@ -109,7 +111,7 @@ Return Value:
 
     WDF_MEMORY_DESCRIPTOR      outputDescriptor;
     HID_COLLECTION_INFORMATION collectionInformation = {0};
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor,
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor, // out (mapped to collectionInformation)
                                       (PVOID) &collectionInformation,
                                       sizeof(HID_COLLECTION_INFORMATION));
 
@@ -124,8 +126,11 @@ Return Value:
                                   NULL,
                                   NULL);
 
+    KdPrint(("FireFly: ProductID=%x, VendorID=%x, VersionNumber=%u, DescriptorSize=%u\n", collectionInformation.ProductID, collectionInformation.VendorID, collectionInformation.VersionNumber, collectionInformation.DescriptorSize));
+
+
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously failed 0x%x\n", status));                
+        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));                
         goto ExitAndFree;
     }
 
@@ -137,20 +142,20 @@ Return Value:
         goto ExitAndFree;
     }
 
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor,
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor, // out (mapped to preparsedData)
                                       (PVOID) preparsedData,
                                       collectionInformation.DescriptorSize);
 
     status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
-                                  IOCTL_HID_GET_COLLECTION_DESCRIPTOR,
+                                  IOCTL_HID_GET_COLLECTION_DESCRIPTOR, // same as HidD_GetPreparsedData in user-mode
                                   NULL,
                                   &outputDescriptor,
                                   NULL,
                                   NULL);
 
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously failed 0x%x\n", status));                
+        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously2 failed 0x%x\n", status));                
         goto ExitAndFree;
     }
 
@@ -166,6 +171,9 @@ Return Value:
 
         goto ExitAndFree;
     }
+
+    KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
+    KdPrint(("FireFly: FeatureReportByteLength: %u\n", caps.FeatureReportByteLength));
 
     //
     // Create a report to send to the device.
@@ -219,7 +227,7 @@ Return Value:
                                   NULL,
                                   NULL);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously failed 0x%x\n", status));                
+        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously3 failed 0x%x\n", status)); 
         goto ExitAndFree;
     }
 
