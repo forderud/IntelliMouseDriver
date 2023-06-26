@@ -142,8 +142,6 @@ EvtWmiInstanceSetInstance(
     //
     status = FireflySetFeature(
         WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
-        TAILLIGHT_PAGE,
-        TAILLIGHT_FEATURE,
         pInfo->TailLit
         );
 
@@ -177,8 +175,6 @@ EvtWmiInstanceSetItem(
         //
         status = FireflySetFeature(
             WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
-            TAILLIGHT_PAGE,
-            TAILLIGHT_FEATURE,
             pInfo->TailLit
             );
 

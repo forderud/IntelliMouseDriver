@@ -39,8 +39,6 @@ Environment:
 NTSTATUS
 FireflySetFeature(
     IN  PDEVICE_CONTEXT DeviceContext,
-    IN  UCHAR           PageId,
-    IN  USHORT          FeatureId,
     IN  BOOLEAN         EnableFeature
     )
 /*++
@@ -175,11 +173,16 @@ Return Value:
     KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
     KdPrint(("FireFly: FeatureReportByteLength: %u\n", caps.FeatureReportByteLength));
 
+    if (caps.FeatureReportByteLength != 73) {
+        KdPrint(("FireFly: FeatureReportByteLength mismatch.\n"));
+        goto ExitAndFree;
+    }
+
     //
     // Create a report to send to the device.
     //
     report = (PCHAR) ExAllocatePool2(
-        POOL_FLAG_NON_PAGED, caps.FeatureReportByteLength, 'ffly');
+        POOL_FLAG_NON_PAGED, caps.FeatureReportByteLength+1, 'ffly');
 
     if (report == NULL) {
         goto ExitAndFree;
@@ -191,34 +194,27 @@ Return Value:
     //
     status = STATUS_SUCCESS;
 
-    if (EnableFeature) {
-
-        //
-        // Edit the report to reflect the enabled feature
-        //
-        USAGE usage = FeatureId;
-        ULONG usageLength = 1;
-
-        status = HidP_SetUsages(
-            HidP_Feature,
-            PageId,
-            0,
-            &usage, // pointer to the usage list
-            &usageLength, // number of usages in the usage list
-            preparsedData,
-            report,
-            caps.FeatureReportByteLength
-            );
-        if (!NT_SUCCESS(status)) {
-            KdPrint(("FireFly: HidP_SetUsages failed 0x%x\n", status));                
-            goto ExitAndFree;
-        }
+    HIDP_VALUE_CAPS valueCaps = {0};
+    USHORT ValueCapsLength = caps.NumberFeatureValueCaps;
+    status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, preparsedData);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("FireFly: HidP_GetValueCaps failed 0x%x\n", status));
+        goto ExitAndFree;
     }
+
+    // Set feature report values (as observed in USBPcap/Wireshark)
+    report[0] = valueCaps.ReportID; // Report ID 0x24 (36)
+    report[1] = 0xB2; // magic value
+    report[2] = 0x03; // magic value
+    // tail-light color
+    report[3] = EnableFeature ? 0x00 : 0xFF; // red
+    report[4] = EnableFeature ? 0xFF : 0x00; // green
+    report[5] = 0; // blue
 
     WDF_MEMORY_DESCRIPTOR inputDescriptor;
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
                                       report,
-                                      caps.FeatureReportByteLength);
+                                      caps.FeatureReportByteLength+1);
     status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
                                   IOCTL_HID_SET_FEATURE,

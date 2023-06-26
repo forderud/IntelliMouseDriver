@@ -29,8 +29,6 @@ Environment:
 NTSTATUS
 FireflySetFeature(
     IN  PDEVICE_CONTEXT DeviceContext,
-    IN  UCHAR           PageId,
-    IN  USHORT          FeatureId,
     IN  BOOLEAN         EnableFeature
     );
 

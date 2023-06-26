@@ -40,7 +40,6 @@ Environment:
 #include "device.h"
 #include "wmi.h"
 #include "vfeature.h"
-#include "magic.h"
 
 //
 // WDFDRIVER Object Events
