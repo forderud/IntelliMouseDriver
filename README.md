@@ -33,7 +33,6 @@ The feature report also contains a number of other non-zero bytes. I don't know 
 Relevant resources for getting started with driver development against IntelliMouse:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
 * [KMDF filter driver for a HID device](https://github.com/microsoft/windows-driver-samples/tree/main/hid/firefly) sample.
-* [Standard USB identifiers](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/standard-usb-identifiers) documents the `USB\VID_v(4)&PID_d(4)&MI_z(2)` identifier.
 * [HIDClass Hardware IDs for Top-Level Collections](https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hidclass-hardware-ids-for-top-level-collections) documents the `HID\Vid_v(4)&Pid_d(4)&MI_z(2)&Colb(2)` identifier.
 
 ### Target computer configuration
