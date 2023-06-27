@@ -50,6 +50,7 @@ Steps to configure the *target* computer for driver testing:
 
 ### Command-line driver installation
 Install: `PNPUTIL /add-driver <oem#.inf> /install`
+
 Uninstall: `PNPUTIL /delete-driver <oem#.inf> /uninstall`
 
 ### Manual driver installation
