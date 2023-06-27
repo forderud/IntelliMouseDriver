@@ -47,7 +47,11 @@ Steps to configure the *target* computer for driver testing:
 * From the host computer, connect with the WinDbg over USB to the `KernelUSBConn` target.
 * Restart the target computer.
 * WinDbg configuration to enable debug messages: `kd>ed nt!Kd_DEFAULT_Mask 0xff`.
- 
+
+### Command-line driver installation
+Install: `PNPUTIL /add-driver <oem#.inf> /install`
+Uninstall: `PNPUTIL /delete-driver <oem#.inf> /uninstall`
+
 ### Manual driver installation
 * Open "Device Manager"
 * Right-click on the relevant device, and select "Update driver".
