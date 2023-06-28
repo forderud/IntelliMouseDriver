@@ -9,5 +9,5 @@ $mouse.Active
 # get tail-light status
 $mouse.TailLit
 
-# update tail-light
+# update tail-light (doesn't work)
 $mouse.TailLit = 0
