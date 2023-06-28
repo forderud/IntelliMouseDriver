@@ -45,7 +45,7 @@ bool UpdateTailColor(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
 int main(int argc, char* argv[]) {
     if (argc < 4) {
         printf("IntelliMouse tail-light shifter.\n");
-        printf("Usage: \"TailLight.exe <red> <green> <blue>\" (example: \"TailLight.exe 0 0 255\").\n");
+        printf("Usage: \"HidUtil.exe <red> <green> <blue>\" (example: \"HidUtil.exe 0 0 255\").\n");
         return -1;
     }
 

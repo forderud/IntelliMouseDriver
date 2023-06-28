@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TailLight", "HidUtil\TailLight.vcxproj", "{05907D64-0811-4F2F-9AE8-9A6BDAE99D9B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HidUtil", "HidUtil\HidUtil.vcxproj", "{05907D64-0811-4F2F-9AE8-9A6BDAE99D9B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "firefly", "firefly\firefly.vcxproj", "{FF968AD9-B8FF-450D-93A0-4CC5AC2B49B5}"
 EndProject
