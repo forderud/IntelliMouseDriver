@@ -77,7 +77,5 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     luminous->Set(TRUE);
 
 End:
-    luminous->Close();
-
     return 0;
 }

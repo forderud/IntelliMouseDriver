@@ -2,11 +2,6 @@
 #include <stdexcept>
 
 
-CLuminous::~CLuminous() {
-    Close();
-}
-
-
 CLuminous::CLuminous() {
     HRESULT           hResult;
 
@@ -35,7 +30,7 @@ CLuminous::CLuminous() {
     }
 }
 
-VOID CLuminous::Close() {
+CLuminous::~CLuminous() {
     if (m_pIWbemServices) {
         m_pIWbemServices->Release();
         m_pIWbemServices = NULL;

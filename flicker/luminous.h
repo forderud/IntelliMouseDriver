@@ -17,7 +17,6 @@ public:
     CLuminous();
     virtual ~CLuminous(VOID);
 
-    VOID Close(VOID);
     BOOL Set(_In_ BOOL Enabled);
     BOOL Get(_In_ BOOL *Enabled);
 
