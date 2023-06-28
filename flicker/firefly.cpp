@@ -52,7 +52,7 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
             } else {
                 _tprintf(_T("Problem occured while adjusting light: %x\n"), GetLastError());
             }
-
+            Sleep(1000); // 1 sec
         } else {
             int k=0;
             int j=1;
