@@ -8,19 +8,15 @@
 // The function converts an ANSI string into BSTR and returns it in an
 // allocated memory. The memory must be freed by the caller using free()
 // function. If nLenSrc is -1, the string is null terminated.
-BSTR AnsiToBstr(_In_ WCHAR* lpSrc, _In_ int nLenSrc)
-{
-    if (lpSrc == NULL) {
-        nLenSrc = 0;
-    }
-    else {
-        if (nLenSrc == -1) {
-            size_t temp = wcslen(lpSrc);
-            if (temp > INT_MAX - 1) {
-                return NULL;
-            }
-            nLenSrc = (int)temp + 1;
+BSTR AnsiToBstr(_In_ WCHAR* lpSrc) {
+    UINT nLenSrc = 0;
+
+    if (lpSrc) {
+        size_t temp = wcslen(lpSrc);
+        if (temp > INT_MAX - 1) {
+            return NULL;
         }
+        nLenSrc = (UINT)temp + 1;
     }
 
     return SysAllocStringLen(lpSrc, nLenSrc);
@@ -48,7 +44,7 @@ IWbemServices* ConnectToNamespace(_In_ LPTSTR chNamespace)
     }
 
     // Namespaces are passed to COM in BSTRs.
-    BSTR bstrNamespace = AnsiToBstr(chNamespace, -1);
+    BSTR bstrNamespace = AnsiToBstr(chNamespace);
 
     if (!bstrNamespace) {
         _tprintf(TEXT("Out of memory.\n"));
@@ -117,7 +113,7 @@ IWbemClassObject* GetInstanceReference(
     HRESULT              hResult;
 
 
-    bstrClassName = AnsiToBstr(lpClassName, -1);
+    bstrClassName = AnsiToBstr(lpClassName);
 
     if (!bstrClassName) {
         _tprintf(TEXT("Out of memory.\n"));
@@ -210,7 +206,7 @@ bool CLuminous::Get(COLORREF* Color) {
     VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
-    BSTR bstrPropertyName = AnsiToBstr( PROPERTY_NAME, -1 );
+    BSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
 
     if ( !bstrPropertyName ) {
         _tprintf( TEXT("Error out of memory.\n") );
@@ -254,7 +250,7 @@ bool CLuminous::Set(COLORREF Color) {
     VariantInit( &varPropVal );
 
     LPTSTR      lpProperty = PROPERTY_NAME;
-    BSTR bstrPropertyName = AnsiToBstr( lpProperty, -1 );
+    BSTR bstrPropertyName = AnsiToBstr(lpProperty);
 
     if ( !bstrPropertyName ) {
         _tprintf( TEXT("Error out of memory.\n") );
