@@ -172,11 +172,9 @@ IWbemClassObject* GetInstanceReference(
 
 
 CLuminous::CLuminous() {
-    HRESULT           hResult;
-
     // Initialize COM library. Must be done before invoking any
     // other COM function.
-    hResult = CoInitialize( NULL );
+    HRESULT hResult = CoInitialize( NULL );
 
     if ( FAILED (hResult)) {
         _tprintf( TEXT("Error %lx: Failed to initialize COM library\n"), hResult );
@@ -216,19 +214,15 @@ CLuminous::~CLuminous() {
 
 
 bool CLuminous::Get(COLORREF* Color) {
-    VARIANT     varPropVal;
-    BSTR          bstrPropertyName = NULL;
-    HRESULT     hResult;
-    CIMTYPE     cimType;
-    bool          bRet= false;
 
     if (!m_pIWbemServices || !m_pIWbemClassObject) {
         return false;
     }
 
+    VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
-    bstrPropertyName = AnsiToBstr( PROPERTY_NAME, -1 );
+    BSTR bstrPropertyName = AnsiToBstr( PROPERTY_NAME, -1 );
 
     if ( !bstrPropertyName ) {
         _tprintf( TEXT("Error out of memory.\n") );
@@ -236,9 +230,10 @@ bool CLuminous::Get(COLORREF* Color) {
         return false;
     }
 
-    //
     // Get the property value.
-    hResult = m_pIWbemClassObject->Get(
+    bool     bRet= false;
+    CIMTYPE  cimType;
+    HRESULT hResult = m_pIWbemClassObject->Get(
                              bstrPropertyName,
                              0,
                              &varPropVal,
@@ -265,20 +260,17 @@ bool CLuminous::Get(COLORREF* Color) {
 }
 
 bool CLuminous::Set(COLORREF Color) {
-    VARIANT     varPropVal;
-    BSTR          bstrPropertyName = NULL;
-    HRESULT     hResult;
-    CIMTYPE     cimType;
-    bool         bRet = false;
-    LPTSTR      lpProperty = PROPERTY_NAME;
+    bool bRet = false;
 
     if (!m_pIWbemServices || !m_pIWbemClassObject) {
         return false;
     }
 
+    VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
-    bstrPropertyName = AnsiToBstr( lpProperty, -1 );
+    LPTSTR      lpProperty = PROPERTY_NAME;
+    BSTR bstrPropertyName = AnsiToBstr( lpProperty, -1 );
 
     if ( !bstrPropertyName ) {
         _tprintf( TEXT("Error out of memory.\n") );
@@ -286,7 +278,8 @@ bool CLuminous::Set(COLORREF Color) {
     }
 
     // Get the property value.
-    hResult = m_pIWbemClassObject->Get(
+    CIMTYPE     cimType;
+    HRESULT hResult = m_pIWbemClassObject->Get(
                              bstrPropertyName,
                              0,
                              &varPropVal,
@@ -309,7 +302,6 @@ bool CLuminous::Set(COLORREF Color) {
                                     &varPropVal,
                                     cimType
                                     );
-
 
         if ( hResult == WBEM_S_NO_ERROR ) {
             hResult = m_pIWbemServices->PutInstance(
