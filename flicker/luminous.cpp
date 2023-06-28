@@ -327,34 +327,16 @@ IWbemClassObject *GetInstanceReference (
 // The function converts an ANSI string into BSTR and returns it in an
 // allocated memory. The memory must be freed by the caller using free()
 // function. If nLenSrc is -1, the string is null terminated.
-BSTR AnsiToBstr (_In_ LPTSTR lpSrc, _In_ int nLenSrc)
+BSTR AnsiToBstr (_In_ WCHAR* lpSrc, _In_ int nLenSrc)
 {
     BSTR lpDest;
 
-    // In case of ANSI version, we need to change the ANSI string to UNICODE since
-    // BSTRs are essentially UNICODE strings.
-#ifndef UNICODE
-    int  nLenDest;
-
-    nLenDest = MultiByteToWideChar( CP_ACP, 0, lpSrc, nLenSrc, NULL, 0);
-
-    lpDest = SysAllocStringLen( NULL, nLenDest );
-
-    if ( lpDest ) {
-        MultiByteToWideChar( CP_ACP, 0, lpSrc, nLenSrc, lpDest, nLenDest );
-    }
-
-    //
-    // In case of UNICODE version, we simply allocate memory and copy the string.
-    //
-
-#else
     if ( lpSrc == NULL ) {
         nLenSrc = 0;
     }
     else {
         if ( nLenSrc == - 1 ) {
-            size_t temp = _tcslen( lpSrc );
+            size_t temp = wcslen( lpSrc );
             if (temp > INT_MAX - 1) {
                 return NULL;
             }
@@ -363,7 +345,6 @@ BSTR AnsiToBstr (_In_ LPTSTR lpSrc, _In_ int nLenSrc)
     }
 
     lpDest = SysAllocStringLen( lpSrc, nLenSrc );
-#endif
 
     return lpDest;
 }
