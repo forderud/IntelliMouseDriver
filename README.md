@@ -48,12 +48,8 @@ Steps to configure the *target* computer for driver testing:
 * Restart the target computer.
 * WinDbg configuration to enable debug messages: `kd>ed nt!Kd_DEFAULT_Mask 0xff`.
 
-### Command-line driver installation
-Install: `PNPUTIL /add-driver <oem#.inf> /install`
-
-Uninstall: `PNPUTIL /delete-driver <oem#.inf> /uninstall`
-
-### Manual driver installation
+### Driver testing
+Driver installation:
 * Open "Device Manager".
 * Switch to "Devices by connection" view.
 * Navigate to the "HID-compliant vendor-defined device" with `HID\VID_045E&PID_082A&MI_01&Col05` hardware ID.
@@ -61,7 +57,11 @@ Uninstall: `PNPUTIL /delete-driver <oem#.inf> /uninstall`
 * Right-click on the relevant device, and select "Update driver".
 * Click on "Browse my computer for drivers".
 * Click on "Let me pick from a list...".
-* Click on "Have Disk..." and select the driver in the file system:
+* Click on "Have Disk..." and select `firefly.inf` in the file system:
 ![ManualDriverPick](ManualDriverPick.png)
 * Click on "Install this driver software anyway" when being warned about the publisher:
 ![UnsignedDriverConfirm](UnsignedDriverConfirm.png)
+
+Driver uninstallation:
+* Either uninstall the driver from "Device Manager",
+* or run `PNPUTIL /delete-driver firefly.inf /uninstall` from an admin command-prompt.
