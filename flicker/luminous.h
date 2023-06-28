@@ -18,5 +18,4 @@ public:
 private:
     CComPtr<IWbemServices> m_pIWbemServices;
     CComPtr<IWbemClassObject> m_pIWbemClassObject;
-    bool m_bCOMInitialized = false;
 };

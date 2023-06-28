@@ -182,8 +182,6 @@ CLuminous::CLuminous() {
 
     }
 
-    m_bCOMInitialized = true;
-
     m_pIWbemServices = ConnectToNamespace( NAME_SPACE);
     if (!m_pIWbemServices ) {
         _tprintf( TEXT("Could not connect name.\n") );
@@ -198,27 +196,14 @@ CLuminous::CLuminous() {
 }
 
 CLuminous::~CLuminous() {
-    if (m_pIWbemServices) {
-        m_pIWbemServices.Release();
-    }
+    m_pIWbemServices.Release();
+    m_pIWbemClassObject.Release();
 
-    if (m_pIWbemClassObject) {
-        m_pIWbemClassObject.Release();
-    }
-
-    if(m_bCOMInitialized) {
-        CoUninitialize();
-        m_bCOMInitialized = false;
-    }
+    CoUninitialize();
 }
 
 
 bool CLuminous::Get(COLORREF* Color) {
-
-    if (!m_pIWbemServices || !m_pIWbemClassObject) {
-        return false;
-    }
-
     VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
@@ -261,10 +246,6 @@ bool CLuminous::Get(COLORREF* Color) {
 
 bool CLuminous::Set(COLORREF Color) {
     bool bRet = false;
-
-    if (!m_pIWbemServices || !m_pIWbemClassObject) {
-        return false;
-    }
 
     VARIANT     varPropVal;
     VariantInit( &varPropVal );
