@@ -34,11 +34,6 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
         return 0;
     }
 
-    if (!luminous->Open()) {
-        _tprintf(_T("Problem opening Luminous\n"));
-        return 0;
-    }
-
     BOOL bSuccessful;
     if (bAdjustLight) {
         if (lightSetting < 2) {

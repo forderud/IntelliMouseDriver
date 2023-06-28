@@ -1,7 +1,5 @@
 #include "luminous.h"
-
-CLuminous::CLuminous() {
-}
+#include <stdexcept>
 
 
 CLuminous::~CLuminous() {
@@ -9,12 +7,8 @@ CLuminous::~CLuminous() {
 }
 
 
-BOOL CLuminous::Open() {
+CLuminous::CLuminous() {
     HRESULT           hResult;
-    BOOL                bRet = FALSE;
-
-    if (m_pIWbemServices)
-        return TRUE;
 
     // Initialize COM library. Must be done before invoking any
     // other COM function.
@@ -22,7 +16,8 @@ BOOL CLuminous::Open() {
 
     if ( FAILED (hResult)) {
         _tprintf( TEXT("Error %lx: Failed to initialize COM library\n"), hResult );
-        goto OpenCleanup;
+        throw std::runtime_error("CoInitialize failure");
+
     }
 
     m_bCOMInitialized = TRUE;
@@ -30,34 +25,14 @@ BOOL CLuminous::Open() {
     m_pIWbemServices = ConnectToNamespace( NAME_SPACE);
     if (!m_pIWbemServices ) {
         _tprintf( TEXT("Could not connect name.\n") );
-        goto OpenCleanup;
+        throw std::runtime_error("ConnectToNamespace failure");
     }
 
      m_pIWbemClassObject = GetInstanceReference( m_pIWbemServices, CLASS_NAME);
      if ( !m_pIWbemClassObject ) {
         _tprintf( TEXT("Could not find the instance.\n") );
-        goto OpenCleanup;
+        throw std::runtime_error("GetInstanceReference failure");
     }
-
-     bRet = TRUE;
-
-OpenCleanup:
-    if(!bRet) {
-        if(m_pIWbemClassObject) {
-            m_pIWbemClassObject->Release();
-            m_pIWbemClassObject = NULL;
-        }
-        if(m_pIWbemServices) {
-            m_pIWbemServices->Release();
-            m_pIWbemServices = NULL;
-        }
-        if(m_bCOMInitialized) {
-            CoUninitialize();
-            m_bCOMInitialized = FALSE;
-        }
-    }
-
-    return bRet;
 }
 
 VOID CLuminous::Close() {
