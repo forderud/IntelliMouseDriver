@@ -1,64 +1,23 @@
-/*++
-
-Copyright (c) Microsoft Corporation.  All rights reserved.
-
-    THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
-    KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
-    PURPOSE.
-
-
-Module Name:
-
-    Luminous.c
-
-Abstract:
-
-    Library for managing the state of all firefly devices
-
-Environment:
-
-    User Mode library
-
---*/
 #include "luminous.h"
 
-CLuminous::CLuminous(
-    VOID
-    )
-{
-    m_pIWbemServices = NULL;
-    m_pIWbemClassObject = NULL;
-    m_bCOMInitialized = FALSE;
+CLuminous::CLuminous() {
 }
 
 
-CLuminous::~CLuminous(
-    VOID
-    )
-{
+CLuminous::~CLuminous() {
     Close();
 }
 
 
-BOOL
-CLuminous::Open(
-    VOID
-    )
-{
+BOOL CLuminous::Open() {
     HRESULT           hResult;
     BOOL                bRet = FALSE;
 
-    if (m_pIWbemServices) {
-
+    if (m_pIWbemServices)
         return TRUE;
-    }
 
-    //
     // Initialize COM library. Must be done before invoking any
     // other COM function.
-    //
-
     hResult = CoInitialize( NULL );
 
     if ( FAILED (hResult)) {
@@ -101,11 +60,7 @@ OpenCleanup:
     return bRet;
 }
 
-VOID
-CLuminous::Close(
-    VOID
-    )
-{
+VOID CLuminous::Close() {
     if (m_pIWbemServices) {
         m_pIWbemServices->Release();
         m_pIWbemServices = NULL;
@@ -120,16 +75,10 @@ CLuminous::Close(
         CoUninitialize();
         m_bCOMInitialized = FALSE;
     }
-
 }
 
 
-BOOL
-CLuminous::Get(
-    _In_ BOOL *Enabled
-    )
-{
-
+BOOL CLuminous::Get(_In_ BOOL *Enabled) {
     VARIANT     varPropVal;
     BSTR          bstrPropertyName = NULL;
     HRESULT     hResult;
@@ -152,8 +101,6 @@ CLuminous::Get(
 
     //
     // Get the property value.
-    //
-
     hResult = m_pIWbemClassObject->Get(
                              bstrPropertyName,
                              0,
@@ -162,10 +109,8 @@ CLuminous::Get(
                              NULL );
 
     if ( hResult != WBEM_S_NO_ERROR ) {
-
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
                         hResult, PROPERTY_NAME);
-
     } else {
         if(varPropVal.vt == VT_BOOL) {
             *Enabled = varPropVal.boolVal;
@@ -180,14 +125,9 @@ CLuminous::Get(
     VariantClear( &varPropVal );
 
     return bRet;
-
 }
 
-BOOL
-CLuminous::Set(
-    _In_ BOOL Enabled
-    )
-{
+BOOL CLuminous::Set(_In_ BOOL Enabled) {
     VARIANT     varPropVal;
     BSTR          bstrPropertyName = NULL;
     HRESULT     hResult;
@@ -208,10 +148,7 @@ CLuminous::Set(
         goto End ;
     }
 
-    //
     // Get the property value.
-    //
-
     hResult = m_pIWbemClassObject->Get(
                              bstrPropertyName,
                              0,
@@ -220,20 +157,15 @@ CLuminous::Set(
                              NULL );
 
     if ( hResult != WBEM_S_NO_ERROR ) {
-
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
                             hResult, lpProperty );
         goto End;
-
     }
 
     if(varPropVal.vt == VT_BOOL) {
         varPropVal.boolVal = (VARIANT_BOOL)Enabled;
 
-        //
         // Set the property value
-        //
-
         hResult = m_pIWbemClassObject->Put(
                                     bstrPropertyName,
                                     0,
@@ -258,14 +190,12 @@ CLuminous::Set(
             }
         }
         else {
-
             _tprintf( TEXT("Error %lX: Failed to set property value of %s.\n"),
             hResult, lpProperty );
         }
     }
 
 End:
-
     if(bstrPropertyName) {
         SysFreeString( bstrPropertyName );
     }
@@ -275,10 +205,7 @@ End:
     return bRet;
 }
 
-//
 // The function connects to the namespace specified by the user.
-//
-
 IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
 {
     IWbemServices *pIWbemServices = NULL;
@@ -288,8 +215,6 @@ IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
 
     //
     // Create an instance of WbemLocator interface.
-    //
-
     hResult = CoCreateInstance(
                            CLSID_WbemLocator,
                            NULL,
@@ -303,10 +228,7 @@ IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
         return NULL;
     }
 
-    //
     // Namespaces are passed to COM in BSTRs.
-    //
-
     bstrNamespace = AnsiToBstr( chNamespace,   -1 );
 
     if ( !bstrNamespace ) {
@@ -315,10 +237,7 @@ IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
         return NULL;
     }
 
-    //
     // Using the locator, connect to COM in the given namespace.
-    //
-
     hResult = pIWbemLocator->ConnectServer(
                   bstrNamespace,
                   NULL,   // NULL means current account, for simplicity.
@@ -329,10 +248,7 @@ IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
                   NULL,   // context
                   &pIWbemServices ); // Returned IWbemServices.
 
-    //
     // Done with Namespace.
-    //
-
     SysFreeString( bstrNamespace );
 
     if ( hResult != WBEM_S_NO_ERROR) {
@@ -343,12 +259,9 @@ IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
         return NULL;
     }
 
-    //
     // Switch the security level to IMPERSONATE so that provider(s)
     // will grant access to system-level objects, and so that
     // CALL authorization will be used.
-    //
-
     hResult = CoSetProxyBlanket(
                    (IUnknown *)pIWbemServices, // proxy
                    RPC_C_AUTHN_WINNT,        // authentication service
@@ -371,11 +284,8 @@ IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
     return pIWbemServices;
 }
 
-//
 // The function returns an interface pointer to the instance given its
 // list-index.
-//
-
 IWbemClassObject *GetInstanceReference (
                                     IWbemServices *pIWbemServices,
                                     _In_ LPTSTR lpClassName)
@@ -395,10 +305,7 @@ IWbemClassObject *GetInstanceReference (
         return NULL;
     }
 
-    //
     // Get Instance Enumerator Interface.
-    //
-
     pEnumInst = NULL;
 
     hResult = pIWbemServices->CreateInstanceEnum(
@@ -413,10 +320,7 @@ IWbemClassObject *GetInstanceReference (
         TEXT(" to instance enumerator.\n"), hResult );
     }
     else {
-        //
         // Get pointer to the instance.
-        //
-
         hResult = WBEM_S_NO_ERROR;
         bFound = FALSE;
 
@@ -441,10 +345,7 @@ IWbemClassObject *GetInstanceReference (
         }
     }
 
-    //
     // Done with the instance enumerator.
-    //
-
     if(pEnumInst) {
         pEnumInst->Release( );
     }
@@ -453,21 +354,15 @@ IWbemClassObject *GetInstanceReference (
     return pInst;
 }
 
-//
 // The function converts an ANSI string into BSTR and returns it in an
 // allocated memory. The memory must be freed by the caller using free()
 // function. If nLenSrc is -1, the string is null terminated.
-//
-
 BSTR AnsiToBstr (_In_ LPTSTR lpSrc, _In_ int nLenSrc)
 {
     BSTR lpDest;
 
-    //
     // In case of ANSI version, we need to change the ANSI string to UNICODE since
     // BSTRs are essentially UNICODE strings.
-    //
-
 #ifndef UNICODE
     int  nLenDest;
 
@@ -502,8 +397,3 @@ BSTR AnsiToBstr (_In_ LPTSTR lpSrc, _In_ int nLenSrc)
 
     return lpDest;
 }
-
-
-
-
-
