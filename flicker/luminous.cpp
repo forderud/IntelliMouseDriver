@@ -1,6 +1,9 @@
 #include "luminous.h"
 #include <stdexcept>
 
+#define NAME_SPACE TEXT("root\\WMI")
+#define CLASS_NAME  TEXT("FireflyDeviceInformation")
+#define PROPERTY_NAME TEXT("TailLight")
 
 // The function converts an ANSI string into BSTR and returns it in an
 // allocated memory. The memory must be freed by the caller using free()
