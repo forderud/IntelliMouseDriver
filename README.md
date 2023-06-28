@@ -48,7 +48,6 @@ Steps to configure the *target* computer for driver testing:
 * Configuration of [kernel-mode debugging over a USB 3.0 cable](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/setting-up-a-usb-3-0-debug-cable-connection) with a USB 3 A/A crossover cable:
   - `bcdedit /debug on`
   - `bcdedit /dbgsettings usb targetname:KernelUSBConn`
-  - `bcdedit /set "{dbgsettings}" busparams <b.d.f>` (bus, device & function numbers for USB host controller)
 * From the host computer, connect with the WinDbg over USB to the `KernelUSBConn` target.
 * Restart the target computer.
 * Reconnect to the target computer using WinDbg.
