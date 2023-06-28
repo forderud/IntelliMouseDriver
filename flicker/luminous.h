@@ -1,11 +1,6 @@
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <atlbase.h>
 #include <windows.h>
-#include <tchar.h>
-#include <wchar.h>
-#include <initguid.h>
 #include <wbemcli.h>
 
 #define NAME_SPACE TEXT("root\\WMI")
@@ -21,9 +16,9 @@ public:
     BOOL Get(_In_ COLORREF*Color);
 
 private:
-    IWbemServices* m_pIWbemServices = nullptr;
-    IWbemClassObject* m_pIWbemClassObject = nullptr;
-    BOOL m_bCOMInitialized = false;
+    CComPtr<IWbemServices> m_pIWbemServices;
+    CComPtr<IWbemClassObject> m_pIWbemClassObject;
+    bool m_bCOMInitialized = false;
 };
 
 

@@ -15,7 +15,7 @@ CLuminous::CLuminous() {
 
     }
 
-    m_bCOMInitialized = TRUE;
+    m_bCOMInitialized = true;
 
     m_pIWbemServices = ConnectToNamespace( NAME_SPACE);
     if (!m_pIWbemServices ) {
@@ -32,18 +32,16 @@ CLuminous::CLuminous() {
 
 CLuminous::~CLuminous() {
     if (m_pIWbemServices) {
-        m_pIWbemServices->Release();
-        m_pIWbemServices = NULL;
+        m_pIWbemServices.Release();
     }
 
     if (m_pIWbemClassObject) {
-        m_pIWbemClassObject->Release();
-        m_pIWbemClassObject = NULL;
+        m_pIWbemClassObject.Release();
     }
 
     if(m_bCOMInitialized) {
         CoUninitialize();
-        m_bCOMInitialized = FALSE;
+        m_bCOMInitialized = false;
     }
 }
 
