@@ -4,4 +4,7 @@
     <ClCompile Include="firefly.cpp" />
     <ClCompile Include="luminous.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="luminous.h" />
+  </ItemGroup>
 </Project>
