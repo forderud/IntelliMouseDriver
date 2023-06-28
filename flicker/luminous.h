@@ -10,10 +10,10 @@
 class CLuminous {
 public:
     CLuminous();
-    virtual ~CLuminous(VOID);
+    virtual ~CLuminous();
 
-    BOOL Set(_In_ COLORREF Color);
-    BOOL Get(_In_ COLORREF*Color);
+    bool Set(COLORREF Color);
+    bool Get(COLORREF*Color);
 
 private:
     CComPtr<IWbemServices> m_pIWbemServices;

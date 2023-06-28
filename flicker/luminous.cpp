@@ -46,15 +46,15 @@ CLuminous::~CLuminous() {
 }
 
 
-BOOL CLuminous::Get(_In_ COLORREF* Color) {
+bool CLuminous::Get(COLORREF* Color) {
     VARIANT     varPropVal;
     BSTR          bstrPropertyName = NULL;
     HRESULT     hResult;
     CIMTYPE     cimType;
-    BOOL          bRet= FALSE;
+    bool          bRet= false;
 
     if (!m_pIWbemServices || !m_pIWbemClassObject) {
-        return FALSE;
+        return false;
     }
 
     VariantInit( &varPropVal );
@@ -64,7 +64,7 @@ BOOL CLuminous::Get(_In_ COLORREF* Color) {
     if ( !bstrPropertyName ) {
         _tprintf( TEXT("Error out of memory.\n") );
         VariantClear( &varPropVal );
-        return FALSE ;
+        return false;
     }
 
     //
@@ -82,7 +82,7 @@ BOOL CLuminous::Get(_In_ COLORREF* Color) {
     } else {
         if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
             *Color = varPropVal.uintVal;
-            bRet = TRUE;
+            bRet = true;
         }
     }
 
@@ -95,16 +95,16 @@ BOOL CLuminous::Get(_In_ COLORREF* Color) {
     return bRet;
 }
 
-BOOL CLuminous::Set(_In_ COLORREF Color) {
+bool CLuminous::Set(COLORREF Color) {
     VARIANT     varPropVal;
     BSTR          bstrPropertyName = NULL;
     HRESULT     hResult;
     CIMTYPE     cimType;
-    BOOL         bRet = FALSE;
+    bool         bRet = false;
     LPTSTR      lpProperty = PROPERTY_NAME;
 
     if (!m_pIWbemServices || !m_pIWbemClassObject) {
-        return FALSE;
+        return false;
     }
 
     VariantInit( &varPropVal );
@@ -154,7 +154,7 @@ BOOL CLuminous::Set(_In_ COLORREF Color) {
                                     TEXT(" %s will not be updated.\n"),
                                     lpProperty );
             } else {
-                bRet = TRUE;
+                bRet = true;
             }
         }
         else {
