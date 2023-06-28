@@ -1,9 +1,12 @@
 Microsoft IntelliMouse utilities. Tested on [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse) Shadow with `VendorID=045E` (Microsoft) and `ProductID=082A` (Pro IntelliMouse).
 
-Tools:
-* `TailLight.exe`: Command-line utility for changing the tail-light color.
+Projects:
+* `TailLight.exe`: Command-line utility for changing the tail-light color directly through the HID protocol.
+* `firefly.sys`: An upper device filter driver for the HID class for Microsoft Pro Intellimouse. Based on the [KMDF filter driver for a HID device](https://github.com/microsoft/Windows-driver-samples/tree/main/hid/firefly) sample from Microsoft. During start device, the driver registers a WMI class (FireflyDeviceInformation). The user mode application connects to the WMI namespace (root\\wmi) and opens this class using COM interfaces. Then the application can make requests to read ("get") or change ("set") the current value of the TailLit data value from this class. In response to a set WMI request, the driver opens the HID collection using IoTarget and sends [**IOCTL\_HID\_GET\_COLLECTION\_INFORMATION**](https://docs.microsoft.com/windows-hardware/drivers/ddi/content/hidclass/ni-hidclass-ioctl_hid_get_collection_information) and [**IOCTL\_HID\_GET\_COLLECTION\_DESCRIPTOR**](https://docs.microsoft.com/windows-hardware/drivers/ddi/content/hidclass/ni-hidclass-ioctl_hid_get_collection_descriptor) requests to get the preparsed data. The driver then calls [**HidP\_GetCaps**](https://docs.microsoft.com/windows-hardware/drivers/ddi/content/hidpi/nf-hidpi-hidp_getcaps) using the preparsed data to retrieve the capabilities of the device. After getting the capabilities of the device, the driver creates a feature report to set or clear the feature that causes the light to toggle.
+* `flicker.exe`: Application for causing the mouse to blink by sending commands through the WMI interface.
 
-### Tail-light protocol
+
+### Tail-light HID protocol
 Steps to update the tail-light:
 * Connect to mouse HID device with `Usage=0212` and `UsagePage=FF07`.
 * Send a *feature report* with the following header:
@@ -30,12 +33,6 @@ Steps:
 The feature report also contains a number of other non-zero bytes. I don't know if they carry a meaning or are just uninitialized memory.
 
 ## Driver development
-The Firefly sample is installed as an upper filter driver for Microsoft Pro Intellimouse. An application provided with the sample can cause the light of the optical mouse to blink by sending commands to the filter driver using the WMI interface.
-
-
-The sample consists of:
-* `firefly.sys` driver: An upper device filter driver for the HID class. Based on the [KMDF filter driver for a HID device](https://github.com/microsoft/Windows-driver-samples/tree/main/hid/firefly) sample from Microsoft. During start device, the driver registers a WMI class (FireflyDeviceInformation). The user mode application connects to the WMI namespace (root\\wmi) and opens this class using COM interfaces. Then the application can make requests to read ("get") or change ("set") the current value of the TailLit data value from this class. In response to a set WMI request, the driver opens the HID collection using IoTarget and sends [**IOCTL\_HID\_GET\_COLLECTION\_INFORMATION**](https://docs.microsoft.com/windows-hardware/drivers/ddi/content/hidclass/ni-hidclass-ioctl_hid_get_collection_information) and [**IOCTL\_HID\_GET\_COLLECTION\_DESCRIPTOR**](https://docs.microsoft.com/windows-hardware/drivers/ddi/content/hidclass/ni-hidclass-ioctl_hid_get_collection_descriptor) requests to get the preparsed data. The driver then calls [**HidP\_GetCaps**](https://docs.microsoft.com/windows-hardware/drivers/ddi/content/hidpi/nf-hidpi-hidp_getcaps) using the preparsed data to retrieve the capabilities of the device. After getting the capabilities of the device, the driver creates a feature report to set or clear the feature that causes the light to toggle.
-* `flicker.exe` application: The application opens the WMI interfaces and send set requests to toggle the light.
 
 Relevant documentation:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
