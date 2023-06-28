@@ -24,7 +24,7 @@ Firefly is a KMDF-based filter driver for a HID device. Along with illustrating 
 
 ## Build the sample
 
-For information on how to build a driver using Microsoft Visual Studio, see [Building a Driver with Visual Studio and the WDK](https://docs.microsoft.com/windows-hardware/drivers/develop/building-a-driver). When you build the sample, MSBuild.exe creates luminous.lib, firefly.sys, flicker.exe, and sauron.dll. Copy these files as well as the KMDF coinstaller (wdfcoinstallerMMmmm.dll) and the INF file (firefly.inf) to a floppy disk or a temporary directory on the target system.
+For information on how to build a driver using Microsoft Visual Studio, see [Building a Driver with Visual Studio and the WDK](https://docs.microsoft.com/windows-hardware/drivers/develop/building-a-driver). When you build the sample, MSBuild.exe creates luminous.lib, firefly.sys and flicker.exe. Copy these files as well as the KMDF coinstaller (wdfcoinstallerMMmmm.dll) and the INF file (firefly.inf) to a floppy disk or a temporary directory on the target system.
 
 > [!NOTE]
 > You can obtain redistributable framework updates by downloading the **wdfcoinstaller.msi** package from [WDK 8 Redistributable Components](https://go.microsoft.com/fwlink/p/?LinkID=253170). This package performs a silent install into the directory of your Windows Driver Kit (WDK) installation. You will see no confirmation that the installation has completed. You can verify that the redistributables have been installed on top of the WDK by ensuring there is a redist\\wdf directory under the root directory of the WDK, %ProgramFiles(x86)%\\Windows Kits\\8.0.
@@ -73,26 +73,6 @@ Usage: Flicker \<-0 | -1 | -2\>
 
 -2 flashes light
 
-### Testing the DLL
-
-The following description applies to Windows Media Player 12 running on Windows 7:
-
-1. Copy the sauron.dll to the Windows Media player Visualization directory (C:\\Program Files\\Windows Media Player\\Visualizations).
-
-1. Register the DLL with COM by calling "regsvr32 sauron.dll" in command shell.
-
-1. Run Windows Media Player *as administrator*.
-
-1. Click on the "Switch to Now Playing" button in the lower right of the application.
-
-1. Right click, select Visualizations, and you will see a menu item called "Sauron."
-
-1. Choose either Firefly Bars or Firefly Flash and play some music.
-
-1. You will see the mouse light dancing to the tune of the music.
-
-1. You can unregister the DLL by calling "regsvr32 -u sauron.dll".
-
 ## Programming Tour
 
 The Firefly sample is installed as an upper filter driver for the Microsoft USB Intellimouse Optical. An application provided with the sample can cause the light of the optical mouse to blink by sending commands to the filter driver using the WMI interface.
@@ -104,5 +84,3 @@ The sample consists of:
 - Library (luminous.lib): The sources for this file are located in the \\hid\\firefly\\lib folder. You will need to build the library before using it. This library is shared by the WDM and WDF samples. All the interfaces required to access the WMI is defined in this library and exposed as CLuminous class.
 
 - Application (flicker.exe): The sources for this file are located in the \\hid\\firefly\\app folder. You will need to build the application before using it. This application is shared by the WDM and WDF samples. The application links to luminous.lib to open the WMI interfaces and send set requests to toggle the light.
-
-- Sauron (sauron.dll): The sources for this file are located in the \\hid\\firefly\\sauron folder. You will need to build this dll before using it. The library is shared by the WDM and WDF samples. Sauron is a Windows Media Player visualization DLL, and is based on a sample from the Windows Media Player SDK kit. By using this DLL, you can cause the mouse lights to blink to the beats of the music.
