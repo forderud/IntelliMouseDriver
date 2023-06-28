@@ -20,14 +20,3 @@ private:
     CComPtr<IWbemClassObject> m_pIWbemClassObject;
     bool m_bCOMInitialized = false;
 };
-
-
-IWbemServices *ConnectToNamespace (
-                                _In_ LPTSTR chNamespace);
-IWbemClassObject *GetInstanceReference (
-                                    IWbemServices *pIWbemServices,
-                                    _In_ LPTSTR lpClassName);
-
-BSTR AnsiToBstr (
-    _In_ LPTSTR lpSrc,
-    _In_ int nLenSrc);

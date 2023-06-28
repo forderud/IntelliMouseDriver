@@ -2,6 +2,181 @@
 #include <stdexcept>
 
 
+// The function converts an ANSI string into BSTR and returns it in an
+// allocated memory. The memory must be freed by the caller using free()
+// function. If nLenSrc is -1, the string is null terminated.
+BSTR AnsiToBstr(_In_ WCHAR* lpSrc, _In_ int nLenSrc)
+{
+    BSTR lpDest;
+
+    if (lpSrc == NULL) {
+        nLenSrc = 0;
+    }
+    else {
+        if (nLenSrc == -1) {
+            size_t temp = wcslen(lpSrc);
+            if (temp > INT_MAX - 1) {
+                return NULL;
+            }
+            nLenSrc = (int)temp + 1;
+        }
+    }
+
+    lpDest = SysAllocStringLen(lpSrc, nLenSrc);
+
+    return lpDest;
+}
+
+// The function connects to the namespace specified by the user.
+IWbemServices* ConnectToNamespace(_In_ LPTSTR chNamespace)
+{
+    IWbemServices* pIWbemServices = NULL;
+    IWbemLocator* pIWbemLocator = NULL;
+    BSTR          bstrNamespace;
+    HRESULT       hResult;
+
+    //
+    // Create an instance of WbemLocator interface.
+    hResult = CoCreateInstance(
+        CLSID_WbemLocator,
+        NULL,
+        CLSCTX_INPROC_SERVER,
+        IID_IWbemLocator,
+        (LPVOID*)&pIWbemLocator);
+
+    if (hResult != S_OK) {
+        _tprintf(TEXT("Error %lX: Could not create instance of IWbemLocator interface.\n"),
+            hResult);
+        return NULL;
+    }
+
+    // Namespaces are passed to COM in BSTRs.
+    bstrNamespace = AnsiToBstr(chNamespace, -1);
+
+    if (!bstrNamespace) {
+        _tprintf(TEXT("Out of memory.\n"));
+        pIWbemLocator->Release();
+        return NULL;
+    }
+
+    // Using the locator, connect to COM in the given namespace.
+    hResult = pIWbemLocator->ConnectServer(
+        bstrNamespace,
+        NULL,   // NULL means current account, for simplicity.
+        NULL,   // NULL means current password, for simplicity.
+        0L,     // locale
+        0L,     // securityFlags
+        NULL,   // authority (domain for NTLM)
+        NULL,   // context
+        &pIWbemServices); // Returned IWbemServices.
+
+    // Done with Namespace.
+    SysFreeString(bstrNamespace);
+
+    if (hResult != WBEM_S_NO_ERROR) {
+        _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"),
+            hResult, chNamespace);
+
+        pIWbemLocator->Release();
+        return NULL;
+    }
+
+    // Switch the security level to IMPERSONATE so that provider(s)
+    // will grant access to system-level objects, and so that
+    // CALL authorization will be used.
+    hResult = CoSetProxyBlanket(
+        (IUnknown*)pIWbemServices, // proxy
+        RPC_C_AUTHN_WINNT,        // authentication service
+        RPC_C_AUTHZ_NONE,         // authorization service
+        NULL,                     // server principle name
+        RPC_C_AUTHN_LEVEL_CALL,   // authentication level
+        RPC_C_IMP_LEVEL_IMPERSONATE, // impersonation level
+        NULL,                     // identity of the client
+        0);                      // capability flags
+
+    if (hResult != S_OK) {
+        _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hResult);
+
+        pIWbemLocator->Release();
+        pIWbemServices->Release();
+        return NULL;
+    }
+
+    pIWbemLocator->Release();
+    return pIWbemServices;
+}
+
+// The function returns an interface pointer to the instance given its
+// list-index.
+IWbemClassObject* GetInstanceReference(
+    IWbemServices* pIWbemServices,
+    _In_ LPTSTR lpClassName)
+{
+    IWbemClassObject* pInst = NULL;
+    IEnumWbemClassObject* pEnumInst;
+    BSTR                 bstrClassName;
+    BOOL                 bFound;
+    ULONG                ulCount;
+    HRESULT              hResult;
+
+
+    bstrClassName = AnsiToBstr(lpClassName, -1);
+
+    if (!bstrClassName) {
+        _tprintf(TEXT("Out of memory.\n"));
+        return NULL;
+    }
+
+    // Get Instance Enumerator Interface.
+    pEnumInst = NULL;
+
+    hResult = pIWbemServices->CreateInstanceEnum(
+        bstrClassName,          // Name of the root class.
+        WBEM_FLAG_SHALLOW |     // Enumerate at current root only.
+        WBEM_FLAG_FORWARD_ONLY, // Forward-only enumeration.
+        NULL,                   // Context.
+        &pEnumInst);          // pointer to class enumerator
+
+    if (hResult != WBEM_S_NO_ERROR || pEnumInst == NULL) {
+        _tprintf(TEXT("Error %lX: Failed to get a reference")
+            TEXT(" to instance enumerator.\n"), hResult);
+    }
+    else {
+        // Get pointer to the instance.
+        hResult = WBEM_S_NO_ERROR;
+        bFound = FALSE;
+
+        while ((hResult == WBEM_S_NO_ERROR) && (bFound == FALSE)) {
+
+            hResult = pEnumInst->Next(
+                2000,      // two seconds timeout
+                1,         // return just one instance.
+                &pInst,    // pointer to instance.
+                &ulCount); // Number of instances returned.
+
+            if (ulCount > 0) {
+
+                bFound = TRUE;
+                break;
+            }
+        }
+
+        if (bFound == FALSE && pInst) {
+            pInst->Release();
+            pInst = NULL;
+        }
+    }
+
+    // Done with the instance enumerator.
+    if (pEnumInst) {
+        pEnumInst->Release();
+    }
+    SysFreeString(bstrClassName);
+
+    return pInst;
+}
+
+
 CLuminous::CLuminous() {
     HRESULT           hResult;
 
@@ -171,178 +346,4 @@ End:
     VariantClear( &varPropVal );
 
     return bRet;
-}
-
-// The function connects to the namespace specified by the user.
-IWbemServices *ConnectToNamespace (_In_ LPTSTR chNamespace)
-{
-    IWbemServices *pIWbemServices = NULL;
-    IWbemLocator  *pIWbemLocator = NULL;
-    BSTR          bstrNamespace;
-    HRESULT       hResult;
-
-    //
-    // Create an instance of WbemLocator interface.
-    hResult = CoCreateInstance(
-                           CLSID_WbemLocator,
-                           NULL,
-                           CLSCTX_INPROC_SERVER,
-                           IID_IWbemLocator,
-                           (LPVOID *)&pIWbemLocator );
-
-    if ( hResult != S_OK ) {
-        _tprintf( TEXT("Error %lX: Could not create instance of IWbemLocator interface.\n"),
-           hResult );
-        return NULL;
-    }
-
-    // Namespaces are passed to COM in BSTRs.
-    bstrNamespace = AnsiToBstr( chNamespace,   -1 );
-
-    if ( !bstrNamespace ) {
-        _tprintf( TEXT("Out of memory.\n") );
-        pIWbemLocator->Release( );
-        return NULL;
-    }
-
-    // Using the locator, connect to COM in the given namespace.
-    hResult = pIWbemLocator->ConnectServer(
-                  bstrNamespace,
-                  NULL,   // NULL means current account, for simplicity.
-                  NULL,   // NULL means current password, for simplicity.
-                  0L,     // locale
-                  0L,     // securityFlags
-                  NULL,   // authority (domain for NTLM)
-                  NULL,   // context
-                  &pIWbemServices ); // Returned IWbemServices.
-
-    // Done with Namespace.
-    SysFreeString( bstrNamespace );
-
-    if ( hResult != WBEM_S_NO_ERROR) {
-        _tprintf( TEXT("Error %lX: Failed to connect to namespace %s.\n"),
-                            hResult, chNamespace );
-
-        pIWbemLocator->Release( );
-        return NULL;
-    }
-
-    // Switch the security level to IMPERSONATE so that provider(s)
-    // will grant access to system-level objects, and so that
-    // CALL authorization will be used.
-    hResult = CoSetProxyBlanket(
-                   (IUnknown *)pIWbemServices, // proxy
-                   RPC_C_AUTHN_WINNT,        // authentication service
-                   RPC_C_AUTHZ_NONE,         // authorization service
-                   NULL,                     // server principle name
-                   RPC_C_AUTHN_LEVEL_CALL,   // authentication level
-                   RPC_C_IMP_LEVEL_IMPERSONATE, // impersonation level
-                   NULL,                     // identity of the client
-                   0 );                      // capability flags
-
-    if ( hResult != S_OK ) {
-        _tprintf( TEXT("Error %lX: Failed to impersonate.\n"), hResult );
-
-        pIWbemLocator->Release();
-        pIWbemServices->Release();
-        return NULL;
-    }
-
-    pIWbemLocator->Release();
-    return pIWbemServices;
-}
-
-// The function returns an interface pointer to the instance given its
-// list-index.
-IWbemClassObject *GetInstanceReference (
-                                    IWbemServices *pIWbemServices,
-                                    _In_ LPTSTR lpClassName)
-{
-    IWbemClassObject     *pInst = NULL;
-    IEnumWbemClassObject *pEnumInst;
-    BSTR                 bstrClassName;
-    BOOL                 bFound;
-    ULONG                ulCount;
-    HRESULT              hResult;
-
-
-    bstrClassName = AnsiToBstr( lpClassName, -1 );
-
-    if ( !bstrClassName ) {
-        _tprintf( TEXT("Out of memory.\n") );
-        return NULL;
-    }
-
-    // Get Instance Enumerator Interface.
-    pEnumInst = NULL;
-
-    hResult = pIWbemServices->CreateInstanceEnum(
-                                bstrClassName,          // Name of the root class.
-                                WBEM_FLAG_SHALLOW |     // Enumerate at current root only.
-                                WBEM_FLAG_FORWARD_ONLY, // Forward-only enumeration.
-                                NULL,                   // Context.
-                                &pEnumInst );          // pointer to class enumerator
-
-    if ( hResult != WBEM_S_NO_ERROR || pEnumInst == NULL ) {
-        _tprintf( TEXT("Error %lX: Failed to get a reference")
-        TEXT(" to instance enumerator.\n"), hResult );
-    }
-    else {
-        // Get pointer to the instance.
-        hResult = WBEM_S_NO_ERROR;
-        bFound = FALSE;
-
-        while ( (hResult == WBEM_S_NO_ERROR) && (bFound == FALSE) ) {
-
-            hResult = pEnumInst->Next(
-                                        2000,      // two seconds timeout
-                                        1,         // return just one instance.
-                                        &pInst,    // pointer to instance.
-                                        &ulCount); // Number of instances returned.
-
-            if ( ulCount > 0 ) {
-
-                bFound = TRUE;
-                break;
-            }
-        }
-
-        if ( bFound == FALSE && pInst) {
-            pInst->Release(  );
-            pInst = NULL;
-        }
-    }
-
-    // Done with the instance enumerator.
-    if(pEnumInst) {
-        pEnumInst->Release( );
-    }
-    SysFreeString( bstrClassName );
-
-    return pInst;
-}
-
-// The function converts an ANSI string into BSTR and returns it in an
-// allocated memory. The memory must be freed by the caller using free()
-// function. If nLenSrc is -1, the string is null terminated.
-BSTR AnsiToBstr (_In_ WCHAR* lpSrc, _In_ int nLenSrc)
-{
-    BSTR lpDest;
-
-    if ( lpSrc == NULL ) {
-        nLenSrc = 0;
-    }
-    else {
-        if ( nLenSrc == - 1 ) {
-            size_t temp = wcslen( lpSrc );
-            if (temp > INT_MAX - 1) {
-                return NULL;
-            }
-            nLenSrc = (int) temp + 1;
-        }
-    }
-
-    lpDest = SysAllocStringLen( lpSrc, nLenSrc );
-
-    return lpDest;
 }
