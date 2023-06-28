@@ -33,6 +33,7 @@ Steps:
 The feature report also contains a number of other non-zero bytes. I don't know if they carry a meaning or are just uninitialized memory.
 
 ## Driver development
+Prerequisite: Built the driver, so that you already have `firefly.sys` and `firefly.inf` available.
 
 Relevant documentation:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
