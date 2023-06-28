@@ -10,7 +10,7 @@
 
 #define NAME_SPACE TEXT("root\\WMI")
 #define CLASS_NAME  TEXT("FireflyDeviceInformation")
-#define PROPERTY_NAME TEXT("TailLit")
+#define PROPERTY_NAME TEXT("TailLight")
 
 class CLuminous {
 public:

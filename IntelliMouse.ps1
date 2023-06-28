@@ -7,7 +7,7 @@ $mouse = Get-CimInstance -Namespace root\WMI -Class FireflyDeviceInformation
 $mouse.Active
 
 # get tail-light status
-$mouse.TailLit
+$mouse.TailLight
 
 # update tail-light (doesn't work)
-$mouse.TailLit = 0
+$mouse.TailLight = 0

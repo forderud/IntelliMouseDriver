@@ -15,6 +15,6 @@ class FireflyDeviceInformation
      read,
      write,
      Description("Current state of the tail light.")]
-    boolean TailLit;
+    boolean TailLight;
 };
 
