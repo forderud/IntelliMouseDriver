@@ -54,7 +54,10 @@ Install: `PNPUTIL /add-driver <oem#.inf> /install`
 Uninstall: `PNPUTIL /delete-driver <oem#.inf> /uninstall`
 
 ### Manual driver installation
-* Open "Device Manager"
+* Open "Device Manager".
+* Switch to "Devices by connection" view.
+* Navigate to the "HID-compliant vendor-defined device" with `HID\VID_045E&PID_082A&MI_01&Col05` hardware ID.
+![DeviceManager](DeviceManager.png)
 * Right-click on the relevant device, and select "Update driver".
 * Click on "Browse my computer for drivers".
 * Click on "Let me pick from a list...".
