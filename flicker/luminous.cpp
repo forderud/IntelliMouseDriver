@@ -7,8 +7,6 @@
 // function. If nLenSrc is -1, the string is null terminated.
 BSTR AnsiToBstr(_In_ WCHAR* lpSrc, _In_ int nLenSrc)
 {
-    BSTR lpDest;
-
     if (lpSrc == NULL) {
         nLenSrc = 0;
     }
@@ -22,9 +20,7 @@ BSTR AnsiToBstr(_In_ WCHAR* lpSrc, _In_ int nLenSrc)
         }
     }
 
-    lpDest = SysAllocStringLen(lpSrc, nLenSrc);
-
-    return lpDest;
+    return SysAllocStringLen(lpSrc, nLenSrc);
 }
 
 // The function connects to the namespace specified by the user.
@@ -32,12 +28,10 @@ IWbemServices* ConnectToNamespace(_In_ LPTSTR chNamespace)
 {
     IWbemServices* pIWbemServices = NULL;
     IWbemLocator* pIWbemLocator = NULL;
-    BSTR          bstrNamespace;
-    HRESULT       hResult;
 
     //
     // Create an instance of WbemLocator interface.
-    hResult = CoCreateInstance(
+    HRESULT hResult = CoCreateInstance(
         CLSID_WbemLocator,
         NULL,
         CLSCTX_INPROC_SERVER,
@@ -51,7 +45,7 @@ IWbemServices* ConnectToNamespace(_In_ LPTSTR chNamespace)
     }
 
     // Namespaces are passed to COM in BSTRs.
-    bstrNamespace = AnsiToBstr(chNamespace, -1);
+    BSTR bstrNamespace = AnsiToBstr(chNamespace, -1);
 
     if (!bstrNamespace) {
         _tprintf(TEXT("Out of memory.\n"));
