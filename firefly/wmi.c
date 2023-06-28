@@ -1,28 +1,3 @@
-/*++
-
-Copyright (c) Microsoft Corporation.  All rights reserved.
-
-    THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
-    KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
-    PURPOSE.
-
-
-Module Name:
-
-    wmi.c
-
-Abstract:
-
-    This modules contains the Windows Driver Framework WMI
-    handlers for the firefly filter driver.
-
-Environment:
-
-    Kernel mode
-
---*/
-
 #include "FireFly.h"
 
 #ifdef ALLOC_PRAGMA
