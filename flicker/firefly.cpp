@@ -1,5 +1,6 @@
 #include "luminous.h"
 #include <dontuse.h>
+#include <Shlobj.h>
 #include <memory>
 
 #define USAGE  \
@@ -20,6 +21,12 @@ int __cdecl
 main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     BOOL                            bAdjustLight = FALSE;
     ULONG                          lightSetting = 0;
+
+    if (!IsUserAnAdmin()) {
+        _tprintf(_T("ERROR: Admin privileges missing.\n"));
+        return -1;
+
+    }
 
     if (argc == 2) {
         if (argv[1][0] == '-') {
