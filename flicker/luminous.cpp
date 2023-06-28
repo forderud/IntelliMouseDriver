@@ -48,7 +48,7 @@ CLuminous::~CLuminous() {
 }
 
 
-BOOL CLuminous::Get(_In_ BOOL *Enabled) {
+BOOL CLuminous::Get(_In_ COLORREF* Color) {
     VARIANT     varPropVal;
     BSTR          bstrPropertyName = NULL;
     HRESULT     hResult;
@@ -82,8 +82,8 @@ BOOL CLuminous::Get(_In_ BOOL *Enabled) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
                         hResult, PROPERTY_NAME);
     } else {
-        if(varPropVal.vt == VT_BOOL) {
-            *Enabled = varPropVal.boolVal;
+        if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
+            *Color = varPropVal.uintVal;
             bRet = TRUE;
         }
     }
@@ -97,7 +97,7 @@ BOOL CLuminous::Get(_In_ BOOL *Enabled) {
     return bRet;
 }
 
-BOOL CLuminous::Set(_In_ BOOL Enabled) {
+BOOL CLuminous::Set(_In_ COLORREF Color) {
     VARIANT     varPropVal;
     BSTR          bstrPropertyName = NULL;
     HRESULT     hResult;
@@ -132,8 +132,8 @@ BOOL CLuminous::Set(_In_ BOOL Enabled) {
         goto End;
     }
 
-    if(varPropVal.vt == VT_BOOL) {
-        varPropVal.boolVal = (VARIANT_BOOL)Enabled;
+    if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
+        varPropVal.uintVal = Color;
 
         // Set the property value
         hResult = m_pIWbemClassObject->Put(

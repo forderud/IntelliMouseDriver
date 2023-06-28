@@ -8,6 +8,14 @@ _T("Usage: Flicker <-0 | -1 | -2>\n\
     \t\t-1 turns on light \n\
     \t\t-2 flashes light ")
 
+
+COLORREF ToColor(bool val) {
+    if (val)
+        return RGB(0, 255, 0); // green
+    else
+        return RGB(255, 0, 0); // red
+}
+
 int __cdecl
 main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     BOOL                            bAdjustLight = FALSE;
@@ -37,7 +45,7 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     BOOL bSuccessful;
     if (bAdjustLight) {
         if (lightSetting < 2) {
-            bSuccessful = luminous->Set((BOOL) lightSetting);
+            bSuccessful = luminous->Set(ToColor(lightSetting));
 
             if (bSuccessful) {
                 _tprintf(_T("Adjusted light to %x\n"), lightSetting);
@@ -51,7 +59,7 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
             for(int i = 500; (i>0)&&(j>0); i-=j) {
                 j = (i*9/100);
                 Sleep(i);
-                if(!luminous->Set((BOOL) k)) {
+                if(!luminous->Set(ToColor(k))) {
                     _tprintf(_T("Set operation on Luminous failed.\n"));
                     goto End;
                 }
@@ -60,21 +68,21 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
             for(int i = 12; i<500; i+=j) {
                 j = (i*9/100);
                 Sleep(i);
-                if(!luminous->Set((BOOL) k)) {
+                if(!luminous->Set(ToColor(k))) {
                     _tprintf(_T("Set operation on Luminous failed.\n"));
                     goto End;
                 }
                 k=1-k;
             }
             if (k) {
-                if(!luminous->Set((BOOL) k)) {
+                if(!luminous->Set(ToColor(k))) {
                     _tprintf(_T("Set operation on Luminous failed.\n"));
                 }
             }
         }
     }
 
-    luminous->Set(TRUE);
+    luminous->Set(RGB(0, 0, 0)); // black
 
 End:
     return 0;

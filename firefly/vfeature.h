@@ -29,7 +29,7 @@ Environment:
 NTSTATUS
 FireflySetFeature(
     IN  PDEVICE_CONTEXT DeviceContext,
-    IN  BOOLEAN         EnableFeature
+    IN  ULONG           Color
     );
 
 #endif // _VFEATURE_H

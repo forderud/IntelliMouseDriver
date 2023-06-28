@@ -39,7 +39,7 @@ Environment:
 NTSTATUS
 FireflySetFeature(
     IN  PDEVICE_CONTEXT DeviceContext,
-    IN  BOOLEAN         EnableFeature
+    IN  ULONG           Color
     )
 /*++
 
@@ -207,9 +207,9 @@ Return Value:
     report[1] = 0xB2; // magic value
     report[2] = 0x03; // magic value
     // tail-light color
-    report[3] = EnableFeature ? 0x00 : 0xFF; // red
-    report[4] = EnableFeature ? 0xFF : 0x00; // green
-    report[5] = 0; // blue
+    report[3] = (Color)      & 0xFF; // red
+    report[4] = (Color >> 8) & 0xFF; // green
+    report[5] = (Color >> 16) & 0xFF; // blue
 
     WDF_MEMORY_DESCRIPTOR inputDescriptor;
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,

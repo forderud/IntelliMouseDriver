@@ -14,7 +14,7 @@ class FireflyDeviceInformation
     [WmiDataId(1),
      read,
      write,
-     Description("Current state of the tail light.")]
-    boolean TailLight;
+     Description("Tail light in RGB COLORREF format.")]
+    uint32 TailLight;
 };
 

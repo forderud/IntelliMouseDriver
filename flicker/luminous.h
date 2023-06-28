@@ -17,8 +17,8 @@ public:
     CLuminous();
     virtual ~CLuminous(VOID);
 
-    BOOL Set(_In_ BOOL Enabled);
-    BOOL Get(_In_ BOOL *Enabled);
+    BOOL Set(_In_ COLORREF Color);
+    BOOL Get(_In_ COLORREF*Color);
 
 private:
     IWbemServices* m_pIWbemServices = nullptr;
