@@ -39,7 +39,7 @@ Prerequisite: Built the driver, so that you already have `firefly.sys` and `fire
 Relevant documentation:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
 * PnP [Device Tree](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/device-tree)
-* [HIDClass Hardware IDs for Top-Level Collections](https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hidclass-hardware-ids-for-top-level-collections) documents the `HID\Vid_v(4)&Pid_d(4)&MI_z(2)&Colb(2)` identifier.
+* [HIDClass Hardware IDs for Top-Level Collections](https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hidclass-hardware-ids-for-top-level-collections) documents the `HID\Vid_v(4)&Pid_d(4)&MI_z(2)&Colb(2)` format.
 
 ### Target computer configuration
 Steps to configure the *target* computer for driver testing:
@@ -51,7 +51,8 @@ Steps to configure the *target* computer for driver testing:
   - `bcdedit /set "{dbgsettings}" busparams <b.d.f>` (bus, device & function numbers for USB host controller)
 * From the host computer, connect with the WinDbg over USB to the `KernelUSBConn` target.
 * Restart the target computer.
-* WinDbg configuration to enable debug messages: `kd>ed nt!Kd_DEFAULT_Mask 0xff`.
+* Reconnect to the target computer using WinDbg.
+* Break execution and send the following command to enable display of debug messages: `kd>ed nt!Kd_DEFAULT_Mask 0xff`.
 
 ### Driver testing
 Driver installation:
