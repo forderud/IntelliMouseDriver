@@ -6,8 +6,7 @@ const wchar_t CLASS_NAME[] = L"FireflyDeviceInformation";
 const wchar_t PROPERTY_NAME[] = L"TailLight";
 
 // The function converts an ANSI string into BSTR and returns it in an
-// allocated memory. The memory must be freed by the caller using free()
-// function. If nLenSrc is -1, the string is null terminated.
+// allocated memory. The memory must be freed by the caller.
 BSTR AnsiToBstr(_In_ const wchar_t* lpSrc) {
     UINT nLenSrc = 0;
 
@@ -44,13 +43,7 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
     }
 
     // Namespaces are passed to COM in BSTRs.
-    BSTR bstrNamespace = AnsiToBstr(chNamespace);
-
-    if (!bstrNamespace) {
-        _tprintf(TEXT("Out of memory.\n"));
-        pIWbemLocator->Release();
-        return NULL;
-    }
+    CComBSTR bstrNamespace = AnsiToBstr(chNamespace);
 
     // Using the locator, connect to COM in the given namespace.
     hResult = pIWbemLocator->ConnectServer(
@@ -62,9 +55,6 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
         NULL,   // authority (domain for NTLM)
         NULL,   // context
         &pIWbemServices); // Returned IWbemServices.
-
-    // Done with Namespace.
-    SysFreeString(bstrNamespace);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"),
@@ -107,18 +97,12 @@ IWbemClassObject* GetInstanceReference(
 {
     IWbemClassObject* pInst = NULL;
     IEnumWbemClassObject* pEnumInst;
-    BSTR                 bstrClassName;
     BOOL                 bFound;
     ULONG                ulCount;
     HRESULT              hResult;
 
 
-    bstrClassName = AnsiToBstr(lpClassName);
-
-    if (!bstrClassName) {
-        _tprintf(TEXT("Out of memory.\n"));
-        return NULL;
-    }
+    CComBSTR bstrClassName = AnsiToBstr(lpClassName);
 
     // Get Instance Enumerator Interface.
     pEnumInst = NULL;
@@ -164,7 +148,6 @@ IWbemClassObject* GetInstanceReference(
     if (pEnumInst) {
         pEnumInst->Release();
     }
-    SysFreeString(bstrClassName);
 
     return pInst;
 }
@@ -206,13 +189,7 @@ bool CLuminous::Get(COLORREF* Color) {
     VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
-    BSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
-
-    if ( !bstrPropertyName ) {
-        _tprintf( TEXT("Error out of memory.\n") );
-        VariantClear( &varPropVal );
-        return false;
-    }
+    CComBSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
 
     // Get the property value.
     bool     bRet= false;
@@ -234,10 +211,6 @@ bool CLuminous::Get(COLORREF* Color) {
         }
     }
 
-    if(bstrPropertyName) {
-        SysFreeString( bstrPropertyName );
-    }
-
     VariantClear( &varPropVal );
 
     return bRet;
@@ -249,12 +222,7 @@ bool CLuminous::Set(COLORREF Color) {
     VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
-    BSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
-
-    if ( !bstrPropertyName ) {
-        _tprintf( TEXT("Error out of memory.\n") );
-        goto End ;
-    }
+    CComBSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
 
     // Get the property value.
     CIMTYPE     cimType;
@@ -304,10 +272,6 @@ bool CLuminous::Set(COLORREF Color) {
     }
 
 End:
-    if(bstrPropertyName) {
-        SysFreeString( bstrPropertyName );
-    }
-
     VariantClear( &varPropVal );
 
     return bRet;
