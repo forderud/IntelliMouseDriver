@@ -6,4 +6,4 @@ Projects:
 * `flicker.exe`: Application for causing the mouse to blink by sending commands through the WMI interface.
 * `HidUtil.exe`: Command-line utility for querying and communicating with HID devices.
 
-Please see the [wiki](../../wiki) for documentation content.
+Please see the [wiki](../../wiki) for additional documentation.
