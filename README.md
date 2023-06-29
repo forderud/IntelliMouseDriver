@@ -38,8 +38,6 @@ Prerequisite: Built the driver, so that you already have `firefly.sys` and `fire
 
 Relevant documentation:
 * [Windows Driver Kit (WDK)](https://learn.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk) installation.
-* PnP [Device Tree](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/device-tree)
-* [HIDClass Hardware IDs for Top-Level Collections](https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hidclass-hardware-ids-for-top-level-collections) documents the `HID\Vid_v(4)&Pid_d(4)&MI_z(2)&Colb(2)` format.
 
 ### Target computer configuration
 Steps to configure the *target* computer for driver testing:
