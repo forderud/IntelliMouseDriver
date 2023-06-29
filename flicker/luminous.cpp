@@ -1,14 +1,14 @@
 #include "luminous.h"
 #include <stdexcept>
 
-#define NAME_SPACE TEXT("root\\WMI")
-#define CLASS_NAME  TEXT("FireflyDeviceInformation")
-#define PROPERTY_NAME TEXT("TailLight")
+const wchar_t NAME_SPACE[] = L"root\\WMI";
+const wchar_t CLASS_NAME[] = L"FireflyDeviceInformation";
+const wchar_t PROPERTY_NAME[] = L"TailLight";
 
 // The function converts an ANSI string into BSTR and returns it in an
 // allocated memory. The memory must be freed by the caller using free()
 // function. If nLenSrc is -1, the string is null terminated.
-BSTR AnsiToBstr(_In_ WCHAR* lpSrc) {
+BSTR AnsiToBstr(_In_ const wchar_t* lpSrc) {
     UINT nLenSrc = 0;
 
     if (lpSrc) {
@@ -23,7 +23,7 @@ BSTR AnsiToBstr(_In_ WCHAR* lpSrc) {
 }
 
 // The function connects to the namespace specified by the user.
-IWbemServices* ConnectToNamespace(_In_ LPTSTR chNamespace)
+IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
 {
     IWbemServices* pIWbemServices = NULL;
     IWbemLocator* pIWbemLocator = NULL;
@@ -103,7 +103,7 @@ IWbemServices* ConnectToNamespace(_In_ LPTSTR chNamespace)
 // list-index.
 IWbemClassObject* GetInstanceReference(
     IWbemServices* pIWbemServices,
-    _In_ LPTSTR lpClassName)
+    _In_ const wchar_t* lpClassName)
 {
     IWbemClassObject* pInst = NULL;
     IEnumWbemClassObject* pEnumInst;
@@ -181,13 +181,13 @@ CLuminous::CLuminous() {
 
     }
 
-    m_pIWbemServices = ConnectToNamespace( NAME_SPACE);
+    m_pIWbemServices = ConnectToNamespace(NAME_SPACE);
     if (!m_pIWbemServices ) {
         _tprintf( TEXT("Could not connect name.\n") );
         throw std::runtime_error("ConnectToNamespace failure");
     }
 
-     m_pIWbemClassObject = GetInstanceReference( m_pIWbemServices, CLASS_NAME);
+     m_pIWbemClassObject = GetInstanceReference(m_pIWbemServices, CLASS_NAME);
      if ( !m_pIWbemClassObject ) {
         _tprintf( TEXT("Could not find the instance.\n") );
         throw std::runtime_error("GetInstanceReference failure");
@@ -249,8 +249,7 @@ bool CLuminous::Set(COLORREF Color) {
     VARIANT     varPropVal;
     VariantInit( &varPropVal );
 
-    LPTSTR      lpProperty = PROPERTY_NAME;
-    BSTR bstrPropertyName = AnsiToBstr(lpProperty);
+    BSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
 
     if ( !bstrPropertyName ) {
         _tprintf( TEXT("Error out of memory.\n") );
@@ -268,7 +267,7 @@ bool CLuminous::Set(COLORREF Color) {
 
     if ( hResult != WBEM_S_NO_ERROR ) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
-                            hResult, lpProperty );
+                            hResult, PROPERTY_NAME);
         goto End;
     }
 
@@ -293,14 +292,14 @@ bool CLuminous::Set(COLORREF Color) {
             if ( hResult != WBEM_S_NO_ERROR ) {
                 _tprintf( TEXT("Failed to save the instance,")
                                     TEXT(" %s will not be updated.\n"),
-                                    lpProperty );
+                                    PROPERTY_NAME);
             } else {
                 bRet = true;
             }
         }
         else {
             _tprintf( TEXT("Error %lX: Failed to set property value of %s.\n"),
-            hResult, lpProperty );
+            hResult, PROPERTY_NAME);
         }
     }
 
