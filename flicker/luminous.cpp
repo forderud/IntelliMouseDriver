@@ -197,16 +197,16 @@ bool CLuminous::Get(COLORREF* Color) {
                              NULL );
 
     if ( hResult != WBEM_S_NO_ERROR ) {
-        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
-                        hResult, PROPERTY_NAME);
-    } else {
-        if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
-            *Color = varPropVal.uintVal;
-            return true;
-        }
+        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
+        return false;
+    } 
+    
+    if ((varPropVal.vt != VT_I4) && (varPropVal.vt != VT_UI4)) {
+        return false; // variant type mismatch
     }
 
-    return false;
+    *Color = varPropVal.uintVal;
+    return true;
 }
 
 bool CLuminous::Set(COLORREF Color) {
