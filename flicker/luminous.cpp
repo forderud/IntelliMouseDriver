@@ -196,7 +196,7 @@ bool CLuminous::Get(COLORREF* Color) {
                              &cimType,
                              NULL );
 
-    if ( hResult != WBEM_S_NO_ERROR ) {
+    if (hResult != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
         return false;
     } 
@@ -223,42 +223,34 @@ bool CLuminous::Set(COLORREF Color) {
                              NULL );
 
     if ( hResult != WBEM_S_NO_ERROR ) {
-        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
-                            hResult, PROPERTY_NAME);
+        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
         return false;
     }
 
-    if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
-        varPropVal.uintVal = Color;
-
-        // Set the property value
-        hResult = m_pIWbemClassObject->Put(
-                                    bstrPropertyName,
-                                    0,
-                                    &varPropVal,
-                                    cimType
-                                    );
-
-        if ( hResult == WBEM_S_NO_ERROR ) {
-            hResult = m_pIWbemServices->PutInstance(
-                                            m_pIWbemClassObject,
-                                            WBEM_FLAG_UPDATE_ONLY,
-                                            NULL,
-                                            NULL );
-
-            if ( hResult != WBEM_S_NO_ERROR ) {
-                _tprintf( TEXT("Failed to save the instance,")
-                                    TEXT(" %s will not be updated.\n"),
-                                    PROPERTY_NAME);
-            } else {
-                return true;
-            }
-        }
-        else {
-            _tprintf( TEXT("Error %lX: Failed to set property value of %s.\n"),
-            hResult, PROPERTY_NAME);
-        }
+    if ((varPropVal.vt != VT_I4) && (varPropVal.vt != VT_UI4)) {
+        return false; // variant type mismatch
     }
 
-    return false;
+    varPropVal.uintVal = Color;
+
+    // Set the property value
+    hResult = m_pIWbemClassObject->Put(bstrPropertyName, 0, &varPropVal, cimType);
+
+    if (hResult != WBEM_S_NO_ERROR) {
+        _tprintf(TEXT("Error %lX: Failed to set property value of %s.\n"), hResult, PROPERTY_NAME);
+        return false;
+    }
+
+    hResult = m_pIWbemServices->PutInstance(
+                                    m_pIWbemClassObject,
+                                    WBEM_FLAG_UPDATE_ONLY,
+                                    NULL,
+                                    NULL );
+
+    if (hResult != WBEM_S_NO_ERROR) {
+        _tprintf( TEXT("Failed to save the instance, %s will not be updated.\n"), PROPERTY_NAME);
+        return false;
+    }
+    
+    return true;
 }
