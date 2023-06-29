@@ -87,11 +87,10 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
 
 // The function returns an interface pointer to the instance given its
 // list-index.
-IWbemClassObject* GetInstanceReference(
+CComPtr<IWbemClassObject> GetInstanceReference(
     IWbemServices* pIWbemServices,
     _In_ const wchar_t* lpClassName)
 {
-    IWbemClassObject* pInst = NULL;
     BOOL                 bFound;
     ULONG                ulCount;
     HRESULT              hResult;
@@ -107,6 +106,7 @@ IWbemClassObject* GetInstanceReference(
         NULL,                   // Context.
         &pEnumInst);          // pointer to class enumerator
 
+    CComPtr<IWbemClassObject> pInst;
     if (hResult != WBEM_S_NO_ERROR || pEnumInst == NULL) {
         _tprintf(TEXT("Error %lX: Failed to get a reference")
             TEXT(" to instance enumerator.\n"), hResult);
@@ -131,8 +131,7 @@ IWbemClassObject* GetInstanceReference(
         }
 
         if (bFound == FALSE && pInst) {
-            pInst->Release();
-            pInst = NULL;
+            pInst.Release();
         }
     }
 
