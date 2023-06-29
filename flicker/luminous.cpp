@@ -25,17 +25,12 @@ BSTR AnsiToBstr(_In_ const wchar_t* lpSrc) {
 CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     // Create an instance of WbemLocator interface.
     CComPtr<IWbemLocator> pIWbemLocator;
-    HRESULT hResult = CoCreateInstance(
-        CLSID_WbemLocator,
-        NULL,
-        CLSCTX_INPROC_SERVER,
-        IID_IWbemLocator,
-        (LPVOID*)&pIWbemLocator);
+    HRESULT hResult = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pIWbemLocator);
 
     if (hResult != S_OK) {
         _tprintf(TEXT("Error %lX: Could not create instance of IWbemLocator interface.\n"),
             hResult);
-        return NULL;
+        return nullptr;
     }
 
     // Namespaces are passed to COM in BSTRs.
@@ -57,7 +52,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"),
             hResult, chNamespace);
 
-        return NULL;
+        return nullptr;
     }
 
     // Switch the security level to IMPERSONATE so that provider(s)
@@ -75,7 +70,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
 
     if (hResult != S_OK) {
         _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hResult);
-        return NULL;
+        return nullptr;
     }
 
     return pIWbemServices;
@@ -83,19 +78,12 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
 
 // The function returns an interface pointer to the instance given its
 // list-index.
-CComPtr<IWbemClassObject> GetInstanceReference(
-    IWbemServices* pIWbemServices,
-    _In_ const wchar_t* lpClassName)
-{
-    BOOL                 bFound;
-    ULONG                ulCount;
-    HRESULT              hResult;
-
+CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _In_ const wchar_t* lpClassName) {
     CComBSTR bstrClassName = AnsiToBstr(lpClassName);
 
     // Get Instance Enumerator Interface.
     CComPtr<IEnumWbemClassObject> pEnumInst;
-    hResult = pIWbemServices->CreateInstanceEnum(
+    HRESULT hResult = pIWbemServices->CreateInstanceEnum(
         bstrClassName,          // Name of the root class.
         WBEM_FLAG_SHALLOW |     // Enumerate at current root only.
         WBEM_FLAG_FORWARD_ONLY, // Forward-only enumeration.
@@ -104,34 +92,25 @@ CComPtr<IWbemClassObject> GetInstanceReference(
 
     CComPtr<IWbemClassObject> pInst;
     if (hResult != WBEM_S_NO_ERROR || pEnumInst == NULL) {
-        _tprintf(TEXT("Error %lX: Failed to get a reference")
-            TEXT(" to instance enumerator.\n"), hResult);
-    }
-    else {
-        // Get pointer to the instance.
-        hResult = WBEM_S_NO_ERROR;
-        bFound = FALSE;
-
-        while ((hResult == WBEM_S_NO_ERROR) && (bFound == FALSE)) {
-            hResult = pEnumInst->Next(
-                2000,      // two seconds timeout
-                1,         // return just one instance.
-                &pInst,    // pointer to instance.
-                &ulCount); // Number of instances returned.
-
-            if (ulCount > 0) {
-
-                bFound = TRUE;
-                break;
-            }
-        }
-
-        if (bFound == FALSE && pInst) {
-            return nullptr;
-        }
+        _tprintf(TEXT("Error %lX: Failed to get a reference to instance enumerator.\n"), hResult);
+        return nullptr;
     }
 
-    return pInst;
+    // Get pointer to the instance.
+    hResult = WBEM_S_NO_ERROR;
+    while (hResult == WBEM_S_NO_ERROR) {
+        ULONG ulCount = 0;
+        hResult = pEnumInst->Next(
+            2000,      // two seconds timeout
+            1,         // return just one instance.
+            &pInst,    // pointer to instance.
+            &ulCount); // Number of instances returned.
+
+        if (ulCount > 0)
+            return pInst;
+    }
+
+    return nullptr;
 }
 
 
@@ -173,12 +152,7 @@ bool CLuminous::Get(COLORREF* Color) {
     // Get the property value.
     CComVariant varPropVal;
     CIMTYPE  cimType = 0;
-    HRESULT hResult = m_pIWbemClassObject->Get(
-                             bstrPropertyName,
-                             0,
-                             &varPropVal,
-                             &cimType,
-                             NULL );
+    HRESULT hResult = m_pIWbemClassObject->Get(bstrPropertyName, 0, &varPropVal, &cimType, NULL);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
@@ -225,11 +199,7 @@ bool CLuminous::Set(COLORREF Color) {
         return false;
     }
 
-    hResult = m_pIWbemServices->PutInstance(
-                                    m_pIWbemClassObject,
-                                    WBEM_FLAG_UPDATE_ONLY,
-                                    NULL,
-                                    NULL );
+    hResult = m_pIWbemServices->PutInstance(m_pIWbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Failed to save the instance, %s will not be updated.\n"), PROPERTY_NAME);
