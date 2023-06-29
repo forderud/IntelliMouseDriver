@@ -22,10 +22,7 @@ BSTR AnsiToBstr(_In_ const wchar_t* lpSrc) {
 }
 
 // The function connects to the namespace specified by the user.
-IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
-{
-    IWbemServices* pIWbemServices = NULL;
-
+CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     // Create an instance of WbemLocator interface.
     CComPtr<IWbemLocator> pIWbemLocator;
     HRESULT hResult = CoCreateInstance(
@@ -45,6 +42,7 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
     CComBSTR bstrNamespace = AnsiToBstr(chNamespace);
 
     // Using the locator, connect to COM in the given namespace.
+    CComPtr<IWbemServices> pIWbemServices;
     hResult = pIWbemLocator->ConnectServer(
         bstrNamespace,
         NULL,   // NULL means current account, for simplicity.
@@ -77,8 +75,6 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
 
     if (hResult != S_OK) {
         _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hResult);
-
-        pIWbemServices->Release();
         return NULL;
     }
 
@@ -131,7 +127,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(
         }
 
         if (bFound == FALSE && pInst) {
-            pInst.Release();
+            return nullptr;
         }
     }
 
