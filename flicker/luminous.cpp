@@ -96,7 +96,6 @@ IWbemClassObject* GetInstanceReference(
     _In_ const wchar_t* lpClassName)
 {
     IWbemClassObject* pInst = NULL;
-    IEnumWbemClassObject* pEnumInst;
     BOOL                 bFound;
     ULONG                ulCount;
     HRESULT              hResult;
@@ -104,8 +103,7 @@ IWbemClassObject* GetInstanceReference(
     CComBSTR bstrClassName = AnsiToBstr(lpClassName);
 
     // Get Instance Enumerator Interface.
-    pEnumInst = NULL;
-
+    CComPtr<IEnumWbemClassObject> pEnumInst;
     hResult = pIWbemServices->CreateInstanceEnum(
         bstrClassName,          // Name of the root class.
         WBEM_FLAG_SHALLOW |     // Enumerate at current root only.
@@ -140,11 +138,6 @@ IWbemClassObject* GetInstanceReference(
             pInst->Release();
             pInst = NULL;
         }
-    }
-
-    // Done with the instance enumerator.
-    if (pEnumInst) {
-        pEnumInst->Release();
     }
 
     return pInst;
