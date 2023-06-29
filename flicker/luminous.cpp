@@ -25,10 +25,9 @@ BSTR AnsiToBstr(_In_ const wchar_t* lpSrc) {
 IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
 {
     IWbemServices* pIWbemServices = NULL;
-    IWbemLocator* pIWbemLocator = NULL;
 
-    //
     // Create an instance of WbemLocator interface.
+    CComPtr<IWbemLocator> pIWbemLocator;
     HRESULT hResult = CoCreateInstance(
         CLSID_WbemLocator,
         NULL,
@@ -60,7 +59,6 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
         _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"),
             hResult, chNamespace);
 
-        pIWbemLocator->Release();
         return NULL;
     }
 
@@ -80,12 +78,10 @@ IWbemServices* ConnectToNamespace(_In_ const wchar_t* chNamespace)
     if (hResult != S_OK) {
         _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hResult);
 
-        pIWbemLocator->Release();
         pIWbemServices->Release();
         return NULL;
     }
 
-    pIWbemLocator->Release();
     return pIWbemServices;
 }
 
