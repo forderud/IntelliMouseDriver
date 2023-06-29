@@ -16,19 +16,15 @@ NTSTATUS DriverEntry(
                         FireFlyEvtDeviceAdd
                         );
 
-    //
     // Create the framework WDFDRIVER object, with the handle
     // to it returned in Driver.
-    //
     NTSTATUS status = WdfDriverCreate(DriverObject, 
                              RegistryPath, 
                              WDF_NO_OBJECT_ATTRIBUTES, 
                              &params, 
                              WDF_NO_HANDLE);
     if (!NT_SUCCESS(status)) {
-        //
         // Framework will automatically cleanup on error Status return
-        //
         KdPrint(("FireFly: Error Creating WDFDRIVER 0x%x\n", status));
     }
 

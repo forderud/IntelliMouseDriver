@@ -7,9 +7,7 @@
 #pragma alloc_text(PAGE, EvtWmiInstanceSetItem)
 #endif
 
-//
 // Register our GUID and Datablock generated from the Firefly.mof file.
-//
 NTSTATUS
 WmiInitialize(
     WDFDEVICE       Device,
@@ -42,11 +40,9 @@ WmiInitialize(
     WDF_OBJECT_ATTRIBUTES woa;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&woa, FireflyDeviceInformation);
 
-    //
     // No need to store the WDFWMIINSTANCE in the device context because it is
     // passed back in the WMI instance callbacks and is not referenced outside
     // of those callbacks.
-    //
     WDFWMIINSTANCE instance;
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &instance);
 
@@ -76,10 +72,8 @@ EvtWmiInstanceQueryInstance(
 
     pInfo = InstanceGetInfo(WmiInstance);
 
-    //
     // Our mininum buffer size has been checked by the Framework
     // and failed automatically if too small.
-    //
     *BufferUsed = sizeof(*pInfo);
 
     RtlCopyMemory(OutBuffer, pInfo, sizeof(*pInfo));
@@ -104,17 +98,13 @@ EvtWmiInstanceSetInstance(
 
     pInfo = InstanceGetInfo(WmiInstance);
 
-    //
     // Our mininum buffer size has been checked by the Framework
     // and failed automatically if too small.
-    //
     length = sizeof(*pInfo);
 
     RtlMoveMemory(pInfo, InBuffer, length);
 
-    //
     // Tell the HID device about the new tail light state
-    //
     status = FireflySetFeature(
         WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
         pInfo->TailLight
@@ -145,9 +135,7 @@ EvtWmiInstanceSetItem(
 
         pInfo->TailLight = (*(PBOOLEAN) InBuffer) ? TRUE : FALSE;
 
-        //
         // Tell the HID device about the new tail light state
-        //
         status = FireflySetFeature(
             WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
             pInfo->TailLight
@@ -159,4 +147,3 @@ EvtWmiInstanceSetItem(
         return STATUS_INVALID_DEVICE_REQUEST;
     }
 }
-

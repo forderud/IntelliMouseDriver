@@ -45,9 +45,7 @@ Return Value:
 {
     PAGED_CODE();
 
-    //
     // Preinit for error.
-    //
     PHIDP_PREPARSED_DATA preparsedData = NULL;
     PCHAR                report = NULL;
     WDFIOTARGET          hidTarget = NULL;
@@ -60,9 +58,7 @@ Return Value:
         return status;
     }
 
-    //
     // Open it up, write access only!
-    //
     WDF_IO_TARGET_OPEN_PARAMS openParams;
     WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(
                                     &openParams,
@@ -71,10 +67,8 @@ Return Value:
 
     KdPrint(("Firefly: DeviceContext->PdoName: %wZ\n", DeviceContext->PdoName)); // outputs "\Device\00000083"
 
-    //
     // We will let the framework to respond automatically to the pnp
     // state changes of the target by closing and opening the handle.
-    //
     openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
 
     status = WdfIoTargetOpen(hidTarget, &openParams);
@@ -90,9 +84,7 @@ Return Value:
                                       (PVOID) &collectionInformation,
                                       sizeof(HID_COLLECTION_INFORMATION));
 
-    //
     // Now get the collection information for this device
-    //
     status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
                                   IOCTL_HID_GET_COLLECTION_INFORMATION,
@@ -102,7 +94,6 @@ Return Value:
                                   NULL);
 
     KdPrint(("FireFly: ProductID=%x, VendorID=%x, VersionNumber=%u, DescriptorSize=%u\n", collectionInformation.ProductID, collectionInformation.VendorID, collectionInformation.VersionNumber, collectionInformation.DescriptorSize));
-
 
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));                
@@ -134,16 +125,13 @@ Return Value:
         goto ExitAndFree;
     }
 
-    //
     // Now get the capabilities.
-    //
     HIDP_CAPS caps;
     RtlZeroMemory(&caps, sizeof(HIDP_CAPS));
 
     status = HidP_GetCaps(preparsedData, &caps);
 
     if (!NT_SUCCESS(status)) {
-
         goto ExitAndFree;
     }
 
@@ -155,9 +143,7 @@ Return Value:
         goto ExitAndFree;
     }
 
-    //
     // Create a report to send to the device.
-    //
     report = (PCHAR) ExAllocatePool2(
         POOL_FLAG_NON_PAGED, caps.FeatureReportByteLength+1, 'ffly');
 
@@ -165,10 +151,8 @@ Return Value:
         goto ExitAndFree;
     }
 
-    //
     // Start with a zeroed report. If we are disabling the feature, this might
     // be all we need to do.
-    //
     status = STATUS_SUCCESS;
 
     HIDP_VALUE_CAPS valueCaps = {0};

@@ -32,9 +32,7 @@ Return Value:
 
     PAGED_CODE();
 
-    //
     // Configure the device as a filter driver
-    //
     WdfFdoInitSetFilter(DeviceInit);
 
     WDF_OBJECT_ATTRIBUTES attributes;
@@ -47,9 +45,7 @@ Return Value:
         return status;
     }
 
-    //
     // Driver Framework always zero initializes an objects context memory
-    //
     PDEVICE_CONTEXT pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
     //
@@ -61,17 +57,14 @@ Return Value:
         return status;
     }
 
-    //
     // In order to send ioctls to our PDO, we have open to open it
     // by name so that we have a valid filehandle (fileobject).
     // When we send ioctls using the IoTarget, framework automatically 
     // sets the filobject in the stack location.
-    //
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    //
+
     // By parenting it to device, we don't have to worry about
     // deleting explicitly. It will be deleted along witht the device.
-    //
     attributes.ParentObject = device;
 
     WDFMEMORY memory;
