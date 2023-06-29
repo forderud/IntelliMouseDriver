@@ -6,6 +6,7 @@ Projects:
 * `flicker.exe`: Application for causing the mouse to blink by sending commands through the WMI interface.
 * `HidUtil.exe`: Command-line utility for querying and communicating with HID devices.
 
+Please see the [wiki](../../wiki) for documentation content.
 
 ## Driver development
 Prerequisite: Built the driver, so that you already have `firefly.sys` and `firefly.inf` available.
