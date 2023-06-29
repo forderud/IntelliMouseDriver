@@ -101,7 +101,6 @@ IWbemClassObject* GetInstanceReference(
     ULONG                ulCount;
     HRESULT              hResult;
 
-
     CComBSTR bstrClassName = AnsiToBstr(lpClassName);
 
     // Get Instance Enumerator Interface.
@@ -124,7 +123,6 @@ IWbemClassObject* GetInstanceReference(
         bFound = FALSE;
 
         while ((hResult == WBEM_S_NO_ERROR) && (bFound == FALSE)) {
-
             hResult = pEnumInst->Next(
                 2000,      // two seconds timeout
                 1,         // return just one instance.
@@ -156,7 +154,7 @@ IWbemClassObject* GetInstanceReference(
 CLuminous::CLuminous() {
     // Initialize COM library. Must be done before invoking any
     // other COM function.
-    HRESULT hResult = CoInitialize( NULL );
+    HRESULT hResult = CoInitialize(NULL);
 
     if ( FAILED (hResult)) {
         _tprintf( TEXT("Error %lx: Failed to initialize COM library\n"), hResult );
@@ -186,14 +184,11 @@ CLuminous::~CLuminous() {
 
 
 bool CLuminous::Get(COLORREF* Color) {
-    VARIANT     varPropVal;
-    VariantInit( &varPropVal );
-
     CComBSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
 
     // Get the property value.
-    bool     bRet= false;
-    CIMTYPE  cimType;
+    CComVariant varPropVal;
+    CIMTYPE  cimType = 0;
     HRESULT hResult = m_pIWbemClassObject->Get(
                              bstrPropertyName,
                              0,
@@ -207,25 +202,19 @@ bool CLuminous::Get(COLORREF* Color) {
     } else {
         if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
             *Color = varPropVal.uintVal;
-            bRet = true;
+            return true;
         }
     }
 
-    VariantClear( &varPropVal );
-
-    return bRet;
+    return false;
 }
 
 bool CLuminous::Set(COLORREF Color) {
-    bool bRet = false;
-
-    VARIANT     varPropVal;
-    VariantInit( &varPropVal );
-
     CComBSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
 
     // Get the property value.
-    CIMTYPE     cimType;
+    CComVariant  varPropVal;
+    CIMTYPE     cimType = 0;
     HRESULT hResult = m_pIWbemClassObject->Get(
                              bstrPropertyName,
                              0,
@@ -236,7 +225,7 @@ bool CLuminous::Set(COLORREF Color) {
     if ( hResult != WBEM_S_NO_ERROR ) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"),
                             hResult, PROPERTY_NAME);
-        goto End;
+        return false;
     }
 
     if((varPropVal.vt == VT_I4) || (varPropVal.vt == VT_UI4)) {
@@ -262,7 +251,7 @@ bool CLuminous::Set(COLORREF Color) {
                                     TEXT(" %s will not be updated.\n"),
                                     PROPERTY_NAME);
             } else {
-                bRet = true;
+                return true;
             }
         }
         else {
@@ -271,8 +260,5 @@ bool CLuminous::Set(COLORREF Color) {
         }
     }
 
-End:
-    VariantClear( &varPropVal );
-
-    return bRet;
+    return false;
 }
