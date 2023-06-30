@@ -3,10 +3,10 @@
 # get IntelliMouse WMI object
 $mouse = Get-CimInstance -Namespace root\WMI -Class FireflyDeviceInformation
 
-Write-Host "IntelliMouse device:"
+Write-Host("IntelliMouse device:")
 
 $name = $mouse.InstanceName
-Write-Host "  InstanceName: $name"
+Write-Host("  InstanceName: $name")
 
 # check if mouse is active
 $active = $mouse.Active
