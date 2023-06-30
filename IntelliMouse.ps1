@@ -10,18 +10,16 @@ Write-Host "  InstanceName: $name"
 
 # check if mouse is active
 $active = $mouse.Active
-Write-Host "  Active: $active"
+Write-Host("  Active: $active")
 
 # get current tail-light color
 $color = $mouse.TailLight
-$colorStr = "{0:x}" -f $color # convert to hex string
-Write-Host "  Color: $colorStr"
+Write-Host("  Color: {0:x}" -f $color) # display as hex string
 
 # set tail-light to blue
 $color = 0xFF0000 # 0xBBGGRR format
-$colorStr = "{0:x}" -f $color # convert to hex string
-Write-Host "  Changing color to $colorStr"
+Write-Host("  Changing color to {0:x}" -f $color) # display as hex string
 $mouse.TailLight = $color
 
-Write-Host "Storing changes..."
+Write-Host("Storing changes...")
 Set-CimInstance -CimInstance $mouse -PassThru
