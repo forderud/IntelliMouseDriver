@@ -5,21 +5,17 @@ $mouse = Get-CimInstance -Namespace root\WMI -Class FireflyDeviceInformation
 
 Write-Host("IntelliMouse device:")
 
-$name = $mouse.InstanceName
-Write-Host("  InstanceName: $name")
+Write-Host("  InstanceName: {0}" -f $mouse.InstanceName)
 
 # check if mouse is active
-$active = $mouse.Active
-Write-Host("  Active: $active")
+Write-Host("  Active: {0}" -f $mouse.Active)
 
 # get current tail-light color
-$color = $mouse.TailLight
-Write-Host("  Color: {0:x}" -f $color) # display as hex string
+Write-Host("  Color: {0:x}" -f $mouse.TailLight) # display as hex string
 
-# set tail-light to blue
-$color = 0xFF0000 # 0xBBGGRR format
-Write-Host("  Changing color to {0:x}" -f $color) # display as hex string
-$mouse.TailLight = $color
+# change tail-light color
+$mouse.TailLight = 0xFF0000 # 0xBBGGRR format (blue)
+Write-Host("  Changing color to {0:x}" -f $mouse.TailLight) # display as hex string
 
 Write-Host("Storing changes...")
 Set-CimInstance -CimInstance $mouse -PassThru
