@@ -103,6 +103,13 @@ private:
             return {};
         }
 
+        wchar_t file_path[MAX_PATH] = {};
+        DWORD len = GetFinalPathNameByHandle(hid_dev.Get(), file_path, (DWORD)std::size(file_path), FILE_NAME_OPENED | VOLUME_NAME_NT);
+        if (len == 0) {
+            DWORD err = GetLastError(); // ==1 (Incorrect function.)
+            assert(false);
+        }
+
         HIDD_ATTRIBUTES attr = {};
         HidD_GetAttributes(hid_dev.Get(), &attr);
 
