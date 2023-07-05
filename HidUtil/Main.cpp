@@ -53,14 +53,14 @@ int main(int argc, char* argv[]) {
     BYTE green = atoi(argv[2]);
     BYTE blue = atoi(argv[3]);
 
-    HID::Query mouse;
-    mouse.VendorID = 0x045E;  // Microsoft
-    mouse.ProductID = 0x082A; // Pro IntelliMouse
-    mouse.Usage = 0x0212;     //
-    mouse.UsagePage = 0xFF07; //
+    HID::Query query;
+    query.VendorID = 0x045E;  // Microsoft
+    query.ProductID = 0x082A; // Pro IntelliMouse
+    query.Usage = 0x0212;     //
+    query.UsagePage = 0xFF07; //
 
     printf("Searching for matching HID devices...\n");
-    auto matches = HID::FindDevices(mouse, false);
+    auto matches = HID::FindDevices(query, false);
     for (HID::Match& match : matches) {
         wprintf(L"Updating %s\n", match.name.c_str());
         bool ok = UpdateTailColor(match.dev.Get(), match.report, match.caps, RGB(red, green, blue));
