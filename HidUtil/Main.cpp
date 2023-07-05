@@ -44,8 +44,8 @@ bool UpdateTailColor(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
 
 int main(int argc, char* argv[]) {
     if (argc < 4) {
-        printf("IntelliMouse tail-light shifter.\n");
-        printf("Usage: \"HidUtil.exe <red> <green> <blue>\" (example: \"HidUtil.exe 0 0 255\").\n");
+        wprintf(L"IntelliMouse tail-light shifter.\n");
+        wprintf(L"Usage: \"HidUtil.exe <red> <green> <blue>\" (example: \"HidUtil.exe 0 0 255\").\n");
         return -1;
     }
 
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     query.Usage = 0x0212;     //
     query.UsagePage = 0xFF07; //
 
-    printf("Searching for matching HID devices...\n");
+    wprintf(L"Searching for matching HID devices...\n");
     auto matches = HID::FindDevices(query, false);
     for (HID::Match& match : matches) {
         wprintf(L"Updating %s\n", match.name.c_str());
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         if (!ok)
             return -2;
 
-        printf("SUCCESS: Tail-light color updated.\n");
+        wprintf(L"SUCCESS: Tail-light color updated.\n");
     }
 
     return 0;

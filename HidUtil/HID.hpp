@@ -98,7 +98,7 @@ private:
             //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
             //assert(err != ERROR_SHARING_VIOLATION); // (32)
             if (verbose)
-                printf("WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
+                wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
 
             return {};
         }
@@ -112,7 +112,7 @@ private:
         HidP_GetCaps(reportDesc, &caps);
 
         if (verbose)
-            printf("Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
+            wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
 
         if (query.VendorID && (query.VendorID != attr.VendorID))
             return {};
@@ -125,15 +125,15 @@ private:
             return {};
 
         if (verbose)
-            printf("  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
+            wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
 #if 0
         wchar_t man_buffer[128] = L"<unknown>";
         HidD_GetManufacturerString(hid_dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
-        printf("  Manufacturer: %ws\n", man_buffer);
+        wprintf(L"  Manufacturer: %ws\n", man_buffer);
 
         wchar_t prod_buffer[128] = L"<unknown>";
         HidD_GetProductString(hid_dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
-        printf("  Product: %ws\n", prod_buffer);
+        wprintf(L"  Product: %ws\n", prod_buffer);
 #endif
         return {deviceName, std::move(hid_dev), std::move(reportDesc), caps};
     }
