@@ -1,4 +1,4 @@
-Filter driver for Microsoft Pro IntelliMouse that exposes a WMI interface. Based on the [KMDF filter driver for a HID device](https://github.com/microsoft/Windows-driver-samples/tree/main/hid/firefly) sample from Microsoft. The mouse should report itself with `VendorID=045E` (Microsoft) and `ProductID=082A` (Pro IntelliMouse).
+Filter driver for Microsoft Pro IntelliMouse that exposes a WMI interface. Based on the [KMDF filter driver for a HID device](https://github.com/microsoft/Windows-driver-samples/tree/main/hid/firefly) sample from Microsoft that have been updated to work with more recent IntelliMouse models. The mouse should report itself with `VendorID=045E` (Microsoft) and `ProductID=082A` (Pro IntelliMouse).
 
 ### Projects
 * `firefly.sys`: An upper device filter driver for the HID class for Microsoft Pro Intellimouse. Registers a [FireflyDeviceInformation](firefly/firefly.mof) WMI class that can be accessed from user mode to control the tail light.
