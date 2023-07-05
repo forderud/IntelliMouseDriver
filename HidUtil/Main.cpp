@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     mouse.UsagePage = 0xFF07; //
 
     printf("Searching for matching HID devices...\n");
-    auto matches = HID::FindDevices(mouse);
+    auto matches = HID::FindDevices(mouse, false);
     for (HID::Match& match : matches) {
         wprintf(L"Updating %s\n", match.name.c_str());
         bool ok = UpdateTailColor(match.dev.Get(), match.report, match.caps, RGB(red, green, blue));

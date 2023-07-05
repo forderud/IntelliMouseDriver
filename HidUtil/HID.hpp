@@ -59,7 +59,7 @@ public:
         HIDP_CAPS caps = {};
     };
 
-    static std::vector<Match> FindDevices (const Query& query, bool verbose = false) {
+    static std::vector<Match> FindDevices (const Query& query, bool verbose) {
         GUID hidguid = {};
         HidD_GetHidGuid(&hidguid);
 
