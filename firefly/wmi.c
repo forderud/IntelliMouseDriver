@@ -43,11 +43,11 @@ WmiInitialize(
     // No need to store the WDFWMIINSTANCE in the device context because it is
     // passed back in the WMI instance callbacks and is not referenced outside
     // of those callbacks.
-    WDFWMIINSTANCE instance = 0;
-    status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &instance);
+    WDFWMIINSTANCE WmiInstance = 0;
+    status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &WmiInstance);
 
     if (NT_SUCCESS(status)) {
-        FireflyDeviceInformation* info = InstanceGetInfo(instance);
+        FireflyDeviceInformation* info = InstanceGetInfo(WmiInstance);
         info->TailLight = 0x000000; // black
     }
 
