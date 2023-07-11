@@ -115,24 +115,19 @@ EvtWmiInstanceSetItem(
 {
     PAGED_CODE();
 
-    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
-
-    if (DataItemId == 1) {
-        if (InBufferSize < FireflyDeviceInformation_TailLight_SIZE) {
-            return STATUS_BUFFER_TOO_SMALL;
-        }
-
-        pInfo->TailLight = ((FireflyDeviceInformation*)InBuffer)->TailLight;
-
-        // Tell the HID device about the new tail light state
-        NTSTATUS status = FireflySetFeature(
-            WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
-            pInfo->TailLight
-            );
-
-        return status;
-    }
-    else {
+    if (DataItemId != 1)
         return STATUS_INVALID_DEVICE_REQUEST;
-    }
+
+    if (InBufferSize < FireflyDeviceInformation_TailLight_SIZE)
+        return STATUS_BUFFER_TOO_SMALL;
+
+    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
+    pInfo->TailLight = ((FireflyDeviceInformation*)InBuffer)->TailLight;
+
+    // Tell the HID device about the new tail light state
+    NTSTATUS status = FireflySetFeature(
+        WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
+        pInfo->TailLight
+        );
+    return status;
 }
