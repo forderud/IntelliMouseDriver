@@ -72,7 +72,7 @@ EvtWmiInstanceQueryInstance(
     // and failed automatically if too small.
     *BufferUsed = sizeof(*pInfo);
 
-    RtlCopyMemory(OutBuffer, pInfo, sizeof(*pInfo));
+    RtlCopyMemory(/*dst*/OutBuffer, /*src*/pInfo, sizeof(*pInfo));
 
     return STATUS_SUCCESS;
 }
