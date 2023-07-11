@@ -19,15 +19,12 @@ FireflySetFeature(
     IN  ULONG           Color
     )
 /*++
-
 Routine Description:
-
     This routine sets the HID feature by sending HID ioctls to our device.
     These IOCTLs will be handled by HIDUSB and converted into USB requests
     and send to the device.
 
 Arguments:
-
     DeviceContext - Context for our device
 
     PageID  - UsagePage of the light control feature.
@@ -36,11 +33,8 @@ Arguments:
 
     EnanbleFeature - True to turn the light on, Falst to turn if off.
 
-
 Return Value:
-
     NT Status code
-
 --*/
 {
     PAGED_CODE();
@@ -58,7 +52,7 @@ Return Value:
         return status;
     }
 
-    // Open it up, write access only!
+    // open in write-only mode
     WDF_IO_TARGET_OPEN_PARAMS openParams = {0};
     WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(
                                     &openParams,
