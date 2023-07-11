@@ -79,15 +79,16 @@ Return Value:
         return STATUS_UNSUCCESSFUL;
     }
 
-    size_t bufferLength = 0;
-    pDeviceContext->PdoName.Buffer = WdfMemoryGetBuffer(memory, &bufferLength);
+    {
+        // initialize pDeviceContext->PdoName based on memory
+        size_t bufferLength = 0;
+        pDeviceContext->PdoName.Buffer = WdfMemoryGetBuffer(memory, &bufferLength);
+        if (pDeviceContext->PdoName.Buffer == NULL)
+            return STATUS_UNSUCCESSFUL;
 
-    if (pDeviceContext->PdoName.Buffer == NULL) {
-        return STATUS_UNSUCCESSFUL;
+        pDeviceContext->PdoName.MaximumLength = (USHORT)bufferLength;
+        pDeviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
     }
-
-    pDeviceContext->PdoName.MaximumLength = (USHORT) bufferLength;
-    pDeviceContext->PdoName.Length = (USHORT) bufferLength-sizeof(UNICODE_NULL);
 
     return status;
 }
