@@ -94,7 +94,7 @@ EvtWmiInstanceSetInstance(
     // and failed automatically if too small.
     ULONG length = sizeof(*pInfo);
 
-    RtlMoveMemory(pInfo, InBuffer, length);
+    RtlMoveMemory(/*dst*/pInfo, /*src*/InBuffer, length);
 
     // Tell the HID device about the new tail light state
     NTSTATUS status = FireflySetFeature(
