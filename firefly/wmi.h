@@ -2,8 +2,7 @@
 #define MOFRESOURCENAME L"FireflyWMI"
 
 // Initialize the FireFly drivers WMI support
-NTSTATUS
-WmiInitialize(
+NTSTATUS WmiInitialize(
     WDFDEVICE       Device,
     PDEVICE_CONTEXT DeviceContext
     );
