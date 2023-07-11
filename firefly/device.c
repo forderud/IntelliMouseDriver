@@ -79,7 +79,7 @@ Return Value:
         return STATUS_UNSUCCESSFUL;
     }
 
-    size_t bufferLength;
+    size_t bufferLength = 0;
     pDeviceContext->PdoName.Buffer = WdfMemoryGetBuffer(memory, &bufferLength);
 
     if (pDeviceContext->PdoName.Buffer == NULL) {
