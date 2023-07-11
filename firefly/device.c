@@ -11,19 +11,16 @@ FireFlyEvtDeviceAdd(
     )
 /*++
 Routine Description:
-
     EvtDeviceAdd is called by the framework in response to AddDevice
     call from the PnP manager. We create and initialize a device object to
     represent to be part of the device stack as a filter.
 
 Arguments:
-
     Driver - Handle to a framework driver object created in DriverEntry
 
     DeviceInit - Pointer to a framework-allocated WDFDEVICE_INIT structure.
 
 Return Value:
-
     NTSTATUS
 
 --*/    
@@ -48,9 +45,7 @@ Return Value:
     // Driver Framework always zero initializes an objects context memory
     PDEVICE_CONTEXT pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
-    //
     // Initialize our WMI support
-    //
     status = WmiInitialize(device, pDeviceContext);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: Error initializing WMI 0x%x\n", status));
