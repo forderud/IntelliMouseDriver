@@ -11,6 +11,6 @@ typedef struct _DEVICE_CONTEXT
 
 WDF_DECLARE_CONTEXT_TYPE(DEVICE_CONTEXT)
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(FireflyDeviceInformation, InstanceGetInfo)
+WDF_DECLARE_CONTEXT_TYPE(FireflyDeviceInformation)
 
 EVT_WDF_DEVICE_CONTEXT_CLEANUP EvtDeviceContextCleanup;

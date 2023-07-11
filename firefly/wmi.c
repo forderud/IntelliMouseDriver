@@ -47,7 +47,7 @@ WmiInitialize(
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &WmiInstance);
 
     if (NT_SUCCESS(status)) {
-        FireflyDeviceInformation* info = InstanceGetInfo(WmiInstance);
+        FireflyDeviceInformation* info = WdfObjectGet_FireflyDeviceInformation(WmiInstance);
         info->TailLight = 0x000000; // black
     }
 
@@ -66,7 +66,7 @@ EvtWmiInstanceQueryInstance(
 
     UNREFERENCED_PARAMETER(OutBufferSize);
 
-    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
+    FireflyDeviceInformation* pInfo = WdfObjectGet_FireflyDeviceInformation(WmiInstance);
 
     // Our mininum buffer size has been checked by the Framework
     // and failed automatically if too small.
@@ -88,7 +88,7 @@ EvtWmiInstanceSetInstance(
 
     UNREFERENCED_PARAMETER(InBufferSize);
 
-    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
+    FireflyDeviceInformation* pInfo = WdfObjectGet_FireflyDeviceInformation(WmiInstance);
 
     // Our mininum buffer size has been checked by the Framework
     // and failed automatically if too small.
@@ -121,7 +121,7 @@ EvtWmiInstanceSetItem(
     if (InBufferSize < FireflyDeviceInformation_TailLight_SIZE)
         return STATUS_BUFFER_TOO_SMALL;
 
-    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
+    FireflyDeviceInformation* pInfo = WdfObjectGet_FireflyDeviceInformation(WmiInstance);
     pInfo->TailLight = ((FireflyDeviceInformation*)InBuffer)->TailLight;
 
     // Tell the HID device about the new tail light state
