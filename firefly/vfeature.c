@@ -59,7 +59,7 @@ Return Value:
     }
 
     // Open it up, write access only!
-    WDF_IO_TARGET_OPEN_PARAMS openParams;
+    WDF_IO_TARGET_OPEN_PARAMS openParams = {0};
     WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(
                                     &openParams,
                                     &DeviceContext->PdoName,
@@ -78,7 +78,7 @@ Return Value:
     }
     
 
-    WDF_MEMORY_DESCRIPTOR      outputDescriptor;
+    WDF_MEMORY_DESCRIPTOR      outputDescriptor = {0};
     HID_COLLECTION_INFORMATION collectionInformation = {0};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor, // out (mapped to collectionInformation)
                                       (PVOID) &collectionInformation,
@@ -126,7 +126,7 @@ Return Value:
     }
 
     // Now get the capabilities.
-    HIDP_CAPS caps;
+    HIDP_CAPS caps = {0};
     RtlZeroMemory(&caps, sizeof(HIDP_CAPS));
 
     status = HidP_GetCaps(preparsedData, &caps);
@@ -172,7 +172,7 @@ Return Value:
     report[4] = (Color >> 8) & 0xFF; // green
     report[5] = (Color >> 16) & 0xFF; // blue
 
-    WDF_MEMORY_DESCRIPTOR inputDescriptor;
+    WDF_MEMORY_DESCRIPTOR inputDescriptor = {0};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
                                       report,
                                       caps.FeatureReportByteLength+1);
@@ -189,7 +189,6 @@ Return Value:
     }
 
 ExitAndFree:
-
     if (preparsedData != NULL) {
         ExFreePool(preparsedData);
         preparsedData = NULL;

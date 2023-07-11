@@ -35,10 +35,10 @@ Return Value:
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
 
-    WDF_OBJECT_ATTRIBUTES attributes;
+    WDF_OBJECT_ATTRIBUTES attributes = {0};
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, DEVICE_CONTEXT);
 
-    WDFDEVICE device;
+    WDFDEVICE device = 0;
     NTSTATUS status = WdfDeviceCreate(&DeviceInit, &attributes, &device);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfDeviceCreate, Error %x\n", status));
@@ -67,7 +67,7 @@ Return Value:
     // deleting explicitly. It will be deleted along witht the device.
     attributes.ParentObject = device;
 
-    WDFMEMORY memory;
+    WDFMEMORY memory = 0;
     status = WdfDeviceAllocAndQueryProperty(device,
                                     DevicePropertyPhysicalDeviceObjectName,
                                     NonPagedPoolNx,

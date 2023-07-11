@@ -26,24 +26,24 @@ WmiInitialize(
         return status;
     }
 
-    WDF_WMI_PROVIDER_CONFIG providerConfig;
+    WDF_WMI_PROVIDER_CONFIG providerConfig = {0};
     WDF_WMI_PROVIDER_CONFIG_INIT(&providerConfig, &FireflyDeviceInformation_GUID);
     providerConfig.MinInstanceBufferSize = sizeof(FireflyDeviceInformation);
 
-    WDF_WMI_INSTANCE_CONFIG instanceConfig;
+    WDF_WMI_INSTANCE_CONFIG instanceConfig = {0};
     WDF_WMI_INSTANCE_CONFIG_INIT_PROVIDER_CONFIG(&instanceConfig, &providerConfig);
     instanceConfig.Register = TRUE;
     instanceConfig.EvtWmiInstanceQueryInstance = EvtWmiInstanceQueryInstance;
     instanceConfig.EvtWmiInstanceSetInstance = EvtWmiInstanceSetInstance;
     instanceConfig.EvtWmiInstanceSetItem = EvtWmiInstanceSetItem;
 
-    WDF_OBJECT_ATTRIBUTES woa;
+    WDF_OBJECT_ATTRIBUTES woa = {0};
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&woa, FireflyDeviceInformation);
 
     // No need to store the WDFWMIINSTANCE in the device context because it is
     // passed back in the WMI instance callbacks and is not referenced outside
     // of those callbacks.
-    WDFWMIINSTANCE instance;
+    WDFWMIINSTANCE instance = 0;
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &instance);
 
     if (NT_SUCCESS(status)) {
@@ -62,13 +62,11 @@ EvtWmiInstanceQueryInstance(
     OUT PULONG BufferUsed
     )
 {
-    FireflyDeviceInformation* pInfo;
-
     PAGED_CODE();
 
     UNREFERENCED_PARAMETER(OutBufferSize);
 
-    pInfo = InstanceGetInfo(WmiInstance);
+    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
 
     // Our mininum buffer size has been checked by the Framework
     // and failed automatically if too small.
@@ -86,24 +84,20 @@ EvtWmiInstanceSetInstance(
     IN  PVOID InBuffer
     )
 {
-    FireflyDeviceInformation* pInfo;
-    ULONG length;
-    NTSTATUS status;
-
     PAGED_CODE();
 
     UNREFERENCED_PARAMETER(InBufferSize);
 
-    pInfo = InstanceGetInfo(WmiInstance);
+    FireflyDeviceInformation* pInfo = InstanceGetInfo(WmiInstance);
 
     // Our mininum buffer size has been checked by the Framework
     // and failed automatically if too small.
-    length = sizeof(*pInfo);
+    ULONG length = sizeof(*pInfo);
 
     RtlMoveMemory(pInfo, InBuffer, length);
 
     // Tell the HID device about the new tail light state
-    status = FireflySetFeature(
+    NTSTATUS status = FireflySetFeature(
         WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
         pInfo->TailLight
         );

@@ -10,7 +10,7 @@ NTSTATUS DriverEntry(
     KdPrint(("FireFly: DriverEntry - WDF version built on %s %s\n", 
                             __DATE__, __TIME__));
 
-    WDF_DRIVER_CONFIG params;
+    WDF_DRIVER_CONFIG params = {0};
     WDF_DRIVER_CONFIG_INIT(
                         &params,
                         FireFlyEvtDeviceAdd
