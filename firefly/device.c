@@ -19,10 +19,6 @@ Arguments:
     Driver - Handle to a framework driver object created in DriverEntry
 
     DeviceInit - Pointer to a framework-allocated WDFDEVICE_INIT structure.
-
-Return Value:
-    NTSTATUS
-
 --*/    
 {
     UNREFERENCED_PARAMETER(Driver);
