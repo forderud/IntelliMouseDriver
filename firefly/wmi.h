@@ -4,7 +4,7 @@
 // Initialize the FireFly drivers WMI support
 NTSTATUS WmiInitialize(
     WDFDEVICE       Device,
-    PDEVICE_CONTEXT DeviceContext
+    DEVICE_CONTEXT* DeviceContext
     );
 
 EVT_WDF_WMI_INSTANCE_QUERY_INSTANCE EvtWmiInstanceQueryInstance;

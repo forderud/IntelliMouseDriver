@@ -11,7 +11,7 @@
 NTSTATUS
 WmiInitialize(
     WDFDEVICE       Device,
-    PDEVICE_CONTEXT DeviceContext
+    DEVICE_CONTEXT* DeviceContext
     )
 {
     DECLARE_CONST_UNICODE_STRING(mofRsrcName, MOFRESOURCENAME);

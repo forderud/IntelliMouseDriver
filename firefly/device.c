@@ -43,7 +43,7 @@ Return Value:
     }
 
     // Driver Framework always zero initializes an objects context memory
-    PDEVICE_CONTEXT pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
+    DEVICE_CONTEXT* pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
     // Initialize our WMI support
     status = WmiInitialize(device, pDeviceContext);
