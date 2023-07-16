@@ -5,21 +5,6 @@ const wchar_t NAME_SPACE[] = L"root\\WMI";
 const wchar_t CLASS_NAME[] = L"FireflyDeviceInformation";
 const wchar_t PROPERTY_NAME[] = L"TailLight";
 
-// The function converts an ANSI string into BSTR and returns it in an
-// allocated memory. The memory must be freed by the caller.
-BSTR AnsiToBstr(_In_ const wchar_t* lpSrc) {
-    UINT nLenSrc = 0;
-
-    if (lpSrc) {
-        size_t temp = wcslen(lpSrc);
-        if (temp > INT_MAX - 1) {
-            return NULL;
-        }
-        nLenSrc = (UINT)temp + 1;
-    }
-
-    return SysAllocStringLen(lpSrc, nLenSrc);
-}
 
 // The function connects to the namespace specified by the user.
 CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
@@ -34,7 +19,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     }
 
     // Namespaces are passed to COM in BSTRs.
-    CComBSTR bstrNamespace = AnsiToBstr(chNamespace);
+    CComBSTR bstrNamespace = chNamespace;
 
     // Using the locator, connect to COM in the given namespace.
     CComPtr<IWbemServices> pIWbemServices;
@@ -79,7 +64,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
 // The function returns an interface pointer to the instance given its
 // list-index.
 CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _In_ const wchar_t* lpClassName) {
-    CComBSTR bstrClassName = AnsiToBstr(lpClassName);
+    CComBSTR bstrClassName = lpClassName;
 
     // Get Instance Enumerator Interface.
     CComPtr<IEnumWbemClassObject> pEnumInst;
@@ -147,7 +132,7 @@ CLuminous::~CLuminous() {
 
 
 bool CLuminous::Get(COLORREF* Color) {
-    CComBSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
+    CComBSTR bstrPropertyName = PROPERTY_NAME;
 
     // Get the property value.
     CComVariant varPropVal;
@@ -168,7 +153,7 @@ bool CLuminous::Get(COLORREF* Color) {
 }
 
 bool CLuminous::Set(COLORREF Color) {
-    CComBSTR bstrPropertyName = AnsiToBstr(PROPERTY_NAME);
+    CComBSTR bstrPropertyName = PROPERTY_NAME;
 
     // Get the property value.
     CComVariant  varPropVal;
