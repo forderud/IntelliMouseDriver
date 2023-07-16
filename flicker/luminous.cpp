@@ -18,13 +18,10 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         return nullptr;
     }
 
-    // Namespaces are passed to COM in BSTRs.
-    CComBSTR bstrNamespace = chNamespace;
-
     // Using the locator, connect to COM in the given namespace.
     CComPtr<IWbemServices> pIWbemServices;
     hResult = pIWbemLocator->ConnectServer(
-        bstrNamespace,
+        CComBSTR(chNamespace),
         NULL,   // NULL means current account, for simplicity.
         NULL,   // NULL means current password, for simplicity.
         0L,     // locale
@@ -61,15 +58,12 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     return pIWbemServices;
 }
 
-// The function returns an interface pointer to the instance given its
-// list-index.
+// The function returns an interface pointer to the instance given its list-index.
 CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _In_ const wchar_t* lpClassName) {
-    CComBSTR bstrClassName = lpClassName;
-
     // Get Instance Enumerator Interface.
     CComPtr<IEnumWbemClassObject> pEnumInst;
     HRESULT hResult = pIWbemServices->CreateInstanceEnum(
-        bstrClassName,          // Name of the root class.
+        CComBSTR(lpClassName),  // Name of the root class.
         WBEM_FLAG_SHALLOW |     // Enumerate at current root only.
         WBEM_FLAG_FORWARD_ONLY, // Forward-only enumeration.
         NULL,                   // Context.
@@ -100,8 +94,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _I
 
 
 CLuminous::CLuminous() {
-    // Initialize COM library. Must be done before invoking any
-    // other COM function.
+    // Initialize COM library. Must be done before invoking any other COM function.
     HRESULT hResult = CoInitialize(NULL);
 
     if ( FAILED (hResult)) {
@@ -132,12 +125,13 @@ CLuminous::~CLuminous() {
 
 
 bool CLuminous::Get(COLORREF* Color) {
-    CComBSTR bstrPropertyName = PROPERTY_NAME;
+    if (!Color)
+        return false;
 
     // Get the property value.
     CComVariant varPropVal;
     CIMTYPE  cimType = 0;
-    HRESULT hResult = m_pIWbemClassObject->Get(bstrPropertyName, 0, &varPropVal, &cimType, NULL);
+    HRESULT hResult = m_pIWbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
@@ -153,13 +147,11 @@ bool CLuminous::Get(COLORREF* Color) {
 }
 
 bool CLuminous::Set(COLORREF Color) {
-    CComBSTR bstrPropertyName = PROPERTY_NAME;
-
     // Get the property value.
     CComVariant  varPropVal;
     CIMTYPE     cimType = 0;
     HRESULT hResult = m_pIWbemClassObject->Get(
-                             bstrPropertyName,
+                             CComBSTR(PROPERTY_NAME),
                              0,
                              &varPropVal,
                              &cimType,
@@ -177,7 +169,7 @@ bool CLuminous::Set(COLORREF Color) {
     varPropVal.uintVal = Color;
 
     // Set the property value
-    hResult = m_pIWbemClassObject->Put(bstrPropertyName, 0, &varPropVal, cimType);
+    hResult = m_pIWbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf(TEXT("Error %lX: Failed to set property value of %s.\n"), hResult, PROPERTY_NAME);
