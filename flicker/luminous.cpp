@@ -69,7 +69,6 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _I
         NULL,                   // Context.
         &pEnumInst);          // pointer to class enumerator
 
-    CComPtr<IWbemClassObject> pInst;
     if (hResult != WBEM_S_NO_ERROR || pEnumInst == NULL) {
         _tprintf(TEXT("Error %lX: Failed to get a reference to instance enumerator.\n"), hResult);
         return nullptr;
@@ -79,6 +78,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _I
     hResult = WBEM_S_NO_ERROR;
     while (hResult == WBEM_S_NO_ERROR) {
         ULONG ulCount = 0;
+        CComPtr<IWbemClassObject> pInst;
         hResult = pEnumInst->Next(
             2000,      // two seconds timeout
             1,         // return just one instance.
