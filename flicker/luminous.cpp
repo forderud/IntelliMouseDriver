@@ -59,32 +59,32 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
 // The function returns an interface pointer to the instance given its list-index.
 CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices* pIWbemServices, _In_ const wchar_t* lpClassName) {
     // Get Instance Enumerator Interface.
-    CComPtr<IEnumWbemClassObject> pEnumInst;
-    HRESULT hResult = pIWbemServices->CreateInstanceEnum(
+    CComPtr<IEnumWbemClassObject> enumInst;
+    HRESULT hr = pIWbemServices->CreateInstanceEnum(
         CComBSTR(lpClassName),  // Name of the root class.
         WBEM_FLAG_SHALLOW |     // Enumerate at current root only.
         WBEM_FLAG_FORWARD_ONLY, // Forward-only enumeration.
         NULL,                   // Context.
-        &pEnumInst);          // pointer to class enumerator
+        &enumInst);          // pointer to class enumerator
 
-    if (hResult != WBEM_S_NO_ERROR || pEnumInst == NULL) {
-        _tprintf(TEXT("Error %lX: Failed to get a reference to instance enumerator.\n"), hResult);
+    if (hr != WBEM_S_NO_ERROR || enumInst == NULL) {
+        _tprintf(TEXT("Error %lX: Failed to get a reference to instance enumerator.\n"), hr);
         return nullptr;
     }
 
     // Get pointer to the instance.
-    hResult = WBEM_S_NO_ERROR;
-    while (hResult == WBEM_S_NO_ERROR) {
-        ULONG ulCount = 0;
-        CComPtr<IWbemClassObject> pInst;
-        hResult = pEnumInst->Next(
+    hr = WBEM_S_NO_ERROR;
+    while (hr == WBEM_S_NO_ERROR) {
+        ULONG count = 0;
+        CComPtr<IWbemClassObject> inst;
+        hr = enumInst->Next(
             2000,      // two seconds timeout
             1,         // return just one instance.
-            &pInst,    // pointer to instance.
-            &ulCount); // Number of instances returned.
+            &inst,    // pointer to instance.
+            &count); // Number of instances returned.
 
-        if (ulCount > 0)
-            return pInst;
+        if (count > 0)
+            return inst;
     }
 
     return nullptr;
