@@ -101,22 +101,22 @@ CLuminous::CLuminous() {
 
     }
 
-    m_pIWbemServices = ConnectToNamespace(NAME_SPACE);
-    if (!m_pIWbemServices ) {
+    m_wbemServices = ConnectToNamespace(NAME_SPACE);
+    if (!m_wbemServices) {
         _tprintf( TEXT("Could not connect name.\n") );
         throw std::runtime_error("ConnectToNamespace failure");
     }
 
-     m_pIWbemClassObject = GetInstanceReference(*m_pIWbemServices, CLASS_NAME);
-     if ( !m_pIWbemClassObject ) {
+    m_wbemClassObject = GetInstanceReference(*m_wbemServices, CLASS_NAME);
+     if ( !m_wbemClassObject) {
         _tprintf( TEXT("Could not find the instance.\n") );
         throw std::runtime_error("GetInstanceReference failure");
     }
 }
 
 CLuminous::~CLuminous() {
-    m_pIWbemServices.Release();
-    m_pIWbemClassObject.Release();
+    m_wbemServices.Release();
+    m_wbemClassObject.Release();
 
     CoUninitialize();
 }
@@ -129,7 +129,7 @@ bool CLuminous::Get(COLORREF* Color) {
     // Get the property value.
     CComVariant varPropVal;
     CIMTYPE  cimType = 0;
-    HRESULT hResult = m_pIWbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
+    HRESULT hResult = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
@@ -148,7 +148,7 @@ bool CLuminous::Set(COLORREF Color) {
     // Get the property value.
     CComVariant  varPropVal;
     CIMTYPE     cimType = 0;
-    HRESULT hResult = m_pIWbemClassObject->Get(
+    HRESULT hResult = m_wbemClassObject->Get(
                              CComBSTR(PROPERTY_NAME),
                              0,
                              &varPropVal,
@@ -167,14 +167,14 @@ bool CLuminous::Set(COLORREF Color) {
     varPropVal.uintVal = Color;
 
     // Set the property value
-    hResult = m_pIWbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
+    hResult = m_wbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf(TEXT("Error %lX: Failed to set property value of %s.\n"), hResult, PROPERTY_NAME);
         return false;
     }
 
-    hResult = m_pIWbemServices->PutInstance(m_pIWbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
+    hResult = m_wbemServices->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
 
     if (hResult != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Failed to save the instance, %s will not be updated.\n"), PROPERTY_NAME);

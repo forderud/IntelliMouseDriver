@@ -13,6 +13,6 @@ public:
     bool Get(COLORREF*Color);
 
 private:
-    CComPtr<IWbemServices> m_pIWbemServices;
-    CComPtr<IWbemClassObject> m_pIWbemClassObject;
+    CComPtr<IWbemServices> m_wbemServices;
+    CComPtr<IWbemClassObject> m_wbemClassObject;
 };
