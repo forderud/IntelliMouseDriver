@@ -1,4 +1,4 @@
-#include "luminous.h"
+#include "luminous.hpp"
 #include <stdexcept>
 
 const wchar_t NAME_SPACE[] = L"root\\WMI";

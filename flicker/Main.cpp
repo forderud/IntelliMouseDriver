@@ -1,4 +1,4 @@
-#include "luminous.h"
+#include "luminous.hpp"
 #include <dontuse.h>
 #include <Shlobj.h>
 #include <memory>

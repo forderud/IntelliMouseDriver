@@ -5,6 +5,6 @@
     <ClCompile Include="luminous.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="luminous.h" />
+    <ClInclude Include="luminous.hpp" />
   </ItemGroup>
 </Project>
