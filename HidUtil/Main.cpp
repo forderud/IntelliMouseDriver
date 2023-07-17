@@ -21,6 +21,11 @@ int main(int argc, char* argv[]) {
 
     wprintf(L"Searching for matching HID devices...\n");
     auto matches = HID::FindDevices(query, false);
+    if (matches.empty()) {
+        wprintf(L"No matching devices found.\n");
+        return -3;
+    }
+
     for (HID::Match& match : matches) {
         wprintf(L"Updating %s\n", match.name.c_str());
         bool ok = UpdateTailLight(match.dev.Get(), match.report, match.caps, RGB(red, green, blue));
