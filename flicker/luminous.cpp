@@ -93,10 +93,10 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _I
 
 CLuminous::CLuminous() {
     // Initialize COM library. Must be done before invoking any other COM function.
-    HRESULT hResult = CoInitialize(NULL);
+    HRESULT hr = CoInitialize(NULL);
 
-    if ( FAILED (hResult)) {
-        _tprintf( TEXT("Error %lx: Failed to initialize COM library\n"), hResult );
+    if ( FAILED (hr)) {
+        _tprintf( TEXT("Error %lx: Failed to initialize COM library\n"), hr);
         throw std::runtime_error("CoInitialize failure");
 
     }
@@ -129,10 +129,10 @@ bool CLuminous::Get(COLORREF* Color) {
     // Get the property value.
     CComVariant varPropVal;
     CIMTYPE  cimType = 0;
-    HRESULT hResult = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
+    HRESULT hr = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
 
-    if (hResult != WBEM_S_NO_ERROR) {
-        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
+    if (hr != WBEM_S_NO_ERROR) {
+        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hr, PROPERTY_NAME);
         return false;
     } 
     
@@ -148,15 +148,15 @@ bool CLuminous::Set(COLORREF Color) {
     // Get the property value.
     CComVariant  varPropVal;
     CIMTYPE     cimType = 0;
-    HRESULT hResult = m_wbemClassObject->Get(
+    HRESULT hr = m_wbemClassObject->Get(
                              CComBSTR(PROPERTY_NAME),
                              0,
                              &varPropVal,
                              &cimType,
                              NULL );
 
-    if ( hResult != WBEM_S_NO_ERROR ) {
-        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hResult, PROPERTY_NAME);
+    if (hr != WBEM_S_NO_ERROR ) {
+        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hr, PROPERTY_NAME);
         return false;
     }
 
@@ -167,16 +167,16 @@ bool CLuminous::Set(COLORREF Color) {
     varPropVal.uintVal = Color;
 
     // Set the property value
-    hResult = m_wbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
+    hr = m_wbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
 
-    if (hResult != WBEM_S_NO_ERROR) {
-        _tprintf(TEXT("Error %lX: Failed to set property value of %s.\n"), hResult, PROPERTY_NAME);
+    if (hr != WBEM_S_NO_ERROR) {
+        _tprintf(TEXT("Error %lX: Failed to set property value of %s.\n"), hr, PROPERTY_NAME);
         return false;
     }
 
-    hResult = m_wbemServices->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
+    hr = m_wbemServices->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
 
-    if (hResult != WBEM_S_NO_ERROR) {
+    if (hr != WBEM_S_NO_ERROR) {
         _tprintf( TEXT("Failed to save the instance, %s will not be updated.\n"), PROPERTY_NAME);
         return false;
     }
