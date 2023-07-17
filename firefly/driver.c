@@ -7,22 +7,19 @@ NTSTATUS DriverEntry(
     IN PUNICODE_STRING RegistryPath
     )
 {
-    KdPrint(("FireFly: DriverEntry - WDF version built on %s %s\n", 
-                            __DATE__, __TIME__));
+    KdPrint(("FireFly: DriverEntry - WDF version built on %s %s\n", __DATE__, __TIME__));
 
     WDF_DRIVER_CONFIG params = {0};
-    WDF_DRIVER_CONFIG_INIT(
-                        &params,
+    WDF_DRIVER_CONFIG_INIT(&params, // [out]
                         FireFlyEvtDeviceAdd
                         );
 
-    // Create the framework WDFDRIVER object, with the handle
-    // to it returned in Driver.
+    // Create the framework WDFDRIVER object, with the handle to it returned in Driver.
     NTSTATUS status = WdfDriverCreate(DriverObject, 
                              RegistryPath, 
                              WDF_NO_OBJECT_ATTRIBUTES, 
                              &params, 
-                             WDF_NO_HANDLE);
+                             WDF_NO_HANDLE); // [out]
     if (!NT_SUCCESS(status)) {
         // Framework will automatically cleanup on error Status return
         KdPrint(("FireFly: Error Creating WDFDRIVER 0x%x\n", status));
