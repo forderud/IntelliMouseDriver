@@ -19,22 +19,9 @@ FireflySetFeature(
     IN  ULONG           Color
     )
 /*++
-Routine Description:
     This routine sets the HID feature by sending HID ioctls to our device.
     These IOCTLs will be handled by HIDUSB and converted into USB requests
     and send to the device.
-
-Arguments:
-    DeviceContext - Context for our device
-
-    PageID  - UsagePage of the light control feature.
-
-    FeatureId - Usage ID of the feature.
-
-    EnanbleFeature - True to turn the light on, Falst to turn if off.
-
-Return Value:
-    NT Status code
 --*/
 {
     PAGED_CODE();
@@ -130,10 +117,9 @@ Return Value:
     }
 
     KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
-    KdPrint(("FireFly: FeatureReportByteLength: %u\n", caps.FeatureReportByteLength));
 
     if (caps.FeatureReportByteLength != 73) {
-        KdPrint(("FireFly: FeatureReportByteLength mismatch.\n"));
+        KdPrint(("FireFly: FeatureReportByteLength mismatch (%u).\n", caps.FeatureReportByteLength));
         goto ExitAndFree;
     }
 
