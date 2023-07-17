@@ -17,10 +17,9 @@ COLORREF ToColor(bool val) {
         return RGB(255, 0, 0); // red
 }
 
-int __cdecl
-main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
-    BOOL                            bAdjustLight = FALSE;
-    ULONG                          lightSetting = 0;
+int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
+    bool  bAdjustLight = false;
+    ULONG lightSetting = 0;
 
     if (!IsUserAnAdmin()) {
         _tprintf(_T("ERROR: Admin privileges missing.\n"));
@@ -31,13 +30,13 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     if (argc == 2) {
         if (argv[1][0] == '-') {
             if ((argv[1][1] >= '0') && (argv[1][1] <= '2')) {
-                bAdjustLight = TRUE;
+                bAdjustLight = true;
                 lightSetting = (argv[1][1] - '0');
             }
         }
      }
 
-    if  (FALSE == bAdjustLight) {
+    if  (!bAdjustLight) {
         _tprintf(USAGE);
         exit(0);
     }
@@ -68,7 +67,7 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
                 Sleep(i);
                 if(!luminous->Set(ToColor(k))) {
                     _tprintf(_T("Set operation on Luminous failed.\n"));
-                    goto End;
+                    return 0;
                 }
                 k=1-k;
             }
@@ -77,7 +76,7 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
                 Sleep(i);
                 if(!luminous->Set(ToColor(k))) {
                     _tprintf(_T("Set operation on Luminous failed.\n"));
-                    goto End;
+                    return 0;
                 }
                 k=1-k;
             }
@@ -89,8 +88,8 @@ main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
         }
     }
 
-    luminous->Set(RGB(0, 0, 0)); // black
+    // set color back to black
+    luminous->Set(RGB(0, 0, 0));
 
-End:
     return 0;
 }
