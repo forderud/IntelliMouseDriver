@@ -91,7 +91,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _I
 }
 
 
-CLuminous::CLuminous() {
+Luminous::Luminous() {
     // Initialize COM library. Must be done before invoking any other COM function.
     HRESULT hr = CoInitialize(NULL);
 
@@ -114,7 +114,7 @@ CLuminous::CLuminous() {
     }
 }
 
-CLuminous::~CLuminous() {
+Luminous::~Luminous() {
     m_wbemServices.Release();
     m_wbemClassObject.Release();
 
@@ -122,7 +122,7 @@ CLuminous::~CLuminous() {
 }
 
 
-bool CLuminous::Get(COLORREF* Color) {
+bool Luminous::Get(COLORREF* Color) {
     if (!Color)
         return false;
 
@@ -144,7 +144,7 @@ bool CLuminous::Get(COLORREF* Color) {
     return true;
 }
 
-bool CLuminous::Set(COLORREF Color) {
+bool Luminous::Set(COLORREF Color) {
     // Get the property value.
     CComVariant  varPropVal;
     CIMTYPE     cimType = 0;

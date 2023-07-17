@@ -4,10 +4,10 @@
 #include <wbemcli.h>
 
 
-class CLuminous {
+class Luminous {
 public:
-    CLuminous();
-    virtual ~CLuminous();
+    Luminous();
+    ~Luminous();
 
     bool Set(COLORREF Color);
     bool Get(COLORREF*Color);

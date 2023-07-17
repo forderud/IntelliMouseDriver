@@ -41,7 +41,7 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
         exit(0);
     }
 
-    auto luminous = std::make_unique<CLuminous>();
+    auto luminous = std::make_unique<Luminous>();
 
     if (luminous == NULL) {
         _tprintf(_T("Problem creating Luminous\n"));
