@@ -8,31 +8,29 @@ const wchar_t PROPERTY_NAME[] = L"TailLight";
 
 // The function connects to the namespace specified by the user.
 CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
-    // Create an instance of WbemLocator interface.
-    CComPtr<IWbemLocator> pIWbemLocator;
-    HRESULT hResult = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&pIWbemLocator);
+    CComPtr<IWbemLocator> wbemLocator;
+    HRESULT hr = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&wbemLocator);
 
-    if (hResult != S_OK) {
+    if (hr != S_OK) {
         _tprintf(TEXT("Error %lX: Could not create instance of IWbemLocator interface.\n"),
-            hResult);
+            hr);
         return nullptr;
     }
 
     // Using the locator, connect to COM in the given namespace.
-    CComPtr<IWbemServices> pIWbemServices;
-    hResult = pIWbemLocator->ConnectServer(
+    CComPtr<IWbemServices> wbemServices;
+    hr = wbemLocator->ConnectServer(
         CComBSTR(chNamespace),
-        NULL,   // NULL means current account, for simplicity.
-        NULL,   // NULL means current password, for simplicity.
+        NULL,   // current account
+        NULL,   // current password
         0L,     // locale
         0L,     // securityFlags
         NULL,   // authority (domain for NTLM)
         NULL,   // context
-        &pIWbemServices); // Returned IWbemServices.
+        &wbemServices); // Returned IWbemServices.
 
-    if (hResult != WBEM_S_NO_ERROR) {
-        _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"),
-            hResult, chNamespace);
+    if (hr != WBEM_S_NO_ERROR) {
+        _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"), hr, chNamespace);
 
         return nullptr;
     }
@@ -40,8 +38,8 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     // Switch the security level to IMPERSONATE so that provider(s)
     // will grant access to system-level objects, and so that
     // CALL authorization will be used.
-    hResult = CoSetProxyBlanket(
-        (IUnknown*)pIWbemServices, // proxy
+    hr = CoSetProxyBlanket(
+        (IUnknown*)wbemServices, // proxy
         RPC_C_AUTHN_WINNT,        // authentication service
         RPC_C_AUTHZ_NONE,         // authorization service
         NULL,                     // server principle name
@@ -50,12 +48,12 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         NULL,                     // identity of the client
         0);                      // capability flags
 
-    if (hResult != S_OK) {
-        _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hResult);
+    if (hr != S_OK) {
+        _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hr);
         return nullptr;
     }
 
-    return pIWbemServices;
+    return wbemServices;
 }
 
 // The function returns an interface pointer to the instance given its list-index.
