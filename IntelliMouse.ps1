@@ -14,7 +14,7 @@ Write-Host("  Active: {0}" -f $mouse.Active)
 Write-Host("  Color: {0:x}" -f $mouse.TailLight) # display as hex string
 
 # change tail-light color
-$mouse.TailLight = 0xFF0000 # 0xBBGGRR format (blue)
+$mouse.TailLight = 0xFF0000 # 0xBBGGRR format
 Write-Host("  Changing color to {0:x}" -f $mouse.TailLight) # display as hex string
 
 Write-Host("Storing changes...")
