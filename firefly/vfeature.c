@@ -83,10 +83,8 @@ FireflySetFeature(
         goto ExitAndFree;
     }
 
-    preparsedData = (PHIDP_PREPARSED_DATA) ExAllocatePool2(
-        POOL_FLAG_NON_PAGED, collectionInformation.DescriptorSize, 'ffly');
-
-    if (preparsedData == NULL) {
+    preparsedData = ExAllocatePool2(POOL_FLAG_NON_PAGED, collectionInformation.DescriptorSize, 'ffly');
+    if (!preparsedData) {
         status = STATUS_INSUFFICIENT_RESOURCES;
         goto ExitAndFree;
     }
@@ -126,10 +124,8 @@ FireflySetFeature(
     }
 
     // Create a report to send to the device.
-    report = (PCHAR) ExAllocatePool2(
-        POOL_FLAG_NON_PAGED, caps.FeatureReportByteLength+1, 'ffly');
-
-    if (report == NULL) {
+    report = ExAllocatePool2(POOL_FLAG_NON_PAGED, caps.FeatureReportByteLength+1, 'ffly');
+    if (!report) {
         goto ExitAndFree;
     }
 
