@@ -78,7 +78,7 @@ FireflySetFeature(
         goto ExitAndFree;
     }
 
-    preparsedData = ExAllocatePool2(POOL_FLAG_NON_PAGED, collectionInformation.DescriptorSize, 'ffly');
+    preparsedData = (PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, collectionInformation.DescriptorSize, 'ffly');
     if (!preparsedData) {
         status = STATUS_INSUFFICIENT_RESOURCES;
         goto ExitAndFree;
