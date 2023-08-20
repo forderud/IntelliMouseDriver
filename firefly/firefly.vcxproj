@@ -119,7 +119,10 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
     <FilesToPackage Include="$(TargetPath)" Condition="'$(ConfigurationType)'=='Driver' or '$(ConfigurationType)'=='DynamicLibrary'" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Exclude="@(ClInclude)" Include="*.h;*.hpp;*.hxx;*.hm;*.inl;*.xsd" />
+    <ClInclude Include="device.h" />
+    <ClInclude Include="firefly.h" />
+    <ClInclude Include="vfeature.h" />
+    <ClInclude Include="wmi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
