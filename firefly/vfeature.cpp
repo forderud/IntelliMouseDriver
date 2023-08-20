@@ -129,7 +129,7 @@ FireflySetFeature(
         return status;
     }
 
-    KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
+    //KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
 
     if (caps.FeatureReportByteLength != sizeof(TailLightReport)) {
         KdPrint(("FireFly: FeatureReportByteLength mismatch (%u, %u).\n", caps.FeatureReportByteLength, sizeof(TailLightReport)));
