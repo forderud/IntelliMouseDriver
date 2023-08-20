@@ -26,6 +26,8 @@ FireflySetFeature(
 {
     PAGED_CODE();
 
+    KdPrint(("Firefly: FireflySetFeature\n"));
+
     // Preinit for error.
     PHIDP_PREPARSED_DATA preparsedData = NULL;
     PCHAR                report = NULL;
@@ -182,6 +184,8 @@ ExitAndFree:
     if (hidTarget != NULL) {
         WdfObjectDelete(hidTarget);
     }
+
+    KdPrint(("Firefly: FireflySetFeature completed\n"));
 
     return status;
 }
