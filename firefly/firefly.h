@@ -15,6 +15,12 @@
 #include "vfeature.h"
 
 // WDFDRIVER Object Events
+#ifdef __cplusplus
+extern "C"
+#endif
 DRIVER_INITIALIZE DriverEntry;
 
+#ifdef __cplusplus
+extern "C"
+#endif
 EVT_WDF_DRIVER_DEVICE_ADD FireFlyEvtDeviceAdd;
