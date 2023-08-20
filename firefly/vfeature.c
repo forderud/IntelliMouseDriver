@@ -30,7 +30,6 @@ FireflySetFeature(
 
     // Preinit for error.
     PHIDP_PREPARSED_DATA preparsedData = NULL;
-    PCHAR                report = NULL;
     WDFIOTARGET          hidTarget = NULL;
     
     NTSTATUS status = WdfIoTargetCreate(WdfObjectContextGetObject(DeviceContext), WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
@@ -113,16 +112,11 @@ FireflySetFeature(
 
     KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
 
-    if (caps.FeatureReportByteLength != 73) {
-        KdPrint(("FireFly: FeatureReportByteLength mismatch (%u).\n", caps.FeatureReportByteLength));
+    if (caps.FeatureReportByteLength != sizeof(HIDMINI_CONTROL_INFO)-1) {
+        KdPrint(("FireFly: FeatureReportByteLength mismatch (%u, %u).\n", caps.FeatureReportByteLength, sizeof(HIDMINI_CONTROL_INFO)));
         goto ExitAndFree;
     }
 
-    // Create a report to send to the device.
-    report = ExAllocatePool2(POOL_FLAG_NON_PAGED, caps.FeatureReportByteLength+1, 'ffly');
-    if (!report) {
-        goto ExitAndFree;
-    }
 
     // Start with a zeroed report. If we are disabling the feature, this might
     // be all we need to do.
@@ -136,19 +130,15 @@ FireflySetFeature(
         goto ExitAndFree;
     }
 
+    // Create a report to send to the device.
     // Set feature report values (as observed in USBPcap/Wireshark)
-    report[0] = valueCaps.ReportID; // Report ID 0x24 (36)
-    report[1] = 0xB2; // magic value
-    report[2] = 0x03; // magic value
-    // tail-light color
-    report[3] = (Color)      & 0xFF; // red
-    report[4] = (Color >> 8) & 0xFF; // green
-    report[5] = (Color >> 16) & 0xFF; // blue
+    HIDMINI_CONTROL_INFO report = { 0 };
+    Init_HIDMINI_CONTROL_INFO(&report, valueCaps.ReportID, Color);
 
     WDF_MEMORY_DESCRIPTOR inputDescriptor = {0};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
-                                      report,
-                                      caps.FeatureReportByteLength+1);
+                                      &report,
+                                      sizeof(report));
     status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
                                   IOCTL_HID_SET_FEATURE,
@@ -167,11 +157,6 @@ ExitAndFree:
         preparsedData = NULL;
     }
 
-    if (report != NULL) {
-        ExFreePool(report);
-        report = NULL;
-    }
-
     if (hidTarget != NULL) {
         WdfObjectDelete(hidTarget);
     }
@@ -179,4 +164,16 @@ ExitAndFree:
     KdPrint(("Firefly: FireflySetFeature completed\n"));
 
     return status;
+}
+
+
+void Init_HIDMINI_CONTROL_INFO(OUT HIDMINI_CONTROL_INFO* report, IN UCHAR ReportID, IN  ULONG Color) {
+    report->ReportId = ReportID; // Report ID 0x24 (36)
+
+    report->Unknown1 = 0xB2; // magic value
+    report->Unknown2 = 0x03; // magic value
+    // tail-light color
+    report->Red   = (Color) & 0xFF; // red;
+    report->Green = (Color >> 8) & 0xFF; // green
+    report->Blue  = (Color >> 16) & 0xFF; // blue
 }
