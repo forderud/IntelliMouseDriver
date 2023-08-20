@@ -1,5 +1,7 @@
 #pragma once
 
+static UCHAR TailLight_ReportID = 36; // 0x24
+
 /** Size should by 73 bytes */
 typedef struct _HIDMINI_CONTROL_INFO {
     //report ID of the collection to which the control request is sent
