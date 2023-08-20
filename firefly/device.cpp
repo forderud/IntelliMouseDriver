@@ -109,26 +109,14 @@ Arguments:
     KdPrint(("FireFly: QueueCreate\n"));
 
     WDF_IO_QUEUE_CONFIG queueConfig = {};
-    WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchParallel);
-
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
     queueConfig.EvtIoDeviceControl = FireFlyEvtIoDeviceControl;
 
-
     WDFQUEUE queue = 0; // auto-deleted when parent is deleted
-    NTSTATUS status = WdfIoQueueCreate(
-        Device,
-        &queueConfig,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &queue);
+    NTSTATUS status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
 
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoQueueCreate failed 0x%x\n", status));
-        return status;
-    }
-
-    status = WdfDeviceConfigureRequestDispatching(Device, queue, WdfRequestTypeDeviceControl);
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfDeviceConfigureRequestDispatching failed 0x%x\n", status));
         return status;
     }
 
