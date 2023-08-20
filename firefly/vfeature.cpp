@@ -77,8 +77,8 @@ FireflySetFeature(
     }
     
 
-    WDF_MEMORY_DESCRIPTOR      outputDescriptor = {0};
-    HID_COLLECTION_INFORMATION collectionInformation = {0};
+    WDF_MEMORY_DESCRIPTOR      outputDescriptor = {};
+    HID_COLLECTION_INFORMATION collectionInformation = {};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor, // out (mapped to collectionInformation)
                                       (PVOID) &collectionInformation,
                                       sizeof(HID_COLLECTION_INFORMATION));
@@ -123,11 +123,10 @@ FireflySetFeature(
     }
 
     // Now get the capabilities.
-    HIDP_CAPS caps = {0};
+    HIDP_CAPS caps = {};
     RtlZeroMemory(&caps, sizeof(HIDP_CAPS));
 
     status = HidP_GetCaps(preparsedData.data, &caps);
-
     if (!NT_SUCCESS(status)) {
         return status;
     }

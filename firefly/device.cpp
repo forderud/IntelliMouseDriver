@@ -28,7 +28,7 @@ Arguments:
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
 
-    WDF_OBJECT_ATTRIBUTES attributes = {0};
+    WDF_OBJECT_ATTRIBUTES attributes = {};
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, DEVICE_CONTEXT);
 
     WDFDEVICE device = 0;
@@ -106,7 +106,7 @@ Arguments:
 {
     KdPrint(("FireFly: QueueCreate\n"));
 
-    WDF_IO_QUEUE_CONFIG queueConfig = {0};
+    WDF_IO_QUEUE_CONFIG queueConfig = {};
     WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchParallel);
 
     queueConfig.EvtIoDeviceControl = FireFlyEvtIoDeviceControl;
@@ -198,7 +198,6 @@ Arguments:
         WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
 
         BOOLEAN ret = WdfRequestSend(Request, Target, &options);
-
         if (ret == FALSE) {
             status = WdfRequestGetStatus(Request);
             KdPrint(("FireFly: WdfRequestSend failed: 0x%x\n", status));
@@ -228,7 +227,7 @@ Arguments:
 {
     KdPrint(("FireFly: SetFeatureFilter\n"));
 
-    WDF_REQUEST_PARAMETERS  params = { 0 };
+    WDF_REQUEST_PARAMETERS params = {};
     WDF_REQUEST_PARAMETERS_INIT(&params);
     WdfRequestGetParameters(Request, &params);
 
@@ -239,7 +238,7 @@ Arguments:
         return STATUS_BUFFER_TOO_SMALL;
     }
 
-    HIDMINI_CONTROL_INFO* packet = 0;
+    HIDMINI_CONTROL_INFO* packet = nullptr;
     NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(HIDMINI_CONTROL_INFO), (void**)&packet, NULL);
     if (!NT_SUCCESS(status) || !packet) {
         KdPrint(("FireFly: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%x\n", status, packet));

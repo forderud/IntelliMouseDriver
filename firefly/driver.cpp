@@ -9,10 +9,8 @@ NTSTATUS DriverEntry(
 {
     KdPrint(("FireFly: DriverEntry - WDF version built on %s %s\n", __DATE__, __TIME__));
 
-    WDF_DRIVER_CONFIG params = {0};
-    WDF_DRIVER_CONFIG_INIT(&params, // [out]
-                        FireFlyEvtDeviceAdd
-                        );
+    WDF_DRIVER_CONFIG params = {};
+    WDF_DRIVER_CONFIG_INIT(/*out*/&params, FireFlyEvtDeviceAdd);
 
     // Create the framework WDFDRIVER object, with the handle to it returned in Driver.
     NTSTATUS status = WdfDriverCreate(DriverObject, 

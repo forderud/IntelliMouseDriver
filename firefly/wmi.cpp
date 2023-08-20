@@ -20,18 +20,18 @@ WmiInitialize(
         return status;
     }
 
-    WDF_WMI_PROVIDER_CONFIG providerConfig = {0};
+    WDF_WMI_PROVIDER_CONFIG providerConfig = {};
     WDF_WMI_PROVIDER_CONFIG_INIT(&providerConfig, &FireflyDeviceInformation_GUID);
     providerConfig.MinInstanceBufferSize = sizeof(FireflyDeviceInformation);
 
-    WDF_WMI_INSTANCE_CONFIG instanceConfig = {0};
+    WDF_WMI_INSTANCE_CONFIG instanceConfig = {};
     WDF_WMI_INSTANCE_CONFIG_INIT_PROVIDER_CONFIG(&instanceConfig, &providerConfig);
     instanceConfig.Register = TRUE;
     instanceConfig.EvtWmiInstanceQueryInstance = EvtWmiInstanceQueryInstance;
     instanceConfig.EvtWmiInstanceSetInstance = EvtWmiInstanceSetInstance;
     instanceConfig.EvtWmiInstanceSetItem = EvtWmiInstanceSetItem;
 
-    WDF_OBJECT_ATTRIBUTES woa = {0};
+    WDF_OBJECT_ATTRIBUTES woa = {};
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&woa, FireflyDeviceInformation);
 
     // No need to store the WDFWMIINSTANCE in the device context because it is
