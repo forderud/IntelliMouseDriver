@@ -1,6 +1,6 @@
 #pragma once
 
-/** Size should by 73+1=74 bytes */
+/** Size should by 73 bytes */
 typedef struct _HIDMINI_CONTROL_INFO {
     //report ID of the collection to which the control request is sent
     UCHAR    ReportId; // 36 (0x24)
@@ -13,7 +13,7 @@ typedef struct _HIDMINI_CONTROL_INFO {
     UCHAR   Green;
     UCHAR   Blue;
 
-    UCHAR  padding[68];
+    UCHAR  padding[67];
 } HIDMINI_CONTROL_INFO;
 
 void Init_HIDMINI_CONTROL_INFO(OUT HIDMINI_CONTROL_INFO* report, IN UCHAR ReportID, IN  ULONG Color);

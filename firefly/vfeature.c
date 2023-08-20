@@ -112,7 +112,7 @@ FireflySetFeature(
 
     KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
 
-    if (caps.FeatureReportByteLength != sizeof(HIDMINI_CONTROL_INFO)-1) {
+    if (caps.FeatureReportByteLength != sizeof(HIDMINI_CONTROL_INFO)) {
         KdPrint(("FireFly: FeatureReportByteLength mismatch (%u, %u).\n", caps.FeatureReportByteLength, sizeof(HIDMINI_CONTROL_INFO)));
         goto ExitAndFree;
     }
