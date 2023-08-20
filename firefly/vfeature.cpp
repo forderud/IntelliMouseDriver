@@ -64,8 +64,6 @@ FireflySetFeature(
     WDF_IO_TARGET_OPEN_PARAMS openParams = {0};
     WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(&openParams, &deviceContext->PdoName, FILE_WRITE_ACCESS);
 
-    KdPrint(("Firefly: DeviceContext->PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083"
-
     // We will let the framework to respond automatically to the pnp
     // state changes of the target by closing and opening the handle.
     openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;

@@ -84,6 +84,8 @@ Arguments:
 
         deviceContext->PdoName.MaximumLength = (USHORT)bufferLength;
         deviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
+
+        KdPrint(("Firefly: PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083
     }
 
     return status;
