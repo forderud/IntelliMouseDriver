@@ -246,7 +246,7 @@ Arguments:
         return status;
     }
 
-    if (packet->ReportId != TailLight_ReportID) {
+    if (!packet->IsValid()) {
         // If collection ID is not for control collection then handle
         // this request just as you would for a regular collection.
         KdPrint(("FireFly: SetFeatureFilter: invalid report id %d\n", packet->ReportId));

@@ -1,9 +1,22 @@
 #pragma once
 
-static UCHAR TailLight_ReportID = 36; // 0x24
-
 /** Size should by 73 bytes */
-typedef struct _HIDMINI_CONTROL_INFO {
+struct HIDMINI_CONTROL_INFO {
+    HIDMINI_CONTROL_INFO(IN UCHAR _ReportID, IN  ULONG Color) {
+        ReportId = _ReportID; // Report ID 0x24 (36)
+
+        Unknown1 = 0xB2; // magic value
+        Unknown2 = 0x03; // magic value
+        // tail-light color
+        Red = (Color) & 0xFF; // red;
+        Green = (Color >> 8) & 0xFF; // green
+        Blue = (Color >> 16) & 0xFF; // blue
+    }
+
+    bool IsValid() const {
+        return ReportId == 36; // 0x24
+    }
+
     //report ID of the collection to which the control request is sent
     UCHAR    ReportId; // 36 (0x24)
 
@@ -16,9 +29,7 @@ typedef struct _HIDMINI_CONTROL_INFO {
     UCHAR   Blue;
 
     UCHAR  padding[67];
-} HIDMINI_CONTROL_INFO;
-
-void Init_HIDMINI_CONTROL_INFO(OUT HIDMINI_CONTROL_INFO* report, IN UCHAR ReportID, IN  ULONG Color);
+};
 
 NTSTATUS Clamp_HIDMINI_CONTROL_INFO(HIDMINI_CONTROL_INFO* report);
 

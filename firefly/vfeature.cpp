@@ -154,8 +154,7 @@ FireflySetFeature(
 
     // Create a report to send to the device.
     // Set feature report values (as observed in USBPcap/Wireshark)
-    HIDMINI_CONTROL_INFO report = { 0 };
-    Init_HIDMINI_CONTROL_INFO(&report, valueCaps.ReportID, Color);
+    HIDMINI_CONTROL_INFO report(valueCaps.ReportID, Color);
 
     WDF_MEMORY_DESCRIPTOR inputDescriptor = {0};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
@@ -177,17 +176,6 @@ FireflySetFeature(
     return status;
 }
 
-
-void Init_HIDMINI_CONTROL_INFO(OUT HIDMINI_CONTROL_INFO* report, IN UCHAR ReportID, IN  ULONG Color) {
-    report->ReportId = ReportID; // Report ID 0x24 (36)
-
-    report->Unknown1 = 0xB2; // magic value
-    report->Unknown2 = 0x03; // magic value
-    // tail-light color
-    report->Red   = (Color) & 0xFF; // red;
-    report->Green = (Color >> 8) & 0xFF; // green
-    report->Blue  = (Color >> 16) & 0xFF; // blue
-}
 
 NTSTATUS Clamp_HIDMINI_CONTROL_INFO(HIDMINI_CONTROL_INFO* report) {
     if ((report->Unknown1 != 0xB2) || (report->Unknown2 != 0x03)) {
