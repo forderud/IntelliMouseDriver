@@ -108,7 +108,7 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="device.c" />
+    <ClCompile Include="device.cpp" />
     <ClCompile Include="driver.cpp" />
     <ClCompile Include="vfeature.c" />
     <ClCompile Include="wmi.cpp" />

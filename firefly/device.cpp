@@ -1,6 +1,9 @@
 #include "FireFly.h"
 #include <Hidport.h>
 
+#ifdef __cplusplus
+extern "C"
+#endif
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL FireFlyEvtIoDeviceControl;
 
 #ifdef ALLOC_PRAGMA
@@ -82,7 +85,7 @@ Arguments:
     {
         // initialize pDeviceContext->PdoName based on memory
         size_t bufferLength = 0;
-        deviceContext->PdoName.Buffer = WdfMemoryGetBuffer(memory, &bufferLength);
+        deviceContext->PdoName.Buffer = (WCHAR*)WdfMemoryGetBuffer(memory, &bufferLength);
         if (deviceContext->PdoName.Buffer == NULL)
             return STATUS_UNSUCCESSFUL;
 
@@ -244,7 +247,7 @@ Arguments:
     }
 
     HIDMINI_CONTROL_INFO* packet = 0;
-    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(HIDMINI_CONTROL_INFO), &packet, NULL);
+    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(HIDMINI_CONTROL_INFO), (void**)&packet, NULL);
     if (!NT_SUCCESS(status) || !packet) {
         KdPrint(("FireFly: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%x\n", status, packet));
         return status;
