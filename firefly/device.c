@@ -48,10 +48,10 @@ Arguments:
     }
 
     // Driver Framework always zero initializes an objects context memory
-    DEVICE_CONTEXT* deviceCtx = WdfObjectGet_DEVICE_CONTEXT(device);
+    DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
     // Initialize our WMI support
-    status = WmiInitialize(device, deviceCtx);
+    status = WmiInitialize(device, deviceContext);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: Error initializing WMI 0x%x\n", status));
         return status;
@@ -82,12 +82,12 @@ Arguments:
     {
         // initialize pDeviceContext->PdoName based on memory
         size_t bufferLength = 0;
-        deviceCtx->PdoName.Buffer = WdfMemoryGetBuffer(memory, &bufferLength);
-        if (deviceCtx->PdoName.Buffer == NULL)
+        deviceContext->PdoName.Buffer = WdfMemoryGetBuffer(memory, &bufferLength);
+        if (deviceContext->PdoName.Buffer == NULL)
             return STATUS_UNSUCCESSFUL;
 
-        deviceCtx->PdoName.MaximumLength = (USHORT)bufferLength;
-        deviceCtx->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
+        deviceContext->PdoName.MaximumLength = (USHORT)bufferLength;
+        deviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
     }
 
     return status;

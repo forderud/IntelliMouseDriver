@@ -24,6 +24,6 @@ NTSTATUS Clamp_HIDMINI_CONTROL_INFO(HIDMINI_CONTROL_INFO* report);
 
 
 NTSTATUS FireflySetFeature(
-    IN  DEVICE_CONTEXT* DeviceContext,
-    IN  ULONG           Color
+    IN  WDFDEVICE Device,
+    IN  ULONG     Color
     );

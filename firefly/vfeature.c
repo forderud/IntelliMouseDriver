@@ -15,8 +15,8 @@
 
 NTSTATUS
 FireflySetFeature(
-    IN  DEVICE_CONTEXT* DeviceContext,
-    IN  ULONG           Color
+    IN  WDFDEVICE Device,
+    IN  ULONG     Color
     )
 /*++
     This routine sets the HID feature by sending HID ioctls to our device.
@@ -32,17 +32,18 @@ FireflySetFeature(
     PHIDP_PREPARSED_DATA preparsedData = NULL;
     WDFIOTARGET          hidTarget = NULL;
     
-    NTSTATUS status = WdfIoTargetCreate(WdfObjectContextGetObject(DeviceContext), WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
+    NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetCreate failed 0x%x\n", status));
         return status;
     }
 
     // open in write-only mode
+    DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(Device);
     WDF_IO_TARGET_OPEN_PARAMS openParams = {0};
-    WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(&openParams, &DeviceContext->PdoName, FILE_WRITE_ACCESS);
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(&openParams, &deviceContext->PdoName, FILE_WRITE_ACCESS);
 
-    KdPrint(("Firefly: DeviceContext->PdoName: %wZ\n", DeviceContext->PdoName)); // outputs "\Device\00000083"
+    KdPrint(("Firefly: DeviceContext->PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083"
 
     // We will let the framework to respond automatically to the pnp
     // state changes of the target by closing and opening the handle.

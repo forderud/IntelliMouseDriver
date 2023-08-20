@@ -103,7 +103,7 @@ EvtWmiInstanceSetInstance(
 
     // Tell the HID device about the new tail light state
     NTSTATUS status = FireflySetFeature(
-        WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
+        WdfWmiInstanceGetDevice(WmiInstance),
         pInfo->TailLight
         );
 
@@ -134,7 +134,7 @@ EvtWmiInstanceSetItem(
 
     // Tell the HID device about the new tail light state
     NTSTATUS status = FireflySetFeature(
-        WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
+        WdfWmiInstanceGetDevice(WmiInstance),
         pInfo->TailLight
         );
 
