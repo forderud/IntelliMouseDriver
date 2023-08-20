@@ -181,31 +181,20 @@ Arguments:
         status = SetFeatureFilter(Request);
         break;
     }
+    // ignore status variable for now
 
-#if 0
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: IoControlCode failed: 0x%x\n", status));
+    // Forward the request down the driver stack
+    WDFIOTARGET Target = WdfDeviceGetIoTarget(device);
+
+    WDF_REQUEST_SEND_OPTIONS options = {};
+    WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
+
+    BOOLEAN ret = WdfRequestSend(Request, Target, &options);
+    if (ret == FALSE) {
+        status = WdfRequestGetStatus(Request);
+        KdPrint(("FireFly: WdfRequestSend failed: 0x%x\n", status));
         WdfRequestComplete(Request, status);
-        return;
     }
-#endif
-
-    {
-        // Forward the request down the driver stack
-        WDFIOTARGET Target = WdfDeviceGetIoTarget(device);
-
-        WDF_REQUEST_SEND_OPTIONS options = { 0 };
-        WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
-
-        BOOLEAN ret = WdfRequestSend(Request, Target, &options);
-        if (ret == FALSE) {
-            status = WdfRequestGetStatus(Request);
-            KdPrint(("FireFly: WdfRequestSend failed: 0x%x\n", status));
-            WdfRequestComplete(Request, status);
-        }
-    }
-
-    KdPrint(("FireFly: EvtIoDeviceControl completed\n"));
 }
 
 
@@ -252,6 +241,5 @@ Arguments:
     // Enforce safety limits (sets color to RED on failure)
     packet->SafetyCheck();
 
-    KdPrint(("FireFly: SetFeatureFilter completed\n"));
     return status;
 }
