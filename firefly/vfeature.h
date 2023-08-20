@@ -1,8 +1,8 @@
 #pragma once
 
 /** Size should by 73 bytes */
-struct HIDMINI_CONTROL_INFO {
-    HIDMINI_CONTROL_INFO(IN UCHAR _ReportID, IN  ULONG Color) {
+struct TailLightReport {
+    TailLightReport(IN UCHAR _ReportID, IN  ULONG Color) {
         ReportId = _ReportID; // Report ID 0x24 (36)
 
         Unknown1 = 0xB2; // magic value
@@ -31,7 +31,7 @@ struct HIDMINI_CONTROL_INFO {
     UCHAR  padding[67];
 };
 
-NTSTATUS Clamp_HIDMINI_CONTROL_INFO(HIDMINI_CONTROL_INFO* report);
+NTSTATUS Clamp_TailLightReport(TailLightReport* report);
 
 NTSTATUS FireflySetFeature(
     IN  WDFDEVICE Device,

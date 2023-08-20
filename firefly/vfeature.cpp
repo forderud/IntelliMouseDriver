@@ -133,8 +133,8 @@ FireflySetFeature(
 
     KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
 
-    if (caps.FeatureReportByteLength != sizeof(HIDMINI_CONTROL_INFO)) {
-        KdPrint(("FireFly: FeatureReportByteLength mismatch (%u, %u).\n", caps.FeatureReportByteLength, sizeof(HIDMINI_CONTROL_INFO)));
+    if (caps.FeatureReportByteLength != sizeof(TailLightReport)) {
+        KdPrint(("FireFly: FeatureReportByteLength mismatch (%u, %u).\n", caps.FeatureReportByteLength, sizeof(TailLightReport)));
         return status;
     }
 
@@ -153,7 +153,7 @@ FireflySetFeature(
 
     // Create a report to send to the device.
     // Set feature report values (as observed in USBPcap/Wireshark)
-    HIDMINI_CONTROL_INFO report(valueCaps.ReportID, Color);
+    TailLightReport report(valueCaps.ReportID, Color);
 
     WDF_MEMORY_DESCRIPTOR inputDescriptor = {0};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
@@ -176,7 +176,7 @@ FireflySetFeature(
 }
 
 
-NTSTATUS Clamp_HIDMINI_CONTROL_INFO(HIDMINI_CONTROL_INFO* report) {
+NTSTATUS Clamp_TailLightReport(TailLightReport* report) {
     if ((report->Unknown1 != 0xB2) || (report->Unknown2 != 0x03)) {
         KdPrint(("FireFly: SetFeatureFilter: Unknown control Code 0x%x 0x%x\n", report->Unknown1, report->Unknown2));
         return STATUS_NOT_IMPLEMENTED;

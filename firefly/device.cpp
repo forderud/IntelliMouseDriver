@@ -233,13 +233,13 @@ Arguments:
 
     KdPrint(("  parameters: Type=0x%x (DeviceControl=0xe), InputBufferLength=%u, \n", params.Type, params.Parameters.DeviceIoControl.InputBufferLength));
 
-    if (params.Parameters.DeviceIoControl.InputBufferLength != sizeof(HIDMINI_CONTROL_INFO)) {
+    if (params.Parameters.DeviceIoControl.InputBufferLength != sizeof(TailLightReport)) {
         KdPrint(("FireFly: SetFeatureFilter: Incorrect InputBufferLength\n"));
         return STATUS_BUFFER_TOO_SMALL;
     }
 
-    HIDMINI_CONTROL_INFO* packet = nullptr;
-    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(HIDMINI_CONTROL_INFO), (void**)&packet, NULL);
+    TailLightReport* packet = nullptr;
+    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(TailLightReport), (void**)&packet, NULL);
     if (!NT_SUCCESS(status) || !packet) {
         KdPrint(("FireFly: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%x\n", status, packet));
         return status;
@@ -252,7 +252,7 @@ Arguments:
         return STATUS_INVALID_PARAMETER;
     }
 
-    status = Clamp_HIDMINI_CONTROL_INFO(packet);
+    status = Clamp_TailLightReport(packet);
 
     KdPrint(("FireFly: SetFeatureFilter completed\n"));
     return status;
