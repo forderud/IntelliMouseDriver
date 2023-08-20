@@ -76,6 +76,7 @@ EvtWmiInstanceQueryInstance(
 
     RtlCopyMemory(/*dst*/OutBuffer, /*src*/pInfo, sizeof(*pInfo));
 
+    KdPrint(("FireFly: WMI QueryInstance completed\n"));
     return STATUS_SUCCESS;
 }
 
@@ -106,6 +107,7 @@ EvtWmiInstanceSetInstance(
         pInfo->TailLight
         );
 
+    KdPrint(("FireFly: WMI SetInstance completed\n"));
     return status;
 }
 
@@ -135,5 +137,7 @@ EvtWmiInstanceSetItem(
         WdfObjectGet_DEVICE_CONTEXT(WdfWmiInstanceGetDevice(WmiInstance)),
         pInfo->TailLight
         );
+
+    KdPrint(("FireFly: WMI SetItem completed\n"));
     return status;
 }
