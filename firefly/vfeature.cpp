@@ -13,6 +13,33 @@
 #pragma alloc_text(PAGE, FireflySetFeature)
 #endif
 
+
+struct PHIDP_PREPARSED_DATA_Wrap {
+    PHIDP_PREPARSED_DATA_Wrap(_In_ SIZE_T NumberOfBytes, _In_ ULONG Tag) {
+        data = (PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, NumberOfBytes, Tag);
+    }
+    ~PHIDP_PREPARSED_DATA_Wrap() {
+        if (data != NULL) {
+            ExFreePool(data);
+            data = NULL;
+        }
+    }
+
+    PHIDP_PREPARSED_DATA data = nullptr;
+};
+
+struct WDFIOTARGET_Wrap {
+    WDFIOTARGET_Wrap() {
+    }
+    ~WDFIOTARGET_Wrap() {
+        if (data != NULL) {
+            WdfObjectDelete(data);
+        }
+    }
+
+    WDFIOTARGET data = NULL;
+};
+
 NTSTATUS
 FireflySetFeature(
     IN  WDFDEVICE Device,
@@ -29,10 +56,8 @@ FireflySetFeature(
     KdPrint(("Firefly: FireflySetFeature\n"));
 
     // Preinit for error.
-    PHIDP_PREPARSED_DATA preparsedData = NULL;
-    WDFIOTARGET          hidTarget = NULL;
-    
-    NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
+    WDFIOTARGET_Wrap hidTarget;
+    NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &hidTarget.data);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetCreate failed 0x%x\n", status));
         return status;
@@ -49,10 +74,10 @@ FireflySetFeature(
     // state changes of the target by closing and opening the handle.
     openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
 
-    status = WdfIoTargetOpen(hidTarget, &openParams);
+    status = WdfIoTargetOpen(hidTarget.data, &openParams);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetOpen failed 0x%x\n", status));
-        goto ExitAndFree;
+        return status;
     }
     
 
@@ -63,7 +88,7 @@ FireflySetFeature(
                                       sizeof(HID_COLLECTION_INFORMATION));
 
     // Now get the collection information for this device
-    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget.data,
                                   NULL,
                                   IOCTL_HID_GET_COLLECTION_INFORMATION,
                                   NULL,
@@ -75,20 +100,20 @@ FireflySetFeature(
 
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));
-        goto ExitAndFree;
+        return status;
     }
 
-    preparsedData = (PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, collectionInformation.DescriptorSize, 'ffly');
-    if (!preparsedData) {
+    PHIDP_PREPARSED_DATA_Wrap preparsedData(collectionInformation.DescriptorSize, 'ffly');
+    if (!preparsedData.data) {
         status = STATUS_INSUFFICIENT_RESOURCES;
-        goto ExitAndFree;
+        return status;
     }
 
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor, // out (mapped to preparsedData)
-                                      (PVOID) preparsedData,
+                                      (PVOID) preparsedData.data,
                                       collectionInformation.DescriptorSize);
 
-    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget.data,
                                   NULL,
                                   IOCTL_HID_GET_COLLECTION_DESCRIPTOR, // same as HidD_GetPreparsedData in user-mode
                                   NULL,
@@ -98,24 +123,24 @@ FireflySetFeature(
 
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously2 failed 0x%x\n", status));
-        goto ExitAndFree;
+        return status;
     }
 
     // Now get the capabilities.
     HIDP_CAPS caps = {0};
     RtlZeroMemory(&caps, sizeof(HIDP_CAPS));
 
-    status = HidP_GetCaps(preparsedData, &caps);
+    status = HidP_GetCaps(preparsedData.data, &caps);
 
     if (!NT_SUCCESS(status)) {
-        goto ExitAndFree;
+        return status;
     }
 
     KdPrint(("FireFly: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
 
     if (caps.FeatureReportByteLength != sizeof(HIDMINI_CONTROL_INFO)) {
         KdPrint(("FireFly: FeatureReportByteLength mismatch (%u, %u).\n", caps.FeatureReportByteLength, sizeof(HIDMINI_CONTROL_INFO)));
-        goto ExitAndFree;
+        return status;
     }
 
 
@@ -125,10 +150,10 @@ FireflySetFeature(
 
     HIDP_VALUE_CAPS valueCaps = {0};
     USHORT ValueCapsLength = caps.NumberFeatureValueCaps;
-    status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, preparsedData);
+    status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, preparsedData.data);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: HidP_GetValueCaps failed 0x%x\n", status));
-        goto ExitAndFree;
+        return status;
     }
 
     // Create a report to send to the device.
@@ -140,7 +165,7 @@ FireflySetFeature(
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
                                       &report,
                                       sizeof(report));
-    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget.data,
                                   NULL,
                                   IOCTL_HID_SET_FEATURE,
                                   &inputDescriptor,
@@ -149,21 +174,10 @@ FireflySetFeature(
                                   NULL);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously3 failed 0x%x\n", status)); 
-        goto ExitAndFree;
-    }
-
-ExitAndFree:
-    if (preparsedData != NULL) {
-        ExFreePool(preparsedData);
-        preparsedData = NULL;
-    }
-
-    if (hidTarget != NULL) {
-        WdfObjectDelete(hidTarget);
+        return status;
     }
 
     KdPrint(("Firefly: FireflySetFeature completed\n"));
-
     return status;
 }
 
