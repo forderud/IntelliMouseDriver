@@ -12,12 +12,19 @@ struct TailLightReport {
         Blue = (Color >> 16) & 0xFF; // blue
     }
 
-    NTSTATUS Clamp() {
+    bool IsValid() const {
+        if (ReportId != 36) // 0x24
+            return false;
+
         if ((Unknown1 != 0xB2) || (Unknown2 != 0x03)) {
-            KdPrint(("FireFly: TailLightReport::Clamp: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2));
-            return STATUS_UNSUCCESSFUL;
+            KdPrint(("FireFly: TailLightReport::IsValid: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2));
+            return false;
         }
 
+        return true;
+    }
+
+    void SafetyCheck () {
         // RGB check
         unsigned int color_sum = Red + Green + Blue;
         if (color_sum > 2 * 255) {
@@ -26,14 +33,8 @@ struct TailLightReport {
             Green /= 2;
             Blue /= 2;
         }
-
-        return STATUS_SUCCESS;
     }
 
-
-    bool IsValid() const {
-        return ReportId == 36; // 0x24
-    }
 
     //report ID of the collection to which the control request is sent
     UCHAR    ReportId; // 36 (0x24)

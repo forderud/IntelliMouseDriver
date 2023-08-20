@@ -253,7 +253,7 @@ Arguments:
     }
 
     // Clamp color to satisfy safety limits
-    status = packet->Clamp();
+    packet->SafetyCheck();
 
     KdPrint(("FireFly: SetFeatureFilter completed\n"));
     return status;
