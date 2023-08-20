@@ -33,20 +33,15 @@ FireflySetFeature(
     PCHAR                report = NULL;
     WDFIOTARGET          hidTarget = NULL;
     
-    NTSTATUS status = WdfIoTargetCreate(WdfObjectContextGetObject(DeviceContext), 
-                            WDF_NO_OBJECT_ATTRIBUTES, 
-                            &hidTarget);    
+    NTSTATUS status = WdfIoTargetCreate(WdfObjectContextGetObject(DeviceContext), WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetCreate failed 0x%x\n", status));        
+        KdPrint(("FireFly: WdfIoTargetCreate failed 0x%x\n", status));
         return status;
     }
 
     // open in write-only mode
     WDF_IO_TARGET_OPEN_PARAMS openParams = {0};
-    WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(
-                                    &openParams,
-                                    &DeviceContext->PdoName,
-                                    FILE_WRITE_ACCESS);
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(&openParams, &DeviceContext->PdoName, FILE_WRITE_ACCESS);
 
     KdPrint(("Firefly: DeviceContext->PdoName: %wZ\n", DeviceContext->PdoName)); // outputs "\Device\00000083"
 
@@ -56,7 +51,7 @@ FireflySetFeature(
 
     status = WdfIoTargetOpen(hidTarget, &openParams);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetOpen failed 0x%x\n", status));                
+        KdPrint(("FireFly: WdfIoTargetOpen failed 0x%x\n", status));
         goto ExitAndFree;
     }
     
@@ -79,7 +74,7 @@ FireflySetFeature(
     KdPrint(("FireFly: ProductID=%x, VendorID=%x, VersionNumber=%u, DescriptorSize=%u\n", collectionInformation.ProductID, collectionInformation.VendorID, collectionInformation.VersionNumber, collectionInformation.DescriptorSize));
 
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));                
+        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));
         goto ExitAndFree;
     }
 
@@ -102,7 +97,7 @@ FireflySetFeature(
                                   NULL);
 
     if (!NT_SUCCESS(status)) {
-        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously2 failed 0x%x\n", status));                
+        KdPrint(("FireFly: WdfIoTargetSendIoctlSynchronously2 failed 0x%x\n", status));
         goto ExitAndFree;
     }
 
