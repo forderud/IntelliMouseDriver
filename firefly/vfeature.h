@@ -20,14 +20,8 @@ typedef struct _HIDMINI_CONTROL_INFO {
 
 void Init_HIDMINI_CONTROL_INFO(OUT HIDMINI_CONTROL_INFO* report, IN UCHAR ReportID, IN  ULONG Color);
 
-#ifdef __cplusplus
-extern "C"
-#endif
 NTSTATUS Clamp_HIDMINI_CONTROL_INFO(HIDMINI_CONTROL_INFO* report);
 
-#ifdef __cplusplus
-extern "C"
-#endif
 NTSTATUS FireflySetFeature(
     IN  WDFDEVICE Device,
     IN  ULONG     Color

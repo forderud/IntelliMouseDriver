@@ -9,10 +9,6 @@
 #pragma warning(default:4201)
 #pragma warning(default:4214)
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text(PAGE, FireflySetFeature)
-#endif
-
 
 struct PHIDP_PREPARSED_DATA_Wrap {
     PHIDP_PREPARSED_DATA_Wrap(_In_ SIZE_T NumberOfBytes, _In_ ULONG Tag) {
