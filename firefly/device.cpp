@@ -252,7 +252,7 @@ Arguments:
         return STATUS_INVALID_PARAMETER;
     }
 
-    // Clamp color to satisfy safety limits
+    // Enforce safety limits (sets color to RED on failure)
     packet->SafetyCheck();
 
     KdPrint(("FireFly: SetFeatureFilter completed\n"));

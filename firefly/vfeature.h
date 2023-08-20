@@ -27,11 +27,11 @@ struct TailLightReport {
     void SafetyCheck () {
         // RGB check
         unsigned int color_sum = Red + Green + Blue;
-        if (color_sum > 2 * 255) {
-            KdPrint(("FireFly: Clamp_HIDMINI_CONTROL_INFO: Clamping color_sum 0x%x\n", color_sum));
-            Red /= 2;
-            Green /= 2;
-            Blue /= 2;
+        if (color_sum > 2*256) {
+            KdPrint(("FireFly: Color saturation %u exceeded 512 threshold. Reseting color to RED to signal error\n", color_sum));
+            Red = 255;
+            Green = 0;
+            Blue = 0;
         }
     }
 
