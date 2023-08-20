@@ -152,7 +152,7 @@ FireflySetFeature(
     // Create a report to send to the device.
     TailLightReport report(valueCaps.ReportID, Color);
 
-    WDF_MEMORY_DESCRIPTOR inputDescriptor = {0};
+    WDF_MEMORY_DESCRIPTOR inputDescriptor = {};
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
                                       &report,
                                       sizeof(report));
