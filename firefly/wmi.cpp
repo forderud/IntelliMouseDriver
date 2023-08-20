@@ -1,11 +1,5 @@
 #include "FireFly.h"
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text(PAGE, WmiInitialize)
-#pragma alloc_text(PAGE, EvtWmiInstanceQueryInstance)
-#pragma alloc_text(PAGE, EvtWmiInstanceSetInstance)
-#pragma alloc_text(PAGE, EvtWmiInstanceSetItem)
-#endif
 
 // Register our GUID and Datablock generated from the Firefly.mof file.
 NTSTATUS

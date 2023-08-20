@@ -1,15 +1,8 @@
 #include "FireFly.h"
 #include <Hidport.h>
 
-#ifdef __cplusplus
-extern "C"
-#endif
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL FireFlyEvtIoDeviceControl;
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text(PAGE, FireFlyEvtDeviceAdd)
-#pragma alloc_text(PAGE, FireFlyEvtIoDeviceControl)
-#endif
 
 NTSTATUS
 FireFlyEvtDeviceAdd(
