@@ -13,11 +13,13 @@ struct TailLightReport {
     }
 
     bool IsValid() const {
-        if (ReportId != 36) // 0x24
+        if (ReportId != 36) {// 0x24
+            KdPrint(("FireFly: TailLightReport: Unsupported report id %d\n", ReportId));
             return false;
+        }
 
         if ((Unknown1 != 0xB2) || (Unknown2 != 0x03)) {
-            KdPrint(("FireFly: TailLightReport::IsValid: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2));
+            KdPrint(("FireFly: TailLightReport: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2));
             return false;
         }
 

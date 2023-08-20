@@ -225,13 +225,11 @@ Arguments:
     Request - Pointer to Request Packet.
 --*/
 {
-    KdPrint(("FireFly: SetFeatureFilter\n"));
-
     WDF_REQUEST_PARAMETERS params = {};
     WDF_REQUEST_PARAMETERS_INIT(&params);
     WdfRequestGetParameters(Request, &params);
 
-    KdPrint(("  parameters: Type=0x%x (DeviceControl=0xe), InputBufferLength=%u, \n", params.Type, params.Parameters.DeviceIoControl.InputBufferLength));
+    KdPrint(("FireFly: SetFeatureFilter: Type=0x%x (DeviceControl=0xe), InputBufferLength=%u, \n", params.Type, params.Parameters.DeviceIoControl.InputBufferLength));
 
     if (params.Parameters.DeviceIoControl.InputBufferLength != sizeof(TailLightReport)) {
         KdPrint(("FireFly: SetFeatureFilter: Incorrect InputBufferLength\n"));
@@ -248,7 +246,6 @@ Arguments:
     if (!packet->IsValid()) {
         // If collection ID is not for control collection then handle
         // this request just as you would for a regular collection.
-        KdPrint(("FireFly: SetFeatureFilter: invalid report id %d\n", packet->ReportId));
         return STATUS_INVALID_PARAMETER;
     }
 
