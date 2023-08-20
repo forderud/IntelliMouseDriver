@@ -252,7 +252,8 @@ Arguments:
         return STATUS_INVALID_PARAMETER;
     }
 
-    status = Clamp_TailLightReport(packet);
+    // Clamp color to satisfy safety limits
+    status = packet->Clamp();
 
     KdPrint(("FireFly: SetFeatureFilter completed\n"));
     return status;

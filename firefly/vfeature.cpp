@@ -174,22 +174,3 @@ FireflySetFeature(
     KdPrint(("Firefly: FireflySetFeature completed\n"));
     return status;
 }
-
-
-NTSTATUS Clamp_TailLightReport(TailLightReport* report) {
-    if ((report->Unknown1 != 0xB2) || (report->Unknown2 != 0x03)) {
-        KdPrint(("FireFly: SetFeatureFilter: Unknown control Code 0x%x 0x%x\n", report->Unknown1, report->Unknown2));
-        return STATUS_NOT_IMPLEMENTED;
-    }
-
-    // RGB check
-    unsigned int color_sum = report->Red + report->Green + report->Blue;
-    if (color_sum > 2 * 255) {
-        KdPrint(("FireFly: Clamp_HIDMINI_CONTROL_INFO: Clamping color_sum 0x%x\n", color_sum));
-        report->Red /= 2;
-        report->Green /= 2;
-        report->Blue /= 2;
-    }
-
-    return STATUS_SUCCESS;
-}
