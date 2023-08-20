@@ -66,6 +66,8 @@ EvtWmiInstanceQueryInstance(
 
     UNREFERENCED_PARAMETER(OutBufferSize);
 
+    KdPrint(("FireFly: WMI QueryInstance\n"));
+
     FireflyDeviceInformation* pInfo = WdfObjectGet_FireflyDeviceInformation(WmiInstance);
 
     // Our mininum buffer size has been checked by the Framework
@@ -87,6 +89,8 @@ EvtWmiInstanceSetInstance(
     PAGED_CODE();
 
     UNREFERENCED_PARAMETER(InBufferSize);
+
+    KdPrint(("FireFly: WMI SetInstance\n"));
 
     FireflyDeviceInformation* pInfo = WdfObjectGet_FireflyDeviceInformation(WmiInstance);
 
@@ -114,6 +118,8 @@ EvtWmiInstanceSetItem(
     )
 {
     PAGED_CODE();
+
+    KdPrint(("FireFly: WMI SetItem\n"));
 
     if (DataItemId != 1)
         return STATUS_INVALID_DEVICE_REQUEST;
