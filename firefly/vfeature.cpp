@@ -141,7 +141,7 @@ FireflySetFeature(
     // be all we need to do.
     status = STATUS_SUCCESS;
 
-    HIDP_VALUE_CAPS valueCaps = {0};
+    HIDP_VALUE_CAPS valueCaps = {};
     USHORT ValueCapsLength = caps.NumberFeatureValueCaps;
     status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, preparsedData.data);
     if (!NT_SUCCESS(status)) {
