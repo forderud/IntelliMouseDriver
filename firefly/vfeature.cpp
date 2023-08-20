@@ -171,6 +171,5 @@ FireflySetFeature(
         return status;
     }
 
-    KdPrint(("Firefly: FireflySetFeature completed\n"));
     return status;
 }
