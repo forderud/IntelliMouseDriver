@@ -152,7 +152,6 @@ FireflySetFeature(
     }
 
     // Create a report to send to the device.
-    // Set feature report values (as observed in USBPcap/Wireshark)
     TailLightReport report(valueCaps.ReportID, Color);
 
     WDF_MEMORY_DESCRIPTOR inputDescriptor = {0};

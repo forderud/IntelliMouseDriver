@@ -1,6 +1,6 @@
 #pragma once
 
-/** Size should by 73 bytes */
+/** Tail-light set feature report values as observed in USBPcap/Wireshark. */
 struct TailLightReport {
     TailLightReport(IN UCHAR _ReportID, IN  ULONG Color) {
         ReportId = _ReportID; // Report ID 0x24 (36)
@@ -51,6 +51,8 @@ struct TailLightReport {
 
     UCHAR  padding[67];
 };
+static_assert(sizeof(TailLightReport) == 73);
+
 
 NTSTATUS FireflySetFeature(
     IN  WDFDEVICE Device,
