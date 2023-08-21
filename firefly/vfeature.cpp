@@ -10,18 +10,25 @@
 #pragma warning(default:4214)
 
 
-struct PHIDP_PREPARSED_DATA_Wrap {
+/** RAII wrapper of PHIDP_PREPARSED_DATA. */
+class PHIDP_PREPARSED_DATA_Wrap {
+public:
     PHIDP_PREPARSED_DATA_Wrap(_In_ SIZE_T NumberOfBytes, _In_ ULONG Tag) {
-        data = (PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, NumberOfBytes, Tag);
+        m_ptr = (PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, NumberOfBytes, Tag);
     }
     ~PHIDP_PREPARSED_DATA_Wrap() {
-        if (data != NULL) {
-            ExFreePool(data);
-            data = NULL;
+        if (m_ptr) {
+            ExFreePool(m_ptr);
+            m_ptr = nullptr;
         }
     }
 
-    PHIDP_PREPARSED_DATA data = nullptr;
+    operator PHIDP_PREPARSED_DATA () const {
+        return m_ptr;
+    }
+
+private:
+    PHIDP_PREPARSED_DATA m_ptr = nullptr;
 };
 
 /** RAII wrapper of WDFIOTARGET. */
@@ -108,13 +115,13 @@ FireflySetFeature(
     }
 
     PHIDP_PREPARSED_DATA_Wrap preparsedData(collectionInformation.DescriptorSize, 'ffly');
-    if (!preparsedData.data) {
+    if (!preparsedData) {
         status = STATUS_INSUFFICIENT_RESOURCES;
         return status;
     }
 
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDescriptor, // out (mapped to preparsedData)
-                                      (PVOID) preparsedData.data,
+                                      static_cast<PHIDP_PREPARSED_DATA>(preparsedData),
                                       collectionInformation.DescriptorSize);
 
     status = WdfIoTargetSendIoctlSynchronously(hidTarget,
@@ -134,7 +141,7 @@ FireflySetFeature(
     HIDP_CAPS caps = {};
     RtlZeroMemory(&caps, sizeof(HIDP_CAPS));
 
-    status = HidP_GetCaps(preparsedData.data, &caps);
+    status = HidP_GetCaps(preparsedData, &caps);
     if (!NT_SUCCESS(status)) {
         return status;
     }
@@ -153,7 +160,7 @@ FireflySetFeature(
 
     HIDP_VALUE_CAPS valueCaps = {};
     USHORT ValueCapsLength = caps.NumberFeatureValueCaps;
-    status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, preparsedData.data);
+    status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, preparsedData);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: HidP_GetValueCaps failed 0x%x\n", status));
         return status;
