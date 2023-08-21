@@ -1,7 +1,7 @@
 # Must be run with admin privileges
 
 # get IntelliMouse WMI object
-$mouse = Get-CimInstance -Namespace root\WMI -Class FireflyDeviceInformation
+$mouse = Get-CimInstance -Namespace root\WMI -Class TailLightDeviceInformation
 
 Write-Host("IntelliMouse device:")
 

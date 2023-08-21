@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 const wchar_t NAME_SPACE[] = L"root\\WMI";
-const wchar_t CLASS_NAME[] = L"FireflyDeviceInformation";
+const wchar_t CLASS_NAME[] = L"TailLightDeviceInformation";
 const wchar_t PROPERTY_NAME[] = L"TailLight";
 
 
