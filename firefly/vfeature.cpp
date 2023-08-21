@@ -13,8 +13,8 @@
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */
 class PHIDP_PREPARSED_DATA_Wrap {
 public:
-    PHIDP_PREPARSED_DATA_Wrap(_In_ SIZE_T NumberOfBytes, _In_ ULONG Tag) {
-        m_ptr = (PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, NumberOfBytes, Tag);
+    PHIDP_PREPARSED_DATA_Wrap(PHIDP_PREPARSED_DATA ptr) {
+        m_ptr = ptr;
     }
     ~PHIDP_PREPARSED_DATA_Wrap() {
         if (m_ptr) {
@@ -114,7 +114,7 @@ FireflySetFeature(
         return status;
     }
 
-    PHIDP_PREPARSED_DATA_Wrap preparsedData(collectionInformation.DescriptorSize, 'ffly');
+    PHIDP_PREPARSED_DATA_Wrap preparsedData((PHIDP_PREPARSED_DATA)ExAllocatePool2(POOL_FLAG_NON_PAGED, collectionInformation.DescriptorSize, 'ffly'));
     if (!preparsedData) {
         status = STATUS_INSUFFICIENT_RESOURCES;
         return status;
