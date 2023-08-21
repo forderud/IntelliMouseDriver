@@ -24,16 +24,26 @@ struct PHIDP_PREPARSED_DATA_Wrap {
     PHIDP_PREPARSED_DATA data = nullptr;
 };
 
-struct WDFIOTARGET_Wrap {
+/** RAII wrapper of WDFIOTARGET. */
+class WDFIOTARGET_Wrap {
+public:
     WDFIOTARGET_Wrap() {
     }
     ~WDFIOTARGET_Wrap() {
-        if (data != NULL) {
-            WdfObjectDelete(data);
+        if (m_obj != NULL) {
+            WdfObjectDelete(m_obj);
         }
     }
 
-    WDFIOTARGET data = NULL;
+    operator WDFIOTARGET () const {
+        return m_obj;
+    }
+    WDFIOTARGET* operator & () {
+        return &m_obj;
+    }
+
+private:
+    WDFIOTARGET m_obj = NULL;
 };
 
 NTSTATUS
@@ -53,7 +63,7 @@ FireflySetFeature(
 
     // Preinit for error.
     WDFIOTARGET_Wrap hidTarget;
-    NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &hidTarget.data);
+    NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetCreate failed 0x%x\n", status));
         return status;
@@ -68,7 +78,7 @@ FireflySetFeature(
     // state changes of the target by closing and opening the handle.
     openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
 
-    status = WdfIoTargetOpen(hidTarget.data, &openParams);
+    status = WdfIoTargetOpen(hidTarget, &openParams);
     if (!NT_SUCCESS(status)) {
         KdPrint(("FireFly: WdfIoTargetOpen failed 0x%x\n", status));
         return status;
@@ -82,7 +92,7 @@ FireflySetFeature(
                                       sizeof(HID_COLLECTION_INFORMATION));
 
     // Now get the collection information for this device
-    status = WdfIoTargetSendIoctlSynchronously(hidTarget.data,
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
                                   IOCTL_HID_GET_COLLECTION_INFORMATION,
                                   NULL,
@@ -107,7 +117,7 @@ FireflySetFeature(
                                       (PVOID) preparsedData.data,
                                       collectionInformation.DescriptorSize);
 
-    status = WdfIoTargetSendIoctlSynchronously(hidTarget.data,
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
                                   IOCTL_HID_GET_COLLECTION_DESCRIPTOR, // same as HidD_GetPreparsedData in user-mode
                                   NULL,
@@ -156,7 +166,7 @@ FireflySetFeature(
     WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
                                       &report,
                                       sizeof(report));
-    status = WdfIoTargetSendIoctlSynchronously(hidTarget.data,
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
                                   NULL,
                                   IOCTL_HID_SET_FEATURE,
                                   &inputDescriptor,
