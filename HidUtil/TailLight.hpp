@@ -21,8 +21,7 @@ bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
     NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, reportDesc);
     assert(status == HIDP_STATUS_SUCCESS);
 
-    // increase size by 1 for report ID header
-    std::vector<BYTE> featureReport(caps.FeatureReportByteLength + 1, (BYTE)0);
+    std::vector<BYTE> featureReport(caps.FeatureReportByteLength, (BYTE)0);
 
     // Set feature report values (as observed in USBPcap/Wireshark)
     featureReport[0] = valueCaps.ReportID; // ReportID 0x24 (36)
