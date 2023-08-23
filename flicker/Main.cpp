@@ -48,16 +48,13 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
         return 0;
     }
 
-    BOOL bSuccessful;
     if (bAdjustLight) {
         if (lightSetting < 2) {
-            bSuccessful = luminous->Set(ToColor(lightSetting));
-
-            if (bSuccessful) {
+            bool ok = luminous->Set(ToColor(lightSetting));
+            if (ok)
                 _tprintf(_T("Adjusted light to %x\n"), lightSetting);
-            } else {
+            else
                 _tprintf(_T("Problem occured while adjusting light: %x\n"), GetLastError());
-            }
             Sleep(1000); // 1 sec
         } else {
             int k=0;
@@ -81,9 +78,8 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
                 k=1-k;
             }
             if (k) {
-                if(!luminous->Set(ToColor(k))) {
+                if(!luminous->Set(ToColor(k)))
                     _tprintf(_T("Set operation on Luminous failed.\n"));
-                }
             }
         }
     }
