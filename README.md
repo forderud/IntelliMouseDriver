@@ -6,11 +6,12 @@ Filter driver for Microsoft Pro IntelliMouse that implements safety checks and e
 * `flicker.exe`: Application for causing the mouse to blink by sending commands through the WMI interface.
 * `HidUtil.exe`: Command-line utility for querying and communicating with HID devices.
 
-Please see the **[wiki](../../wiki)** for additional documentation.
-
 ### Prerequisites
 * Microsoft [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse)
 * Separate computer for driver testing. Needed to avoid crashing or corrupting your main computer in case of driver problems.
 * USB 3 A/A crossover cable for kernel debugging. Can also use a network connection if the machine has a compatible network adapter.
+
+Please see the **[wiki](../../wiki)** for getting started information.
+
 
 ![Prerequisites](Prerequisites.png)
