@@ -1,6 +1,7 @@
 # Must be run with admin privileges
 
-# get IntelliMouse WMI object
+# Get IntelliMouse WMI object
+# HW drivers reside in the "root\wmi" namespace (https://learn.microsoft.com/en-us/windows/win32/wmicoreprov/wdm-provider)
 $mouse = Get-CimInstance -Namespace root\WMI -Class TailLightDeviceInformation
 
 Write-Host("IntelliMouse device:")
