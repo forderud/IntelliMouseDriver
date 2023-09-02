@@ -7,6 +7,7 @@ const wchar_t PROPERTY_NAME[] = L"TailLight";
 
 
 // The function connects to the namespace specified by the user.
+// DOC: https://learn.microsoft.com/en-us/windows/win32/wmisdk/example-creating-a-wmi-application
 CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     CComPtr<IWbemLocator> wbemLocator;
     HRESULT hr = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&wbemLocator);
@@ -36,17 +37,16 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     }
 
     // Switch the security level to IMPERSONATE so that provider(s)
-    // will grant access to system-level objects, and so that
-    // CALL authorization will be used.
+    // will grant access to system-level objects, and so that CALL authorization will be used.
     hr = CoSetProxyBlanket(
         (IUnknown*)wbemServices, // proxy
         RPC_C_AUTHN_WINNT,        // authentication service
         RPC_C_AUTHZ_NONE,         // authorization service
         NULL,                     // server principle name
         RPC_C_AUTHN_LEVEL_CALL,   // authentication level
-        RPC_C_IMP_LEVEL_IMPERSONATE, // impersonation level
+        RPC_C_IMP_LEVEL_IMPERSONATE,// impersonation level
         NULL,                     // identity of the client
-        0);                      // capability flags
+        EOAC_NONE);               // capability flags
 
     if (hr != S_OK) {
         _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hr);
