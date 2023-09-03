@@ -4,10 +4,7 @@
 
 /** Tail-light feature report as observed in USBPcap/Wireshark. */
 struct TailLightReport {
-    TailLightReport(ULONG Color) {
-        Red = (Color) & 0xFF; // red;
-        Green = (Color >> 8) & 0xFF; // green
-        Blue = (Color >> 16) & 0xFF; // blue
+    TailLightReport() {
     }
 
     bool IsValid() const {
@@ -20,6 +17,16 @@ struct TailLightReport {
         }
 
         return true;
+    }
+
+    void SetColor(ULONG Color) {
+        Red = (Color) & 0xFF; // red;
+        Green = (Color >> 8) & 0xFF; // green
+        Blue = (Color >> 16) & 0xFF; // blue
+    }
+
+    ULONG GetColor() const {
+        return (Blue << 16) || (Green << 8) || Red;
     }
 
     //report ID of the collection to which the control request is sent
@@ -36,6 +43,23 @@ struct TailLightReport {
     UCHAR  padding[67] = {};
 };
 static_assert(sizeof(TailLightReport) == 73);
+
+
+bool GetTailLight(HANDLE hid_dev, COLORREF & color) {
+    TailLightReport featureReport;
+
+    BOOLEAN ok = HidD_GetFeature(hid_dev, &featureReport, (ULONG)sizeof(featureReport));
+    if (!ok) {
+        DWORD err = GetLastError();
+        printf("ERROR: HidD_GetFeature failure (err %d).\n", err);
+        assert(ok);
+        return false;
+    }
+
+    color = featureReport.GetColor();
+    return true;
+
+}
 
 
 bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS caps, COLORREF color) {
@@ -56,7 +80,8 @@ bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
     NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, reportDesc);
     assert(status == HIDP_STATUS_SUCCESS);
 
-    TailLightReport featureReport(color);
+    TailLightReport featureReport;
+    featureReport.SetColor(color);
 
     BOOLEAN ok = HidD_SetFeature(hid_dev, &featureReport, (ULONG)sizeof(featureReport));
     if (!ok) {

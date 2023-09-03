@@ -27,6 +27,13 @@ int main(int argc, char* argv[]) {
     }
 
     for (HID::Match& match : matches) {
+#if 0
+        COLORREF cur_color = 0;
+        if (GetTailLight(match.dev.Get(), cur_color)) {
+            wprintf(L"Current color: %u\n", cur_color);
+        }
+#endif
+
         wprintf(L"Updating %s\n", match.name.c_str());
         bool ok = UpdateTailLight(match.dev.Get(), match.report, match.caps, RGB(red, green, blue));
         if (!ok)
