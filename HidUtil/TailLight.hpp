@@ -2,6 +2,41 @@
 #include <Windows.h>
 #include <Hidsdi.h>
 
+/** Tail-light feature report as observed in USBPcap/Wireshark. */
+struct TailLightReport {
+    TailLightReport(ULONG Color) {
+        Red = (Color) & 0xFF; // red;
+        Green = (Color >> 8) & 0xFF; // green
+        Blue = (Color >> 16) & 0xFF; // blue
+    }
+
+    bool IsValid() const {
+        if (ReportId != 36) {// 0x24
+            return false;
+        }
+
+        if ((Unknown1 != 0xB2) || (Unknown2 != 0x03)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    //report ID of the collection to which the control request is sent
+    UCHAR    ReportId = 36; // (0x24)
+
+    // control codes (user-defined)
+    UCHAR   Unknown1 = 0xB2; // magic value
+    UCHAR   Unknown2 = 0x03; // magic value
+
+    UCHAR   Red = 0;
+    UCHAR   Green = 0;
+    UCHAR   Blue = 0;
+
+    UCHAR  padding[67] = {};
+};
+static_assert(sizeof(TailLightReport) == 73);
+
 
 bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS caps, COLORREF color) {
 #if 0
@@ -21,18 +56,9 @@ bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
     NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, reportDesc);
     assert(status == HIDP_STATUS_SUCCESS);
 
-    std::vector<BYTE> featureReport(caps.FeatureReportByteLength, (BYTE)0);
+    TailLightReport featureReport(color);
 
-    // Set feature report values (as observed in USBPcap/Wireshark)
-    featureReport[0] = valueCaps.ReportID; // ReportID 0x24 (36)
-    featureReport[1] = 0xB2; // magic value
-    featureReport[2] = 0x03; // magic value
-    // tail-light color
-    featureReport[3] = (color) & 0xFF; // red
-    featureReport[4] = (color >> 8) & 0xFF; // green
-    featureReport[5] = (color >> 16) & 0xFF; // blue
-
-    BOOLEAN ok = HidD_SetFeature(hid_dev, featureReport.data(), (ULONG)featureReport.size());
+    BOOLEAN ok = HidD_SetFeature(hid_dev, &featureReport, (ULONG)sizeof(featureReport));
     if (!ok) {
         DWORD err = GetLastError();
         printf("ERROR: HidD_SetFeature failure (err %d).\n", err);
