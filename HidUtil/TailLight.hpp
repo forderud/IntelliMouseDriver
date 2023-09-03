@@ -1,48 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <Hidsdi.h>
-
-/** Tail-light feature report as observed in USBPcap/Wireshark. */
-struct TailLightReport {
-    TailLightReport() {
-    }
-
-    bool IsValid() const {
-        if (ReportId != 36) {// 0x24
-            return false;
-        }
-
-        if ((Unknown1 != 0xB2) || (Unknown2 != 0x03)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    void SetColor(ULONG Color) {
-        Red = (Color) & 0xFF; // red;
-        Green = (Color >> 8) & 0xFF; // green
-        Blue = (Color >> 16) & 0xFF; // blue
-    }
-
-    ULONG GetColor() const {
-        return (Blue << 16) || (Green << 8) || Red;
-    }
-
-    //report ID of the collection to which the control request is sent
-    UCHAR    ReportId = 36; // (0x24)
-
-    // control codes (user-defined)
-    UCHAR   Unknown1 = 0xB2; // magic value
-    UCHAR   Unknown2 = 0x03; // magic value
-
-    UCHAR   Red = 0;
-    UCHAR   Green = 0;
-    UCHAR   Blue = 0;
-
-    UCHAR  padding[67] = {};
-};
-static_assert(sizeof(TailLightReport) == 73);
+#include "../TailLight/TailLight.h"
 
 
 bool GetTailLight(HANDLE hid_dev, COLORREF & color) {
