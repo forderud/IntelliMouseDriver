@@ -21,12 +21,6 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     bool  bAdjustLight = false;
     ULONG lightSetting = 0;
 
-    if (!IsUserAnAdmin()) {
-        _tprintf(_T("ERROR: Admin privileges missing.\n"));
-        return -1;
-
-    }
-
     if (argc == 2) {
         if (argv[1][0] == '-') {
             if ((argv[1][1] >= '0') && (argv[1][1] <= '2')) {
