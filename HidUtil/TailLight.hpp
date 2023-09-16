@@ -55,5 +55,15 @@ bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
         return false;
     }
 
+    {
+        // TEST: Read input report
+        std::vector<BYTE> inputBuf(caps.InputReportByteLength, (BYTE)0);
+        inputBuf[0] = 0x27; // ReportID 39
+        ok = HidD_GetInputReport(hid_dev, inputBuf.data(), (ULONG)inputBuf.size());
+        assert(ok);
+        assert(inputBuf[1] == 0xB2);
+        // the rest of inputBuf is still empty
+    }
+
     return true;
 }
