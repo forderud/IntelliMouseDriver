@@ -2,6 +2,28 @@
 #include <Hidport.h>
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
+EVT_WDF_REQUEST_COMPLETION_ROUTINE IoctlRequestCompletionRoutine;
+
+
+VOID IoctlRequestCompletionRoutine(
+    WDFREQUEST                      Request,
+    WDFIOTARGET                     Target,
+    WDF_REQUEST_COMPLETION_PARAMS*  CompletionParams,
+    WDFCONTEXT                      Context
+)
+/*++
+Arguments:
+    Dummy competion routine that simply calls WdfRequestComplete. We have to use
+    this dummy competion routine instead of WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET,
+    because we're formating a manually created request.
+--*/
+{
+    UNREFERENCED_PARAMETER(Target);
+    UNREFERENCED_PARAMETER(CompletionParams);
+    UNREFERENCED_PARAMETER(Context);
+
+    WdfRequestCompleteWithInformation(Request, WdfRequestGetStatus(Request), WdfRequestGetInformation(Request));
+}
 
 
 NTSTATUS EvtDriverDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
@@ -95,6 +117,58 @@ Arguments:
     if (!NT_SUCCESS(status)) {
         KdPrint(("TailLight: Error initializing WMI 0x%x\n", status));
         return status;
+    }
+
+    {
+        // initialize tail-light to black
+        WDF_OBJECT_ATTRIBUTES  req_attr = {};
+        WDF_OBJECT_ATTRIBUTES_INIT(&req_attr);
+        req_attr.ParentObject = device; // auto-delete with device
+
+        WDFREQUEST request = 0;
+        status = WdfRequestCreate(&req_attr, WdfDeviceGetIoTarget(device), &request);
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("TailLight: WdfRequestCreate failed: 0x%x\n", status));
+            return status;
+        }
+
+        // populate request
+        TailLightReport report;
+        report.SetColor(0); // black color
+
+        // Set up a WDF memory object for the IOCTL request
+        WDF_OBJECT_ATTRIBUTES mem_attrib = {};
+        WDF_OBJECT_ATTRIBUTES_INIT(&mem_attrib);
+        mem_attrib.ParentObject = request; // auto-delete with request
+
+        WDFMEMORY InBuffer = 0;
+        BYTE* InBuffer_ptr = nullptr;
+        status = WdfMemoryCreate(&mem_attrib, NonPagedPool, POOL_TAG, sizeof(report), &InBuffer, (void**)&InBuffer_ptr);
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("TailLight: WdfMemoryCreatePreallocated failed: 0x%x\n", status));
+            return status;
+        }
+        RtlCopyMemory(InBuffer_ptr, &report, sizeof(report));
+
+        // Format the request as write operation
+        status = WdfIoTargetFormatRequestForIoctl(WdfDeviceGetIoTarget(device), request, IOCTL_HID_SET_FEATURE, InBuffer, 0, 0, 0);
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("TailLight: WdfIoTargetFormatRequestForIoctl failed: 0x%x\n", status));
+            return status;
+        }
+
+        WdfRequestSetCompletionRoutine(request, IoctlRequestCompletionRoutine, NULL);
+
+        // Forward the request down the driver stack
+        WDF_REQUEST_SEND_OPTIONS options = {};
+        WDF_REQUEST_SEND_OPTIONS_INIT(&options, 0); // WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET incompatible with WdfIoTargetFormatRequest...
+
+        BOOLEAN ret = WdfRequestSend(request, WdfDeviceGetIoTarget(device), &options);
+        if (ret == FALSE) {
+            status = WdfRequestGetStatus(request);
+            KdPrint(("TailLight: WdfRequestSend failed: 0x%x\n", status));
+        }
+
     }
 
     return status;
