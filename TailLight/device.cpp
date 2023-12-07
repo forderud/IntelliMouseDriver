@@ -97,9 +97,77 @@ Arguments:
         return status;
     }
 
+    status = TailLight_SetBlack(deviceContext);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("TailLight: Error setting taillight to black 0x%x\n", status));
+        return status;
+    }
+
     return status;
 }
 
+NTSTATUS TailLight_SetBlack(DEVICE_CONTEXT* pDeviceContext)
+{
+    WDF_MEMORY_DESCRIPTOR inputDescriptor;
+    PCHAR               report = NULL;
+    NTSTATUS            status;
+    WDFIOTARGET         hidTarget = NULL;
+
+    PAGED_CODE();
+
+    status = WdfIoTargetCreate((WDFDEVICE)WdfObjectContextGetObject(pDeviceContext),
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &hidTarget);
+
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("FireFly: WdfIoTargetCreate failed 0x%x\n", status));
+        return status;
+    }
+
+    //
+    // Create a report to send to the device.
+    //
+    report = (PCHAR)ExAllocatePool2(
+        POOL_FLAG_NON_PAGED, sizeof(TailLightReport), 'TLRp');
+
+    if (report == NULL) {
+        goto ExitAndFree;
+    }
+
+    TailLightReport* pTailLightReport = (TailLightReport*)report;
+    pTailLightReport->Blue = 0;
+    pTailLightReport->Green = 0;
+    pTailLightReport->Red = 0;
+  
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDescriptor,
+        report,
+        sizeof(TailLightReport));
+
+    status = WdfIoTargetSendIoctlSynchronously(hidTarget,
+        NULL,
+        IOCTL_HID_SET_FEATURE,
+        &inputDescriptor,
+        NULL,
+        NULL,
+        NULL);
+
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("TailLight: WdfIoTargetSendIoctlSynchronously failed 0x%x\n", status));
+        goto ExitAndFree;
+    }
+
+ExitAndFree:
+    if (report != NULL) {
+        ExFreePool(report);
+        report = NULL;
+    }
+
+    if (hidTarget != NULL) {
+        WdfObjectDelete(hidTarget);
+    }
+
+    return status;
+}
 
 VOID EvtIoDeviceControlFilter(
     _In_  WDFQUEUE          Queue,
