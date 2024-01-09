@@ -12,6 +12,11 @@
 #include "wmi.h"
 #include "vfeature.h"
 
+enum class RequestFlags
+{
+	FrameworkOwned = 0x0,
+	DriverOwned = 0x1
+};
 
 /** Memory allocation tag name (for debugging leaks). */
 static constexpr ULONG POOL_TAG = 'ffly';

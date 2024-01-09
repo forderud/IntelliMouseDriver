@@ -176,6 +176,7 @@ NTSTATUS SetFeatureColor (
 NTSTATUS SetFeatureFilter(
     _In_ WDFDEVICE  Device,
     _In_ WDFREQUEST Request,
+    _In_ TailLightReport &report,
     _In_ size_t     InputBufferLength
 
 )
@@ -191,6 +192,8 @@ Arguments:
     Request - Pointer to Request Packet.
 --*/
 {
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+
     KdPrint(("TailLight: SetFeatureFilter\n"));
     DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(Device);
 
@@ -199,37 +202,38 @@ Arguments:
         return STATUS_BUFFER_TOO_SMALL;
     }
 
-    TailLightReport* packet = nullptr;
-    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(TailLightReport), (void**)&packet, NULL);
-    if (!NT_SUCCESS(status) || !packet) {
-        KdPrint(("TailLight: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%p\n", status, packet));
+    status = WdfRequestRetrieveInputBuffer(Request, sizeof(TailLightReport), (void**)&report, NULL);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("TailLight: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%p\n", status, &report));
         return status;
     }
 
-    if (!packet->IsValid()) {
+    if (!report.IsValid()) {
         // If collection ID is not for control collection then handle
         // this request just as you would for a regular collection.
         return STATUS_INVALID_PARAMETER;
     }
 
     // capture color before safety adjustments
-    UCHAR r = packet->Red;
-    UCHAR g = packet->Green;
-    UCHAR b = packet->Blue;
+    UCHAR r = report.Red;
+    UCHAR g = report.Green;
+    UCHAR b = report.Blue;
     // Enforce safety limits (sets color to RED on failure)
-    if (!packet->SafetyCheck()) {
+    if (!report.SafetyCheck()) {
         // log safety violation to Windows Event Viewer "System" log
         WCHAR color_requested[16] = {};
         swprintf_s(color_requested, L"%u,%u,%u", r, g, b);
         WCHAR color_adjusted[16] = {};
-        swprintf_s(color_adjusted, L"%u,%u,%u", packet->Red, packet->Green, packet->Blue);
+        swprintf_s(color_adjusted, L"%u,%u,%u", report.Red, report.Green, report.Blue);
 
         WriteToSystemLog(Device, TailLight_SAFETY, color_requested, color_adjusted);
         status =  STATUS_CONTENT_BLOCKED;
     }
-
+    report.SetColor(0);
     // update last written color
-    deviceContext->TailLight = packet->GetColor();
+    deviceContext->TailLight = report.GetColor();
+
+    KdPrint(("Color safety check applied"));
 
     return status;
 }

@@ -10,5 +10,6 @@ NTSTATUS SetFeatureColor (
 NTSTATUS SetFeatureFilter(
     _In_ WDFDEVICE  Device,
     _In_ WDFREQUEST Request,
+    _In_ TailLightReport& report,
     _In_ size_t     InputBufferLength
 );
