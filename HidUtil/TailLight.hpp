@@ -1,8 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <Hidsdi.h>
-#include "../TailLight/TailLight.h"
-
+#include "inc\TailLight.h"
 
 bool GetTailLight(HANDLE hid_dev, COLORREF & color) {
     std::vector<BYTE> featureReport(41, 0); // 41 observed in WireShark
@@ -25,7 +24,6 @@ bool GetTailLight(HANDLE hid_dev, COLORREF & color) {
 
 }
 
-
 bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS caps, COLORREF color) {
 #if 0
     printf("Device capabilities:\n");
@@ -45,7 +43,7 @@ bool UpdateTailLight(HANDLE hid_dev, PHIDP_PREPARSED_DATA reportDesc, HIDP_CAPS 
     assert(status == HIDP_STATUS_SUCCESS);
 
     TailLightReport featureReport;
-    featureReport.SetColor(color);
+    SetColor(&featureReport, color);
 
     BOOLEAN ok = HidD_SetFeature(hid_dev, &featureReport, (ULONG)sizeof(featureReport));
     if (!ok) {

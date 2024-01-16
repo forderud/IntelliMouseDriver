@@ -27,7 +27,7 @@ public:
         }
     }
 
-    PreparsedData(PreparsedData&& obj) {
+   PreparsedData(PreparsedData&& obj) noexcept {
         std::swap(report, obj.report);
     }
 
@@ -104,12 +104,19 @@ private:
         }
 
         HIDD_ATTRIBUTES attr = {};
-        HidD_GetAttributes(hid_dev.Get(), &attr);
+        HIDP_CAPS caps = {};
+        
+        if (!HidD_GetAttributes(hid_dev.Get(), &attr)) {
+            return {};
+        }
 
         PreparsedData reportDesc(hid_dev.Get());
 
-        HIDP_CAPS caps = {};
-        HidP_GetCaps(reportDesc, &caps);
+
+        NTSTATUS status = HidP_GetCaps(reportDesc, &caps);
+        if (FAILED(status)) {
+            return {};
+        }
 
         if (verbose)
             wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);

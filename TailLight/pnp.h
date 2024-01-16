@@ -1,0 +1,4 @@
+#pragma once
+
+PAGED_CODE_SEG
+EVT_WDF_DEVICE_SELF_MANAGED_IO_INIT EvtDeviceSelfManagedInitFilter;

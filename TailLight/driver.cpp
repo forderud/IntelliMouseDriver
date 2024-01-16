@@ -2,6 +2,7 @@
 
 /** Driver entry point.
     Initialize the framework and register driver event handlers. */
+INIT_CODE_SEG
 NTSTATUS DriverEntry(
     _In_ PDRIVER_OBJECT  DriverObject,
     _In_ PUNICODE_STRING RegistryPath
@@ -30,6 +31,7 @@ NTSTATUS DriverEntry(
 
 /** Driver unload callback.
     Used to perform operations that must take place before the driver is unloaded.  */
+PAGED_CODE_SEG
 VOID EvtDriverUnload(
     _In_ WDFDRIVER Driver
     )

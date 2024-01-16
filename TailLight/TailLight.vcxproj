@@ -38,6 +38,9 @@
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="Shared">
+    <Import Project="..\umkm\umkm.vcxitems" Label="Shared" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
@@ -113,6 +116,8 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
     <ClCompile Include="device.cpp" />
     <ClCompile Include="driver.cpp" />
     <ClCompile Include="eventlog.cpp" />
+    <ClCompile Include="deviocontrol.cpp" />
+    <ClCompile Include="pnp.cpp" />
     <ClCompile Include="vfeature.cpp" />
     <ClCompile Include="wmi.cpp" />
     <ResourceCompile Include="module.rc" />
@@ -123,10 +128,12 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CppAllocator.hpp" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="device.h" />
+    <ClInclude Include="deviocontrol.h" />
     <ClInclude Include="driver.h" />
     <ClInclude Include="eventlog.h" />
-    <ClInclude Include="TailLight.h" />
+    <ClInclude Include="pnp.h" />
     <ClInclude Include="vfeature.h" />
     <ClInclude Include="wmi.h" />
   </ItemGroup>

@@ -12,18 +12,14 @@
 #include "wmi.h"
 #include "vfeature.h"
 
-enum class RequestFlags
-{
-	FrameworkOwned = 0x0,
-	DriverOwned = 0x1
-};
-
 /** Memory allocation tag name (for debugging leaks). */
 static constexpr ULONG POOL_TAG = 'ffly';
 
 extern "C"
+INIT_CODE_SEG
 DRIVER_INITIALIZE         DriverEntry;
 
-EVT_WDF_DRIVER_UNLOAD     EvtDriverUnload;
+EVT_WDF_DRIVER_UNLOAD  
+PAGED_CODE_SEG   
+EvtDriverUnload;
 
-EVT_WDF_DRIVER_DEVICE_ADD EvtDriverDeviceAdd;
