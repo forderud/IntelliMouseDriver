@@ -5,17 +5,6 @@
 
 // TODO: Streamline this once everything works
 typedef struct _SET_BLACK_WORK_ITEM_CONTEXT {
-    enum class state {
-        initialized = 0,
-        queued_waiting,
-        executing,
-        completed,
-        owning_device_unloaded
-    };
-
-    state _state;
-
-    WDFDEVICE owningDevice;
     NTSTATUS  resultStatus;
 } SET_BLACK_WORK_ITEM_CONTEXT, * PSET_BLACK_WORK_ITEM_CONTEXT;
 
@@ -25,7 +14,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(
     SET_BLACK_WORK_ITEM_CONTEXT, 
     Get_SetBlackWorkItemContext)
 
-PAGED_CODE_SEG
 NTSTATUS SetBlack(
     WDFDEVICE device)
 /*++
@@ -44,7 +32,7 @@ Return Value:
 
 --*/
 {
-    TailLightReport* pReport = NULL;
+    TailLightReport  report = {};
     NTSTATUS         status = STATUS_FAILED_DRIVER_ENTRY;
     WDFREQUEST       request = NULL;
     WDFIOTARGET      hidTarget = NULL;
@@ -52,8 +40,6 @@ Return Value:
     WDFMEMORY InBuffer = 0;
     BOOLEAN ret = FALSE;
     BYTE* pInBuffer = nullptr;
-
-    PAGED_CODE();
 
     KdPrint(("TailLight: %s\n", __func__));
 
@@ -72,25 +58,12 @@ Return Value:
 
     hidTarget = WdfDeviceGetIoTarget(device);
 
-    //
-    // Create a report to send to the device.
-    //
-    pReport = (TailLightReport*)ExAllocatePool2(
-        POOL_FLAG_NON_PAGED,
-        sizeof(TailLightReport),
-        POOL_TAG_TAILLIGHT_REPORT);
-
-    if (pReport == NULL) {
-        KdPrint(("TailLight: Can't create Tail Light report.\n"));
-        goto ExitAndFree;
-    }
-
-    Init(pReport);
+    Init(&report);
 
     // TODO: Init to black once working.
-    pReport->Blue = 0;
-    pReport->Green = 0x0;
-    pReport->Red = 0;
+    report.Blue = 0;
+    report.Green = 0x0;
+    report.Red = 0;
 
     status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES,
         hidTarget,
@@ -119,7 +92,9 @@ Return Value:
         KdPrint(("TailLight: WdfMemoryCreate failed: 0x%x\n", status));
         return status;
     }
-    RtlCopyMemory(pInBuffer, &pReport, sizeof(TailLightReport));
+
+    // TODO: Wondering if we just cant cast pInBuffr as a TailLightReport
+    RtlCopyMemory(pInBuffer, &report, sizeof(TailLightReport));
 
     // Format the request as write operation
     status = WdfIoTargetFormatRequestForIoctl(hidTarget,
@@ -147,11 +122,6 @@ Return Value:
     }
 
 ExitAndFree:
-    if (pReport != NULL) {
-        ExFreePool(pReport);
-        pReport = NULL;
-    }
-
     if (request != NULL) {
         WdfObjectDelete(request);
         request = NULL;
@@ -162,7 +132,6 @@ ExitAndFree:
     return status;
 }
 
-PAGED_CODE_SEG
 VOID EvtSetBlackWorkItem(
     WDFWORKITEM workItem)
 /*++
@@ -181,9 +150,6 @@ Notes:
     that launched this work item.
 --*/
 {
-
-    PAGED_CODE();
-
     TRACE_FN_ENTRY
 
     PSET_BLACK_WORK_ITEM_CONTEXT pContext = Get_SetBlackWorkItemContext(workItem);
@@ -194,10 +160,7 @@ Notes:
     TRACE_FN_EXIT
 }
 
-PAGED_CODE_SEG
 NTSTATUS EvtDeviceSelfManagedInitFilter(_In_ WDFDEVICE Device) {
-
-    PAGED_CODE();
 
     PSET_BLACK_WORK_ITEM_CONTEXT pWorkItemContext = NULL;
     WDF_OBJECT_ATTRIBUTES        workItemAttributes;
@@ -228,7 +191,6 @@ NTSTATUS EvtDeviceSelfManagedInitFilter(_In_ WDFDEVICE Device) {
     }
 
     pWorkItemContext = Get_SetBlackWorkItemContext(hWorkItem);
-    pWorkItemContext->owningDevice = Device;
 
     WdfWorkItemEnqueue(hWorkItem);
 
@@ -237,7 +199,6 @@ NTSTATUS EvtDeviceSelfManagedInitFilter(_In_ WDFDEVICE Device) {
     return status;
 }
 
-PAGED_CODE_SEG
 void EvtSetBlackCompletionRoutine(
     _In_ WDFREQUEST Request,
     _In_ WDFIOTARGET Target,
@@ -248,8 +209,6 @@ void EvtSetBlackCompletionRoutine(
     UNREFERENCED_PARAMETER(Target);
     UNREFERENCED_PARAMETER(Params);
     UNREFERENCED_PARAMETER(Context);
-
-    PAGED_CODE();
 
     TRACE_FN_ENTRY
     TRACE_FN_EXIT

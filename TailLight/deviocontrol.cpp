@@ -5,7 +5,6 @@
 
 EVT_WDF_REQUEST_COMPLETION_ROUTINE  EvtDeviceIoControlCompletionRoutine;
 
-PAGED_CODE_SEG
 void EvtDeviceIoControlCompletionRoutine(
     _In_
     WDFREQUEST Request,
@@ -20,8 +19,6 @@ void EvtDeviceIoControlCompletionRoutine(
     UNREFERENCED_PARAMETER(Params);
     UNREFERENCED_PARAMETER(Context);
 
-    PAGED_CODE();
-
     TRACE_FN_ENTRY
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
@@ -30,7 +27,6 @@ void EvtDeviceIoControlCompletionRoutine(
 }
 
 
-PAGED_CODE_SEG
 VOID EvtIoDeviceControlFilter(
     _In_  WDFQUEUE          Queue,
     _In_  WDFREQUEST        Request,
@@ -60,8 +56,6 @@ Arguments:
 --*/
 {
     UNREFERENCED_PARAMETER(OutputBufferLength);
-
-    PAGED_CODE();
 
     WDFDEVICE device = WdfIoQueueGetDevice(Queue);
     WDFIOTARGET target = WdfDeviceGetIoTarget(device);

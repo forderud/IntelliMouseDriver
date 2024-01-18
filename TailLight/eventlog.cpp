@@ -6,7 +6,6 @@ constexpr USHORT IO_ERROR_LOG_PACKET_size() {
     return sizeof(IO_ERROR_LOG_PACKET); // -8;
 }
 
-PAGED_CODE_SEG
 void WriteToSystemLog(WDFDEVICE Device, NTSTATUS MessageId, WCHAR* InsertionStr1, WCHAR* InsertionStr2) {
     // determine length of each insertion string
     UCHAR InsertionStr1Len = 0;

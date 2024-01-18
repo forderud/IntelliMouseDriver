@@ -16,10 +16,8 @@
 static constexpr ULONG POOL_TAG = 'ffly';
 
 extern "C"
-INIT_CODE_SEG
 DRIVER_INITIALIZE         DriverEntry;
 
 EVT_WDF_DRIVER_UNLOAD  
-PAGED_CODE_SEG   
 EvtDriverUnload;
 

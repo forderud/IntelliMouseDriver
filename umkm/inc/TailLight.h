@@ -25,19 +25,13 @@ struct TailLightReport {
 
 static_assert(sizeof(TailLightReport) == 73, "TailLightReport is not of the needed size.");
 
-PAGED_CODE_SEG
 void Init(TailLightReport* pReport);
 
-PAGED_CODE_SEG
 ULONG GetColor(TailLightReport* pReport);
 
-PAGED_CODE_SEG
 void SetColor(TailLightReport* pReport, ULONG Color);
 
 #ifdef _KERNEL_MODE
-    PAGED_CODE_SEG
     bool IsValid(TailLightReport* pReport);
-
-    PAGED_CODE_SEG
     bool SafetyCheck(TailLightReport* pReport);
 #endif

@@ -4,7 +4,6 @@
 #include "deviocontrol.h"
 #include "pnp.h"
 
-PAGED_CODE_SEG
 NTSTATUS CreateQueue(
     _In_ WDFDEVICE device)
 /*++
@@ -25,8 +24,6 @@ Return Value:
 {
     NTSTATUS status = STATUS_FAILED_DRIVER_ENTRY;
 
-    PAGED_CODE();
-
     // create queue to process IOCTLs
     WDF_IO_QUEUE_CONFIG queueConfig = {};
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel); // don't synchronize
@@ -43,7 +40,6 @@ Return Value:
     return status;
 }
 
-PAGED_CODE_SEG
 NTSTATUS CreateTaillightDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit,
     _Out_ WDFDEVICE* device)
@@ -65,8 +61,6 @@ Return Value:
 
 --*/
  {
-     PAGED_CODE();
-     
      NTSTATUS status = STATUS_FAILED_DRIVER_ENTRY;
 
      // Configure the device as a filter driver
@@ -92,7 +86,6 @@ Return Value:
     return status;
 }
 
-PAGED_CODE_SEG
 NTSTATUS EvtDriverDeviceAdd(
     _In_ WDFDRIVER Driver, 
     _Inout_ PWDFDEVICE_INIT DeviceInit)
@@ -114,8 +107,6 @@ Arguments:
 --*/    
 {
     UNREFERENCED_PARAMETER(Driver);
-
-    PAGED_CODE();
 
     WDFDEVICE device = 0;
     NTSTATUS status = STATUS_FAILED_DRIVER_ENTRY;
