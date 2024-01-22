@@ -78,6 +78,9 @@ Return Value:
     WDF_OBJECT_ATTRIBUTES attributes = {};
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, DEVICE_CONTEXT);
 
+    // If use synchronous (request) processing, set to passive per OSR.
+    attributes.ExecutionLevel = WdfExecutionLevelPassive;
+
     status = WdfDeviceCreate(&DeviceInit, &attributes, device);
     if (!NT_SUCCESS(status)) {
         KdPrint(("TailLight: WdfDeviceCreate, Error %x\n", status));
