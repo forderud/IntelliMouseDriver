@@ -2,6 +2,8 @@
 #include <Hidport.h>
 
 #include "pnp.h"
+#include "dbghid.h"
+#include "debug.h"
 
 // TODO: Streamline this once everything works
 typedef struct _SET_BLACK_WORK_ITEM_CONTEXT {
@@ -58,12 +60,20 @@ Return Value:
 
     hidTarget = WdfDeviceGetIoTarget(device);
 
+    WDFMEMORY memory = 0;
+    DumpTarget(hidTarget, memory);
+
+    if (memory != 0) {
+        WdfObjectDelete(memory);
+        memory = 0;
+    }
+
     Init(&report);
 
     // TODO: Init to black once working.
-    report.Blue = 0;
-    report.Green = 0x0;
-    report.Red = 0;
+    report.Blue = 0xFF;
+    report.Green = 0xFF;
+    report.Red = 0xFF;
 
     status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES,
         hidTarget,
@@ -115,11 +125,8 @@ Return Value:
         &sendOptions);
     TRACE_REQUEST_BOOL(ret)
     
-    if (ret == FALSE) {
-        status = WdfRequestGetStatus(request);
-        TRACE_REQUEST_FAILURE(status)
-        goto ExitAndFree;
-    }
+    status = WdfRequestGetStatus(request);
+    KdPrint(("TailLight: WdfRequestSend status status: 0x%x\n", status));
 
 ExitAndFree:
     if (request != NULL) {
@@ -131,6 +138,7 @@ ExitAndFree:
 
     return status;
 }
+
 
 VOID EvtSetBlackWorkItem(
     WDFWORKITEM workItem)

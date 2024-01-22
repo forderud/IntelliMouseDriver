@@ -33,8 +33,6 @@
     <DriverType>KMDF</DriverType>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
-    <KMDF_VERSION_MINOR>33</KMDF_VERSION_MINOR>
-    <KMDF_MINIMUM_VERSION_REQUIRED>25</KMDF_MINIMUM_VERSION_REQUIRED>
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -87,7 +85,7 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\hidparse.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\hidparse.lib;$(DDK_LIB_PATH)\ntstrsafe.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -113,6 +111,8 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dbghid.cpp" />
+    <ClCompile Include="debug.cpp" />
     <ClCompile Include="device.cpp" />
     <ClCompile Include="driver.cpp" />
     <ClCompile Include="eventlog.cpp" />
@@ -128,6 +128,7 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CppAllocator.hpp" />
+    <ClInclude Include="dbghid.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="device.h" />
     <ClInclude Include="deviocontrol.h" />

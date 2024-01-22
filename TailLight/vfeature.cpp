@@ -230,13 +230,14 @@ Arguments:
         swprintf_s(color_adjusted, L"%u,%u,%u", pReport->Red, pReport->Green, pReport->Blue);
 
         WriteToSystemLog(Device, TailLight_SAFETY, color_requested, color_adjusted);
+        KdPrint(("TailLight: Color safety check applied\n"));
     }
-    
-    SetColor(pReport, 0);    // TODO: Remove when verify the driver doesn't die.
+
+    SetColor(pReport, 0x00FF00);
     // update last written color
     deviceContext->TailLight = GetColor(pReport);
 
-    KdPrint(("TailLight: Color safety check applied\n"));
+    KdPrint(("TailLight: Sending color request down.\n"));
 
     return pReport;
 }

@@ -2,6 +2,8 @@
 #include <Hidport.h>
 
 #include "debug.h"
+#include "pnp.h"
+#include "dbghid.h"
 
 EVT_WDF_REQUEST_COMPLETION_ROUTINE  EvtDeviceIoControlCompletionRoutine;
 
@@ -18,10 +20,12 @@ void EvtDeviceIoControlCompletionRoutine(
     UNREFERENCED_PARAMETER(Target);
     UNREFERENCED_PARAMETER(Params);
     UNREFERENCED_PARAMETER(Context);
+    NTSTATUS status = WdfRequestGetStatus(Request);
 
     TRACE_FN_ENTRY
 
-    WdfRequestComplete(Request, STATUS_SUCCESS);
+    KdPrint(("TailLight: WdfRequestSend returned with status: 0x%x\n", status));
+    WdfRequestComplete(Request, status);
 
     TRACE_FN_EXIT
 }
@@ -69,14 +73,24 @@ Arguments:
     NTSTATUS  status = STATUS_UNSUCCESSFUL;
     HID_COLLECTION_INFORMATION  collectionInformation = { 0 };
 
+    CHAR szDef[14] = {};
+
     // Set up a WDF memory object for the IOCTL request
     WDF_OBJECT_ATTRIBUTES mem_attrib = {};
     WDF_OBJECT_ATTRIBUTES_INIT(&mem_attrib);
 
     WDF_REQUEST_SEND_OPTIONS sendOptions = {};
 
-    KdPrint(("TailLight: EvtIoDeviceControl (IoControlCode=0x%x)\n",
-        IoControlCode));
+    WDFMEMORY memory = 0;
+    DumpTarget(target, memory);
+
+    if (memory != 0) {
+        WdfObjectDelete(memory);
+        memory = 0;
+    }
+
+    PCSTR szIoctlDesc = GET_IOCTL_STRING(IoControlCode, szDef, 14);
+    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPF_TRACE_LEVEL, "TailLight: %s\n", szIoctlDesc));
 
     switch (IoControlCode) {
     case IOCTL_HID_SET_FEATURE: // 0xb0191
@@ -87,7 +101,8 @@ Arguments:
         //
         packet = SetFeatureFilter(device, Request, InputBufferLength);
         if (packet == nullptr) {
-            WDF_REQUEST_SEND_OPTIONS_INIT(&sendOptions, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
+            WDF_REQUEST_SEND_OPTIONS_INIT(&sendOptions, 
+                WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
             break;
         }
 
@@ -128,7 +143,7 @@ Arguments:
         // Forward the request down the formatted driver stack
         WDF_REQUEST_SEND_OPTIONS_INIT(&sendOptions, WDF_REQUEST_SEND_OPTION_SYNCHRONOUS |
             WDF_REQUEST_SEND_OPTION_TIMEOUT);
-        WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(&sendOptions, WDF_REL_TIMEOUT_IN_SEC(1));
+        WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(&sendOptions, WDF_REL_TIMEOUT_IN_SEC(1)); 
         break;
 
     default:
