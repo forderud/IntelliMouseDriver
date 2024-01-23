@@ -130,7 +130,7 @@ Arguments:
             return status;
         }
 
-        status = WdfTimerStart(timer, WDF_REL_TIMEOUT_IN_MS(100)); // wait 100ms
+        status = WdfTimerStart(timer, 0); // no wait
         if (!NT_SUCCESS(status)) {
             KdPrint(("WdfTimerStart failed 0x%x\n", status));
             return status;
