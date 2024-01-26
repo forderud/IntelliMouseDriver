@@ -1,22 +1,44 @@
 #include "driver.h"
 #include <Hidport.h>
 
+#include "SetBlack.h"
+
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
+NTSTATUS EvtSimBattSelfManagedIoInit(WDFDEVICE device) {
+    
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+    WDFTIMER timer = nullptr;
 
-VOID EvtSetBlackTimer(_In_ WDFTIMER  Timer) {
-    KdPrint(("TailLight: EvtSetBlackTimer begin\n"));
+    {
+        // Initialize tail-light to black to have control over HW state
+        WDF_TIMER_CONFIG timerCfg = {};
+        WDF_TIMER_CONFIG_INIT_PERIODIC(
+            &timerCfg, 
+            &SetBlackTimerProc,
+            1);
 
-    WDFDEVICE device = (WDFDEVICE)WdfTimerGetParentObject(Timer);
-    NT_ASSERTMSG("EvtSetBlackTimer device NULL\n", device);
+        WDF_OBJECT_ATTRIBUTES attribs = {};
+        WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
+        attribs.ParentObject = device;
 
-    NTSTATUS status = SetFeatureColor(device, 0);
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: EvtSetBlackTimer failure NTSTATUS=0x%x\n", status));
-        return;
+        status = WdfTimerCreate(&timerCfg, &attribs, &timer);
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("WdfTimerCreate failed 0x%x\n", status));
+            return status;
+        }
     }
 
-    KdPrint(("TailLight: EvtSetBlackTimer end\n"));
+    WdfObjectGet_DEVICE_CONTEXT(device)->ulSetBlackTimerTicksLeft = MAX_SET_BLACK_TIMER_TICKS;
+
+    status = WdfTimerStart(timer, 0);
+    KdPrint(("TailLight: Periodic timer started.\n"));
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("TailLight: WdfTimerStart failed 0x%x\n", status));
+        return status;
+    }
+
+    return status;
 }
 
 
@@ -37,6 +59,14 @@ Arguments:
 
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
+
+    {
+        // register PnP callbacks (must be done before WdfDeviceCreate)
+        WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
+        WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&PnpPowerCallbacks);
+        PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = EvtSimBattSelfManagedIoInit;
+        WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &PnpPowerCallbacks);
+    }
 
     WDFDEVICE device = 0;
     {
@@ -111,30 +141,6 @@ Arguments:
     if (!NT_SUCCESS(status)) {
         KdPrint(("TailLight: Error initializing WMI 0x%x\n", status));
         return status;
-    }
-
-    {
-        // Initialize tail-light to black to have control over HW state
-        WDF_TIMER_CONFIG timerCfg = {};
-        WDF_TIMER_CONFIG_INIT(&timerCfg, EvtSetBlackTimer);
-
-        WDF_OBJECT_ATTRIBUTES attribs = {};
-        WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
-        attribs.ParentObject = device;
-        attribs.ExecutionLevel = WdfExecutionLevelPassive; // required to access HID functions
-
-        WDFTIMER timer = nullptr;
-        status = WdfTimerCreate(&timerCfg, &attribs, &timer);
-        if (!NT_SUCCESS(status)) {
-            KdPrint(("WdfTimerCreate failed 0x%x\n", status));
-            return status;
-        }
-
-        status = WdfTimerStart(timer, WDF_REL_TIMEOUT_IN_MS(100)); // wait 100ms
-        if (!NT_SUCCESS(status)) {
-            KdPrint(("WdfTimerStart failed 0x%x\n", status));
-            return status;
-        }
     }
 
     return status;
