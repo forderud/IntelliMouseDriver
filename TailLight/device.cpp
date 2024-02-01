@@ -1,6 +1,7 @@
 #include "driver.h"
 #include <Hidport.h>
 
+#include "debug.h"
 #include "SetBlack.h"
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
@@ -41,6 +42,20 @@ NTSTATUS EvtSimBattSelfManagedIoInit(WDFDEVICE device) {
     return status;
 }
 
+void EvtDeviceFileCreate(
+    _In_ WDFDEVICE Device,
+    _In_ WDFREQUEST Request,
+    _In_ WDFFILEOBJECT FileObject) {
+
+    UNREFERENCED_PARAMETER(Device);
+    UNREFERENCED_PARAMETER(FileObject);
+
+    TRACE_FN_ENTRY
+
+    WdfRequestComplete(Request, STATUS_SUCCESS);
+
+    TRACE_FN_EXIT
+}
 
 NTSTATUS EvtDriverDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
 /*++
@@ -59,6 +74,15 @@ Arguments:
 
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
+    auto pdo = WdfFdoInitWdmGetPhysicalDevice(DeviceInit);
+
+    { // TODO: Determine how effective
+        WDF_FILEOBJECT_CONFIG fileObjectConfig = {};
+        WDF_FILEOBJECT_CONFIG_INIT(&fileObjectConfig, 
+            EvtDeviceFileCreate, 
+            NULL, 
+            NULL);
+    }
 
     {
         // register PnP callbacks (must be done before WdfDeviceCreate)
@@ -117,6 +141,8 @@ Arguments:
         deviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
 
         KdPrint(("TailLight: PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083
+
+        deviceContext->pdo = pdo;
     }
 
     {
@@ -188,7 +214,6 @@ Arguments:
         status = SetFeatureFilter(device, Request, InputBufferLength);
         break;
     }
-    // No NT_SUCCESS(status) check here since we don't want to fail blocked calls
 
     // Forward the request down the driver stack
     WDF_REQUEST_SEND_OPTIONS options = {};

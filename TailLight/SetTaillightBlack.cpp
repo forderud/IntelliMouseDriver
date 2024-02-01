@@ -83,6 +83,161 @@ NTSTATUS SetBlack(
     WDFREQUEST       request = NULL;
     WDFIOTARGET      hidTarget = NULL;
 
+    DEVICE_CONTEXT* pDeviceContext = NULL;
+
+    KdPrint(("TailLight: %s\n", __func__));
+
+    // Set up a WDF memory object for the IOCTL request
+    WDF_OBJECT_ATTRIBUTES mem_attrib = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&mem_attrib);
+
+    WDF_REQUEST_SEND_OPTIONS sendOptions = {};
+    WDF_REQUEST_SEND_OPTIONS_INIT(
+        &sendOptions,
+        WDF_REQUEST_SEND_OPTION_SYNCHRONOUS |
+        WDF_REQUEST_SEND_OPTION_TIMEOUT);
+    WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
+        &sendOptions,
+        WDF_REL_TIMEOUT_IN_SEC(1));
+
+    WDF_IO_TARGET_OPEN_PARAMS   openParams = {};
+
+    pDeviceContext =
+        WdfObjectGet_DEVICE_CONTEXT(device);
+
+    if (pDeviceContext == NULL) {
+        return STATUS_DEVICE_NOT_READY;
+    }
+
+    if (pDeviceContext->ulSetBlackTimerTicksLeft) {
+        pDeviceContext->ulSetBlackTimerTicksLeft--;
+    }
+    else
+    {
+        return STATUS_TIMEOUT;
+    }
+
+    status = WdfIoTargetCreate(
+        device,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &hidTarget);
+
+    if (!NT_SUCCESS(status)) {
+        KdPrintEx((DPFLTR_IHVDRIVER_ID,
+            DPFLTR_ERROR_LEVEL,
+            "TailLight: 0x%x while creating I/O target from worker thread\n",
+            status));
+        return status;
+    }
+
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_EXISTING_DEVICE(
+        &openParams,
+        pDeviceContext->pdo);
+
+    openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
+    openParams.DesiredAccess = FILE_WRITE_ACCESS | FILE_READ_ACCESS;
+
+    status = WdfIoTargetOpen(hidTarget, &openParams);
+    if (!NT_SUCCESS(status)) {
+        KdPrintEx((DPFLTR_IHVDRIVER_ID,
+            DPFLTR_ERROR_LEVEL,
+            "TailLight: 0x%x while opening the I/O target from worker thread\n",
+            status));
+        goto ExitAndFree;
+    }
+
+    // TODO: Init to black once working.
+    report.Blue = 0x0;
+    report.Green = 0x0;
+    report.Red = 0x0;
+
+    WDF_MEMORY_DESCRIPTOR inputMemDesc;
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputMemDesc, &report, sizeof(TailLightReport));
+
+    status = WdfIoTargetSendInternalIoctlSynchronously(
+        WdfDeviceGetIoTarget(device),
+        NULL,
+        IOCTL_HID_SET_FEATURE,
+        &inputMemDesc,
+        NULL,
+        &sendOptions,
+        NULL);
+
+    KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
+
+ExitAndFree:
+    if (request != NULL) {
+        WdfObjectDelete(request);
+        request = NULL;
+    }
+
+    if (hidTarget != NULL) {
+        WdfObjectDelete(hidTarget);
+        hidTarget = NULL;
+    }
+        
+    return status;
+}
+
+
+VOID EvtQueryRelationsFilter(WDFDEVICE device, DEVICE_RELATION_TYPE RelationType)
+{
+    UNREFERENCED_PARAMETER(RelationType);
+    SetBlack(device);
+}
+
+void EvtSetBlackCompletionRoutine(
+    _In_ WDFREQUEST Request,
+    _In_ WDFIOTARGET Target,
+    _In_ PWDF_REQUEST_COMPLETION_PARAMS Params,
+    _In_ WDFCONTEXT Context)
+{
+    UNREFERENCED_PARAMETER(Request);
+    UNREFERENCED_PARAMETER(Target);
+    UNREFERENCED_PARAMETER(Params);
+    UNREFERENCED_PARAMETER(Context);
+}
+
+
+VOID EvtSetBlackWorkItem(
+    WDFWORKITEM workItem)
+    /*++
+
+    Routine Description:
+
+        Creates a WDF workitem to do the SetBlack() call after the driver
+        stack has initialized.
+
+    Arguments:
+
+        Device - Handle to a pre-allocated WDF work item.
+
+    Notes:
+        TODO: The framework might not be fully finished handling the PNP IRP
+        that launched this work item.
+    --*/
+{
+    TRACE_FN_ENTRY
+
+    PSET_BLACK_WORK_ITEM_CONTEXT pContext = Get_SetBlackWorkItemContext(workItem);
+    WDFDEVICE device = static_cast<WDFDEVICE>(WdfWorkItemGetParentObject(workItem));
+
+    NTSTATUS status = SetBlack_CreateRequest(device);
+
+    if (NT_SUCCESS(status)) {
+        WdfTimerStop(pContext->setBlackTimer, FALSE);
+        pContext->setBlackTimer = NULL;
+    }
+
+    TRACE_FN_EXIT
+}
+
+NTSTATUS SetBlack_CreateRequest(WDFDEVICE device) {
+    TailLightReport  report = {};
+    NTSTATUS         status = STATUS_FAILED_DRIVER_ENTRY;
+    WDFREQUEST       request = NULL;
+    WDFIOTARGET      hidTarget = NULL;
+
     WDFMEMORY InBuffer = 0;
     BOOLEAN ret = FALSE;
     BYTE* pInBuffer = nullptr;
@@ -133,13 +288,13 @@ NTSTATUS SetBlack(
         return status;
     }
 
-    WDF_IO_TARGET_OPEN_PARAMS_INIT_OPEN_BY_NAME(
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_CREATE_BY_NAME(
         &openParams,
         &pDeviceContext->PdoName,
-        FILE_WRITE_ACCESS);
+        FILE_SHARE_WRITE);
 
-    openParams.Type = WDF_IO_TARGET_OPEN_TYPE::WdfIoTargetOpenByName;
     openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
+    //openParams.DesiredAccess = FILE_WRITE_ACCESS | FILE_READ_ACCESS;
 
     status = WdfIoTargetOpen(hidTarget, &openParams);
     if (!NT_SUCCESS(status)) {
@@ -154,7 +309,7 @@ NTSTATUS SetBlack(
     report.Blue = 0xFF;
     report.Green = 0xFF;
     report.Red = 0xFF;
-
+    
     status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES,
         hidTarget,
         &request);
@@ -169,7 +324,7 @@ NTSTATUS SetBlack(
         EvtSetBlackCompletionRoutine,
         WDF_NO_CONTEXT);
 
-    mem_attrib.ParentObject = request; // auto-delete with request
+    mem_attrib.ParentObject = request; // auto-delete with request*/
 
     status = WdfMemoryCreate(&mem_attrib,
         NonPagedPool,
@@ -217,60 +372,6 @@ ExitAndFree:
         WdfObjectDelete(hidTarget);
         hidTarget = NULL;
     }
-        
+
     return status;
-}
-
-
-VOID EvtQueryRelationsFilter(WDFDEVICE device, DEVICE_RELATION_TYPE RelationType)
-{
-    UNREFERENCED_PARAMETER(RelationType);
-    SetBlack(device);
-}
-
-void EvtSetBlackCompletionRoutine(
-    _In_ WDFREQUEST Request,
-    _In_ WDFIOTARGET Target,
-    _In_ PWDF_REQUEST_COMPLETION_PARAMS Params,
-    _In_ WDFCONTEXT Context)
-{
-    UNREFERENCED_PARAMETER(Request);
-    UNREFERENCED_PARAMETER(Target);
-    UNREFERENCED_PARAMETER(Params);
-    UNREFERENCED_PARAMETER(Context);
-}
-
-
-
-VOID EvtSetBlackWorkItem(
-    WDFWORKITEM workItem)
-    /*++
-
-    Routine Description:
-
-        Creates a WDF workitem to do the SetBlack() call after the driver
-        stack has initialized.
-
-    Arguments:
-
-        Device - Handle to a pre-allocated WDF work item.
-
-    Notes:
-        TODO: The framework might not be fully finished handling the PNP IRP
-        that launched this work item.
-    --*/
-{
-    TRACE_FN_ENTRY
-
-    PSET_BLACK_WORK_ITEM_CONTEXT pContext = Get_SetBlackWorkItemContext(workItem);
-    WDFDEVICE device = static_cast<WDFDEVICE>(WdfWorkItemGetParentObject(workItem));
-
-    NTSTATUS status = SetBlack(device);
-
-    if (NT_SUCCESS(status)) {
-        WdfTimerStop(pContext->setBlackTimer, FALSE);
-        pContext->setBlackTimer = NULL;
-    }
-
-    TRACE_FN_EXIT
 }

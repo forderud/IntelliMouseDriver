@@ -23,7 +23,7 @@ struct TailLightReport {
         }
 
         if ((Unknown1 != 0xB2) || (Unknown2 != 0x03)) {
-            KdPrint(("TailLight: TailLightReport: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2));
+            //KdPrint(("TailLight: TailLightReport: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2));
             return false;
         }
 

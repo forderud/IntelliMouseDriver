@@ -191,11 +191,11 @@ Arguments:
     Request - Pointer to Request Packet.
 --*/
 {
-    KdPrint(("TailLight: SetFeatureFilter\n"));
+    //KdPrint(("TailLight: SetFeatureFilter\n"));
     DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(Device);
 
     if (InputBufferLength != sizeof(TailLightReport)) {
-        KdPrint(("TailLight: SetFeatureFilter: Incorrect InputBufferLength\n"));
+        //KdPrint(("TailLight: SetFeatureFilter: Incorrect InputBufferLength\n"));
         return STATUS_BUFFER_TOO_SMALL;
     }
 
