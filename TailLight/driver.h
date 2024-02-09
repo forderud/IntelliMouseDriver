@@ -14,7 +14,14 @@
 
 
 /** Memory allocation tag name (for debugging leaks). */
-static constexpr ULONG POOL_TAG = 'ffly';
+static constexpr ULONG POOL_TAG = 'ylff';
+static constexpr ULONG WDF_POOL_TAG = 'wTLT'; // Taillight WPF allocated
+
+typedef struct _DRIVER_CONTEXT {
+    PVOID pnpDevInterfaceChangedHandle;
+} DRIVER_CONTEXT, * PDRIVER_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE(DRIVER_CONTEXT);
 
 extern "C"
 DRIVER_INITIALIZE         DriverEntry;

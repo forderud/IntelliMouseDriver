@@ -6,7 +6,7 @@
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
-NTSTATUS EvtSimBattSelfManagedIoInit(WDFDEVICE device) {
+NTSTATUS StartPeriodicTimerToOpenIoTarget(WDFDEVICE device) {
     
     NTSTATUS status = STATUS_UNSUCCESSFUL;
     WDFTIMER timer = nullptr;
@@ -57,6 +57,99 @@ void EvtDeviceFileCreate(
     TRACE_FN_EXIT
 }
 
+NTSTATUS StartTimerToOpenDevice(WDFDEVICE device) {
+
+    NTSTATUS status;
+
+    // Initialize tail-light to black to have control over HW state
+    WDF_TIMER_CONFIG timerCfg = {};
+    WDF_TIMER_CONFIG_INIT(&timerCfg, SetBlackTimerProc);
+
+    WDF_OBJECT_ATTRIBUTES attribs = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
+    attribs.ParentObject = device;
+    attribs.ExecutionLevel = WdfExecutionLevelPassive; // required to access HID functions
+
+    WDFTIMER timer = nullptr;
+    status = WdfTimerCreate(&timerCfg, &attribs, &timer);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("WdfTimerCreate failed 0x%x\n", status));
+        return status;
+    }
+
+    WdfObjectGet_DEVICE_CONTEXT(device)->ulSetBlackTimerTicksLeft = MAX_SET_BLACK_TIMER_TICKS;
+
+    status = WdfTimerStart(timer, 0); // no wait
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("WdfTimerStart failed 0x%x\n", status));
+        return status;
+    }
+
+    return status;
+}
+
+NTSTATUS PnpNotifyDeviceInterfaceChange(
+    _In_ PVOID pvNotificationStructure,
+    _Inout_opt_ PVOID pvContext) {
+
+    KdPrint(("TailLight: PnpNotifyDeviceInterfaceChange enter\n"));
+    ASSERTMSG("WDFDEVICE not passed in!", pvContext);
+
+    if (pvNotificationStructure == NULL) {
+        return STATUS_SUCCESS;
+    }
+
+    PDEVICE_INTERFACE_CHANGE_NOTIFICATION pDevInterface =
+        (PDEVICE_INTERFACE_CHANGE_NOTIFICATION)pvNotificationStructure;
+
+    ASSERT(IsEqualGUID(*(_GUID*)&(pDevInterface->InterfaceClassGuid),
+        *(_GUID*)&GUID_DEVINTERFACE_HID));
+
+    if (IsEqualGUID(*(LPGUID) & (pDevInterface->Event),
+        *(LPGUID)&GUID_DEVICE_INTERFACE_ARRIVAL)) {
+
+        auto& symLinkName = pDevInterface->SymbolicLinkName;
+        if (symLinkName->Length < sizeof(MSINTELLIMOUSE_USBINTERFACE5_PREFIX)) {
+            return STATUS_SUCCESS;
+        }
+
+        // Ensure that the Microsoft Mouse USB interface #5 has arrived.
+        if (!memcmp((PVOID)MSINTELLIMOUSE_USBINTERFACE5_PREFIX,
+            symLinkName->Buffer,
+            sizeof(MSINTELLIMOUSE_USBINTERFACE5_PREFIX) - 2)) {
+
+            // TODO:
+            // Queue work item
+            // See stuff on page 356 of Oney
+            return StartTimerToOpenDevice((WDFDEVICE)pvContext);
+        }
+
+    }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS SelfManagedIoInit(WDFDEVICE device) {
+
+    WDFDRIVER driver = WdfDeviceGetDriver(device);
+    PDRIVER_CONTEXT driverContext = WdfObjectGet_DRIVER_CONTEXT(driver);
+    UNREFERENCED_PARAMETER(device);
+
+    NTSTATUS status = STATUS_SUCCESS;
+
+    status = IoRegisterPlugPlayNotification(
+        EventCategoryDeviceInterfaceChange,
+        PNPNOTIFY_DEVICE_INTERFACE_INCLUDE_EXISTING_INTERFACES,
+        (PVOID)&GUID_DEVINTERFACE_HID,
+        WdfDriverWdmGetDriverObject(driver),
+        PnpNotifyDeviceInterfaceChange,
+        (PVOID)device,
+        &driverContext->pnpDevInterfaceChangedHandle
+    );
+
+    return status;
+}
+
 NTSTATUS EvtDriverDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
 /*++
 Routine Description:
@@ -74,6 +167,7 @@ Arguments:
 
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
+    //WdfDeviceInitSetExclusive(DeviceInit, TRUE);
     auto pdo = WdfFdoInitWdmGetPhysicalDevice(DeviceInit);
 
     { // TODO: Determine how effective
@@ -88,7 +182,7 @@ Arguments:
         // register PnP callbacks (must be done before WdfDeviceCreate)
         WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
         WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&PnpPowerCallbacks);
-        PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = EvtSimBattSelfManagedIoInit;
+        PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = SelfManagedIoInit;
         WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &PnpPowerCallbacks);
     }
 

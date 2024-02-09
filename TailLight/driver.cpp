@@ -11,12 +11,16 @@ NTSTATUS DriverEntry(
 
     WDF_DRIVER_CONFIG params = {};
     WDF_DRIVER_CONFIG_INIT(/*out*/&params, EvtDriverDeviceAdd);
+    params.DriverPoolTag = WDF_POOL_TAG;
     params.EvtDriverUnload = EvtDriverUnload;
+
+    WDF_OBJECT_ATTRIBUTES attributes = {};
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, DRIVER_CONTEXT);
 
     // Create the framework WDFDRIVER object, with the handle to it returned in Driver.
     NTSTATUS status = WdfDriverCreate(DriverObject, 
                              RegistryPath, 
-                             WDF_NO_OBJECT_ATTRIBUTES, 
+                             &attributes, 
                              &params, 
                              WDF_NO_HANDLE); // [out]
     if (!NT_SUCCESS(status)) {
@@ -36,4 +40,16 @@ VOID EvtDriverUnload(
 {
     UNREFERENCED_PARAMETER(Driver);
     KdPrint(("TailLight: DriverUnload.\n"));
+
+    PDRIVER_CONTEXT pDriverContext = WdfObjectGet_DRIVER_CONTEXT(Driver);
+
+    // TODO: Remove conditional when working
+    if (pDriverContext->pnpDevInterfaceChangedHandle) {
+        NTSTATUS status = STATUS_SUCCESS;
+        status = IoUnregisterPlugPlayNotificationEx(pDriverContext->pnpDevInterfaceChangedHandle);
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("IoUnregisterPlugPlayNotification failed with 0x%x\n", status));
+        }
+    }
+    pDriverContext->pnpDevInterfaceChangedHandle = NULL;
 }

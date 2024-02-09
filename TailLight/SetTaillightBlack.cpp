@@ -6,8 +6,8 @@
 
 // TODO: Streamline this once everything works
 
-EVT_WDF_REQUEST_COMPLETION_ROUTINE  EvtSetBlackCompletionRoutine;
-EVT_WDF_WORKITEM                    EvtSetBlackWorkItem;
+EVT_WDF_REQUEST_COMPLETION_ROUTINE  SetBlackCompletionRoutine;
+EVT_WDF_WORKITEM                    SetBlackWorkItem;
 
 // TODO: Streamline this once everything works
 typedef struct _SET_BLACK_WORK_ITEM_CONTEXT {
@@ -37,7 +37,7 @@ VOID SetBlackTimerProc(WDFTIMER timer) {
         WDF_OBJECT_ATTRIBUTES_SET_CONTEXT_TYPE(&workItemAttributes,
             SET_BLACK_WORK_ITEM_CONTEXT);
 
-        WDF_WORKITEM_CONFIG_INIT(&workItemConfig, EvtSetBlackWorkItem);
+        WDF_WORKITEM_CONFIG_INIT(&workItemConfig, SetBlackWorkItem);
 
         status = WdfWorkItemCreate(&workItemConfig,
             &workItemAttributes,
@@ -186,7 +186,7 @@ VOID EvtQueryRelationsFilter(WDFDEVICE device, DEVICE_RELATION_TYPE RelationType
     SetBlack(device);
 }
 
-void EvtSetBlackCompletionRoutine(
+void SetBlackCompletionRoutine(
     _In_ WDFREQUEST Request,
     _In_ WDFIOTARGET Target,
     _In_ PWDF_REQUEST_COMPLETION_PARAMS Params,
@@ -199,7 +199,7 @@ void EvtSetBlackCompletionRoutine(
 }
 
 
-VOID EvtSetBlackWorkItem(
+VOID SetBlackWorkItem(
     WDFWORKITEM workItem)
     /*++
 
@@ -306,9 +306,9 @@ NTSTATUS SetBlack_CreateRequest(WDFDEVICE device) {
     }
 
     // TODO: Init to black once working.
-    report.Blue = 0xFF;
-    report.Green = 0xFF;
-    report.Red = 0xFF;
+    report.Blue = 0x0;
+    report.Green = 0x0;
+    report.Red = 0x0;
     
     status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES,
         hidTarget,
@@ -321,7 +321,7 @@ NTSTATUS SetBlack_CreateRequest(WDFDEVICE device) {
 
     WdfRequestSetCompletionRoutine(
         request,
-        EvtSetBlackCompletionRoutine,
+        SetBlackCompletionRoutine,
         WDF_NO_CONTEXT);
 
     mem_attrib.ParentObject = request; // auto-delete with request*/
