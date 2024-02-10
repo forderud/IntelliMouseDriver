@@ -9,7 +9,6 @@
 EVT_WDF_REQUEST_COMPLETION_ROUTINE  SetBlackCompletionRoutine;
 EVT_WDF_WORKITEM                    SetBlackWorkItem;
 
-// TODO: Streamline this once everything works
 typedef struct _SET_BLACK_WORK_ITEM_CONTEXT {
     WDFTIMER setBlackTimer;
 } SET_BLACK_WORK_ITEM_CONTEXT, * PSET_BLACK_WORK_ITEM_CONTEXT;
@@ -19,13 +18,11 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(
 
 VOID SetBlackTimerProc(WDFTIMER timer) {
 
-    TRACE_FN_ENTRY
+    //TRACE_FN_ENTRY
     
     PSET_BLACK_WORK_ITEM_CONTEXT pWorkItemContext = NULL;
     WDFWORKITEM                  hWorkItem = 0;
     NTSTATUS status = STATUS_PNP_DRIVER_CONFIGURATION_INCOMPLETE;
-
-    KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_TRACE_LEVEL, "TailLight: %s\n", __func__));
 
     WDFDEVICE device = (WDFDEVICE)WdfTimerGetParentObject(timer);
 
@@ -57,7 +54,33 @@ VOID SetBlackTimerProc(WDFTIMER timer) {
 
     WdfWorkItemEnqueue(hWorkItem);
 
-    TRACE_FN_EXIT
+    //TRACE_FN_EXIT
+}
+
+static NTSTATUS TryToOpenIoTarget(WDFIOTARGET target, 
+    DEVICE_CONTEXT& DeviceContext) {
+
+    WDF_IO_TARGET_OPEN_PARAMS   openParams = {};
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_CREATE_BY_NAME(
+        &openParams,
+        &DeviceContext.PdoName,
+        FILE_WRITE_ACCESS);
+
+    openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
+
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+
+    // Ensure freed if fails.
+    status = WdfIoTargetOpen(target, &openParams);
+    if (!NT_SUCCESS(status)) {
+        KdPrintEx((DPFLTR_IHVDRIVER_ID,
+            DPFLTR_ERROR_LEVEL,
+            "TailLight: 0x%x while opening the I/O target from worker thread\n",
+            status));
+        NukeWdfHandle<WDFIOTARGET>(target);
+    }
+
+    return status;
 }
 
 NTSTATUS SetBlack(
@@ -79,43 +102,17 @@ NTSTATUS SetBlack(
     --*/
 {
     TailLightReport  report = {};
-    NTSTATUS         status = STATUS_FAILED_DRIVER_ENTRY;
+    NTSTATUS         status = STATUS_UNSUCCESSFUL;
     WDFREQUEST       request = NULL;
     WDFIOTARGET      hidTarget = NULL;
 
-    DEVICE_CONTEXT* pDeviceContext = NULL;
+    DEVICE_CONTEXT*  pDeviceContext = NULL;
 
-    KdPrint(("TailLight: %s\n", __func__));
+    TRACE_FN_ENTRY
 
-    // Set up a WDF memory object for the IOCTL request
-    WDF_OBJECT_ATTRIBUTES mem_attrib = {};
-    WDF_OBJECT_ATTRIBUTES_INIT(&mem_attrib);
-
-    WDF_REQUEST_SEND_OPTIONS sendOptions = {};
-    WDF_REQUEST_SEND_OPTIONS_INIT(
-        &sendOptions,
-        WDF_REQUEST_SEND_OPTION_SYNCHRONOUS |
-        WDF_REQUEST_SEND_OPTION_TIMEOUT);
-    WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
-        &sendOptions,
-        WDF_REL_TIMEOUT_IN_SEC(1));
-
-    WDF_IO_TARGET_OPEN_PARAMS   openParams = {};
-
-    pDeviceContext =
-        WdfObjectGet_DEVICE_CONTEXT(device);
-
-    if (pDeviceContext == NULL) {
-        return STATUS_DEVICE_NOT_READY;
-    }
-
-    if (pDeviceContext->ulSetBlackTimerTicksLeft) {
-        pDeviceContext->ulSetBlackTimerTicksLeft--;
-    }
-    else
-    {
-        return STATUS_TIMEOUT;
-    }
+    RETURN_RESULT_IF_SET_OPERATION_NULL(pDeviceContext, 
+        WdfObjectGet_DEVICE_CONTEXT(device), 
+        STATUS_DEVICE_NOT_READY);
 
     status = WdfIoTargetCreate(
         device,
@@ -130,42 +127,39 @@ NTSTATUS SetBlack(
         return status;
     }
 
-    WDF_IO_TARGET_OPEN_PARAMS_INIT_EXISTING_DEVICE(
-        &openParams,
-        pDeviceContext->pdo);
+    status = TryToOpenIoTarget(hidTarget, *pDeviceContext);
 
-    openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
-    openParams.DesiredAccess = FILE_WRITE_ACCESS | FILE_READ_ACCESS;
+    if (NT_SUCCESS(status)) {
 
-    status = WdfIoTargetOpen(hidTarget, &openParams);
-    if (!NT_SUCCESS(status)) {
-        KdPrintEx((DPFLTR_IHVDRIVER_ID,
-            DPFLTR_ERROR_LEVEL,
-            "TailLight: 0x%x while opening the I/O target from worker thread\n",
-            status));
-        goto ExitAndFree;
+        // TODO: Init to black once working.
+        report.Blue = 0x0;
+        report.Green = 0x0;
+        report.Red = 0x0;
+
+        WDF_MEMORY_DESCRIPTOR inputMemDesc;
+        WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputMemDesc, &report, sizeof(TailLightReport));
+
+        WDF_REQUEST_SEND_OPTIONS sendOptions = {};
+        WDF_REQUEST_SEND_OPTIONS_INIT(
+            &sendOptions,
+            WDF_REQUEST_SEND_OPTION_SYNCHRONOUS |
+            WDF_REQUEST_SEND_OPTION_TIMEOUT);
+        WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
+            &sendOptions,
+            WDF_REL_TIMEOUT_IN_SEC(1));
+
+        status = WdfIoTargetSendInternalIoctlSynchronously(
+            hidTarget,
+            NULL,
+            IOCTL_HID_SET_FEATURE,
+            &inputMemDesc,
+            NULL,
+            &sendOptions,
+            NULL);
+
+        KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
     }
 
-    // TODO: Init to black once working.
-    report.Blue = 0x0;
-    report.Green = 0x0;
-    report.Red = 0x0;
-
-    WDF_MEMORY_DESCRIPTOR inputMemDesc;
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputMemDesc, &report, sizeof(TailLightReport));
-
-    status = WdfIoTargetSendInternalIoctlSynchronously(
-        WdfDeviceGetIoTarget(device),
-        NULL,
-        IOCTL_HID_SET_FEATURE,
-        &inputMemDesc,
-        NULL,
-        &sendOptions,
-        NULL);
-
-    KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
-
-ExitAndFree:
     if (request != NULL) {
         WdfObjectDelete(request);
         request = NULL;
@@ -179,23 +173,22 @@ ExitAndFree:
     return status;
 }
 
-
-VOID EvtQueryRelationsFilter(WDFDEVICE device, DEVICE_RELATION_TYPE RelationType)
-{
-    UNREFERENCED_PARAMETER(RelationType);
-    SetBlack(device);
-}
-
 void SetBlackCompletionRoutine(
     _In_ WDFREQUEST Request,
     _In_ WDFIOTARGET Target,
     _In_ PWDF_REQUEST_COMPLETION_PARAMS Params,
     _In_ WDFCONTEXT Context)
 {
-    UNREFERENCED_PARAMETER(Request);
     UNREFERENCED_PARAMETER(Target);
     UNREFERENCED_PARAMETER(Params);
     UNREFERENCED_PARAMETER(Context);
+
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+    status = WdfRequestGetStatus(Request);
+    KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
+
+    // One-shot and top of stack, so delete and pray.
+    WdfObjectDelete(Request);
 }
 
 
@@ -217,161 +210,142 @@ VOID SetBlackWorkItem(
         that launched this work item.
     --*/
 {
-    TRACE_FN_ENTRY
+    //TRACE_FN_ENTRY
 
     PSET_BLACK_WORK_ITEM_CONTEXT pContext = Get_SetBlackWorkItemContext(workItem);
     WDFDEVICE device = static_cast<WDFDEVICE>(WdfWorkItemGetParentObject(workItem));
+    DEVICE_CONTEXT* pDeviceContext = NULL;
 
-    NTSTATUS status = SetBlack_CreateRequest(device);
+    NTSTATUS status = SetBlackAsync(device);
 
-    if (NT_SUCCESS(status)) {
+    pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
+
+    if (pDeviceContext == NULL) {
+        NT_ASSERTMSG("Device context not passed in", 0);
+        return;
+    }
+
+    auto& remainingTicks = pDeviceContext->ulSetBlackTimerTicksLeft;
+
+    if (remainingTicks)  {
+        remainingTicks--;
+    }
+
+    if (NT_SUCCESS(status) || (!remainingTicks)) {
         WdfTimerStop(pContext->setBlackTimer, FALSE);
         pContext->setBlackTimer = NULL;
     }
 
-    TRACE_FN_EXIT
+    //TRACE_FN_EXIT
 }
 
-NTSTATUS SetBlack_CreateRequest(WDFDEVICE device) {
-    TailLightReport  report = {};
-    NTSTATUS         status = STATUS_FAILED_DRIVER_ENTRY;
-    WDFREQUEST       request = NULL;
-    WDFIOTARGET      hidTarget = NULL;
+NTSTATUS SetBlackAsync(WDFDEVICE device) {
 
-    WDFMEMORY InBuffer = 0;
-    BOOLEAN ret = FALSE;
-    BYTE* pInBuffer = nullptr;
-    DEVICE_CONTEXT* pDeviceContext = NULL;
+    TRACE_FN_ENTRY
 
-    KdPrint(("TailLight: %s\n", __func__));
+    NTSTATUS        status = STATUS_FAILED_DRIVER_ENTRY;
+    WDFIOTARGET     hidTarget = NULL;
 
-    // Set up a WDF memory object for the IOCTL request
-    WDF_OBJECT_ATTRIBUTES mem_attrib = {};
-    WDF_OBJECT_ATTRIBUTES_INIT(&mem_attrib);
-
-    WDF_REQUEST_SEND_OPTIONS sendOptions = {};
-    WDF_REQUEST_SEND_OPTIONS_INIT(
-        &sendOptions,
-        WDF_REQUEST_SEND_OPTION_SYNCHRONOUS |
-        WDF_REQUEST_SEND_OPTION_TIMEOUT);
-    WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
-        &sendOptions,
-        WDF_REL_TIMEOUT_IN_SEC(1));
-
-    WDF_IO_TARGET_OPEN_PARAMS   openParams = {};
-
-    pDeviceContext =
-        WdfObjectGet_DEVICE_CONTEXT(device);
-
-    if (pDeviceContext == NULL) {
-        return STATUS_DEVICE_NOT_READY;
-    }
-
-    if (pDeviceContext->ulSetBlackTimerTicksLeft) {
-        pDeviceContext->ulSetBlackTimerTicksLeft--;
-    }
-    else
     {
-        return STATUS_TIMEOUT;
+        DEVICE_CONTEXT* pDeviceContext = NULL;
+
+        pDeviceContext =
+            WdfObjectGet_DEVICE_CONTEXT(device);
+
+        if (pDeviceContext == NULL) {
+            return STATUS_DEVICE_NOT_READY;
+        }
+
+        // Ensure freed if fails.
+        status = WdfIoTargetCreate(
+            device,
+            WDF_NO_OBJECT_ATTRIBUTES,
+            &hidTarget);
+
+        if (!NT_SUCCESS(status)) {
+            KdPrintEx((DPFLTR_IHVDRIVER_ID,
+                DPFLTR_ERROR_LEVEL,
+                "TailLight: 0x%x while creating I/O target from worker thread\n",
+                status));
+            return status;
+        }
+
+        status = TryToOpenIoTarget(hidTarget, *pDeviceContext);
     }
 
-    status = WdfIoTargetCreate(
-        device,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &hidTarget);
+    if (NT_SUCCESS(status)) {
 
-    if (!NT_SUCCESS(status)) {
-        KdPrintEx((DPFLTR_IHVDRIVER_ID,
-            DPFLTR_ERROR_LEVEL,
-            "TailLight: 0x%x while creating I/O target from worker thread\n",
-            status));
-        return status;
+        WDFREQUEST  request = NULL;
+
+        status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES,
+            hidTarget,
+            &request);
+
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("TailLight: WdfRequestCreate failed 0x%x\n", status));
+            goto ExitAndFree;
+        }
+
+        WdfRequestSetCompletionRoutine(
+            request,
+            SetBlackCompletionRoutine,
+            WDF_NO_CONTEXT);
+
+        TailLightReport  report = {};
+        report.Blue = 0x0;
+        report.Green = 0x0;
+        report.Red = 0x0;
+
+        // Set up a WDF memory object for the IOCTL request
+        WDF_OBJECT_ATTRIBUTES mem_attrib = {};
+        WDF_OBJECT_ATTRIBUTES_INIT(&mem_attrib);
+        mem_attrib.ParentObject = request; // auto-delete with request*/
+
+        WDFMEMORY InBuffer = 0;
+        BYTE* pInBuffer = nullptr;
+
+        status = WdfMemoryCreate(&mem_attrib,
+            NonPagedPool,
+            POOL_TAG,
+            sizeof(TailLightReport),
+            &InBuffer,
+            (void**)&pInBuffer);
+
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("TailLight: WdfMemoryCreate failed: 0x%x\n", status));
+            goto ExitAndFree;
+        }
+
+        // TODO: Wondering if we just cant cast pInBuffr as a TailLightReport
+        RtlCopyMemory(pInBuffer, &report, sizeof(TailLightReport));
+
+        // Format the request as write operation
+        status = WdfIoTargetFormatRequestForIoctl(hidTarget,
+            request,
+            IOCTL_HID_SET_FEATURE,
+            InBuffer,
+            NULL,
+            0,
+            0);
+
+        if (!NT_SUCCESS(status)) {
+            KdPrint(("TailLight: WdfIoTargetFormatRequestForIoctl failed: 0x%x\n", status));
+            goto ExitAndFree;
+        }
+
+        if (!WdfRequestSend(request, hidTarget, WDF_NO_SEND_OPTIONS)) {
+            WdfObjectDelete(request);
+            request = NULL;
+        }
     }
-
-    WDF_IO_TARGET_OPEN_PARAMS_INIT_CREATE_BY_NAME(
-        &openParams,
-        &pDeviceContext->PdoName,
-        FILE_SHARE_WRITE);
-
-    openParams.ShareAccess = FILE_SHARE_WRITE | FILE_SHARE_READ;
-    //openParams.DesiredAccess = FILE_WRITE_ACCESS | FILE_READ_ACCESS;
-
-    status = WdfIoTargetOpen(hidTarget, &openParams);
-    if (!NT_SUCCESS(status)) {
-        KdPrintEx((DPFLTR_IHVDRIVER_ID,
-            DPFLTR_ERROR_LEVEL,
-            "TailLight: 0x%x while opening the I/O target from worker thread\n",
-            status));
-        goto ExitAndFree;
-    }
-
-    // TODO: Init to black once working.
-    report.Blue = 0x0;
-    report.Green = 0x0;
-    report.Red = 0x0;
-    
-    status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES,
-        hidTarget,
-        &request);
-
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: WdfRequestCreate failed 0x%x\n", status));
-        goto ExitAndFree;
-    }
-
-    WdfRequestSetCompletionRoutine(
-        request,
-        SetBlackCompletionRoutine,
-        WDF_NO_CONTEXT);
-
-    mem_attrib.ParentObject = request; // auto-delete with request*/
-
-    status = WdfMemoryCreate(&mem_attrib,
-        NonPagedPool,
-        POOL_TAG,
-        sizeof(TailLightReport),
-        &InBuffer,
-        (void**)&pInBuffer);
-
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: WdfMemoryCreate failed: 0x%x\n", status));
-        goto ExitAndFree;
-    }
-
-    // TODO: Wondering if we just cant cast pInBuffr as a TailLightReport
-    RtlCopyMemory(pInBuffer, &report, sizeof(TailLightReport));
-
-    // Format the request as write operation
-    status = WdfIoTargetFormatRequestForIoctl(hidTarget,
-        request,
-        IOCTL_HID_SET_FEATURE,
-        InBuffer,
-        NULL,
-        0,
-        0);
-
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: WdfIoTargetFormatRequestForIoctl failed: 0x%x\n", status));
-        goto ExitAndFree;
-    }
-
-    ret = WdfRequestSend(request,
-        hidTarget,
-        &sendOptions);
-
-    status = WdfRequestGetStatus(request);
-    KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
 
 ExitAndFree:
-    if (request != NULL) {
-        WdfObjectDelete(request);
-        request = NULL;
-    }
-
     if (hidTarget != NULL) {
         WdfObjectDelete(hidTarget);
         hidTarget = NULL;
     }
+
+    TRACE_FN_EXIT
 
     return status;
 }

@@ -10,6 +10,21 @@ typedef struct _DEVICE_CONTEXT {
     PDEVICE_OBJECT pdo;
 } DEVICE_CONTEXT;
 
+#define NUKE_WDF_HANDLE( h ) { \
+    WdfObjectDelete(h);  \
+    h = NULL; }
+
+template<typename T> inline void NukeWdfHandle(T& handle) {
+    if (!handle) {
+        WdfObjectDelete(handle);
+        handle = 0;
+    }
+}
+
+#define RETURN_RESULT_IF_SET_OPERATION_NULL( var, op, result ) { \
+    var = op; \
+    if (var == NULL) return status; }
+
 WDF_DECLARE_CONTEXT_TYPE(DEVICE_CONTEXT)
 
 WDF_DECLARE_CONTEXT_TYPE(TailLightDeviceInformation)

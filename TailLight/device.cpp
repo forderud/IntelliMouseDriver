@@ -92,7 +92,7 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
     _In_ PVOID pvNotificationStructure,
     _Inout_opt_ PVOID pvContext) {
 
-    KdPrint(("TailLight: PnpNotifyDeviceInterfaceChange enter\n"));
+    //KdPrint(("TailLight: PnpNotifyDeviceInterfaceChange enter\n"));
     ASSERTMSG("WDFDEVICE not passed in!", pvContext);
 
     if (pvNotificationStructure == NULL) {
@@ -108,6 +108,8 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
     if (IsEqualGUID(*(LPGUID) & (pDevInterface->Event),
         *(LPGUID)&GUID_DEVICE_INTERFACE_ARRIVAL)) {
 
+        // We don't care about removal or query removes.
+        // If the Pro Intellimouse is removed it goes black, so no work needed.
         auto& symLinkName = pDevInterface->SymbolicLinkName;
         if (symLinkName->Length < sizeof(MSINTELLIMOUSE_USBINTERFACE5_PREFIX)) {
             return STATUS_SUCCESS;
@@ -118,12 +120,11 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
             symLinkName->Buffer,
             sizeof(MSINTELLIMOUSE_USBINTERFACE5_PREFIX) - 2)) {
 
-            // TODO:
-            // Queue work item
-            // See stuff on page 356 of Oney
+            // Opening a device may trigger PnP operations. Ensure that either a
+            // timer or a work item is used when opening up a device.
+            // Refer to p356 of Oney and IoGetDeviceObjectPointer.
             return StartTimerToOpenDevice((WDFDEVICE)pvContext);
         }
-
     }
 
     return STATUS_SUCCESS;
