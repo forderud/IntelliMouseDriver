@@ -3,9 +3,9 @@
 cd /d "%~dp0"
 
 :: delete the devnode
-devcon /r remove "HID\VID_045E&PID_082A&MI_00&Col01"
+devcon /r remove "HID\VID_046D&PID_C044"
 :: TODO: Switch to PNPUTIL in Win11 21H2
-::PNPUTIL /remove-device /deviceid "HID\VID_045E&PID_082A&MI_00&Col01"
+::PNPUTIL /remove-device /deviceid "HID\VID_046D&PID_C044"
 
 :: uninstall driver
 PNPUTIL /delete-driver MouseMirror.inf /uninstall /force /reboot
