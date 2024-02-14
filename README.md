@@ -2,7 +2,7 @@ Filter driver for Microsoft Pro IntelliMouse that implements safety checks and e
 
 ### Projects
 * `TailLight.sys`: An upper device filter driver for the HID class for Microsoft Pro Intellimouse. Registers a [TailLightDeviceInformation](TailLight/TailLight.mof) WMI class that can be accessed from user mode to control the tail-light.
-* `IntelliMouse.ps1`: PowerShell script for sending commands through the WMI interface.
+* `TailLight.ps1`: PowerShell script for updating the tail-light through the WMI interface.
 * `flicker.exe`: Application for causing the mouse to blink by sending commands through the WMI interface.
 * `HidUtil.exe`: Command-line utility for querying and communicating with HID devices.
 
