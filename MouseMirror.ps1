@@ -9,7 +9,9 @@ Write-Host("  InstanceName: {0}" -f $mouse.InstanceName)
 # check if mouse is active
 Write-Host("  Active: {0}" -f $mouse.Active)
 
-Write-Host("Enabling mirroring of mouse movement...")
+Write-Host("  Flipping: LeftRight={0}, UpDown={1}" -f $mouse.FlipLeftRight, $mouse.FlipUpDown)
+
+Write-Host("Enabling flipping of mouse movement...")
 $mouse.FlipLeftRight = $true
 $mouse.FlipUpDown = $true
 
