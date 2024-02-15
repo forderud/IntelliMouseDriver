@@ -69,7 +69,7 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
     return STATUS_SUCCESS;
 }
 
-NTSTATUS SelfManagedIoInit(WDFDEVICE device) {
+NTSTATUS EvtSelfManagedIoInit(WDFDEVICE device) {
 
     WDFDRIVER driver = WdfDeviceGetDriver(device);
     PDRIVER_CONTEXT driverContext = WdfObjectGet_DRIVER_CONTEXT(driver);
@@ -111,12 +111,12 @@ Arguments:
 
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
-    //WdfDeviceInitSetExclusive(DeviceInit, TRUE);
+
     {
         // register PnP callbacks (must be done before WdfDeviceCreate)
         WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
         WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&PnpPowerCallbacks);
-        PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = SelfManagedIoInit;
+        PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = EvtSelfManagedIoInit;
         WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &PnpPowerCallbacks);
     }
 
