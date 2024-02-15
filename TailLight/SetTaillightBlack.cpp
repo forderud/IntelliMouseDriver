@@ -4,33 +4,48 @@
 #include "debug.h"
 #include "SetBlack.h"
 
-// TODO: Streamline this once everything works
-
 EVT_WDF_REQUEST_COMPLETION_ROUTINE  SetBlackCompletionRoutine;
 EVT_WDF_WORKITEM                    SetBlackWorkItem;
 
-typedef struct _SET_BLACK_WORK_ITEM_CONTEXT {
-    WDFTIMER setBlackTimer;
-} SET_BLACK_WORK_ITEM_CONTEXT, * PSET_BLACK_WORK_ITEM_CONTEXT;
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(
     SET_BLACK_WORK_ITEM_CONTEXT,
     Get_SetBlackWorkItemContext)
 
-VOID SetBlackTimerProc(WDFTIMER timer) {
+NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device)
+    /*++
+
+    Routine Description:
+
+        Creates a WDF workitem to do the SetBlack() call after the driver
+        stack has initialized.
+
+    Arguments:
+
+        Device - Handle to a pre-allocated WDF work item.
+
+    Requirements:
+        Must be synchronized to the device.
+
+    --*/
+{
 
     //TRACE_FN_ENTRY
     
-    PSET_BLACK_WORK_ITEM_CONTEXT pWorkItemContext = NULL;
-    WDFWORKITEM                  hWorkItem = 0;
+    WDFWORKITEM hWorkItem = 0;
     NTSTATUS status = STATUS_PNP_DRIVER_CONFIGURATION_INCOMPLETE;
-
-    WDFDEVICE device = (WDFDEVICE)WdfTimerGetParentObject(timer);
-
     {
         WDF_WORKITEM_CONFIG        workItemConfig;
         WDF_OBJECT_ATTRIBUTES      workItemAttributes;
         WDF_OBJECT_ATTRIBUTES_INIT(&workItemAttributes);
         workItemAttributes.ParentObject = device;
+
+        DEVICE_CONTEXT* pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
+
+        // It's possible to get called twice. Been there, done that?
+        if (pDeviceContext->fSetBlackSuccess) {
+            return STATUS_SUCCESS;
+        }
+
         WDF_OBJECT_ATTRIBUTES_SET_CONTEXT_TYPE(&workItemAttributes,
             SET_BLACK_WORK_ITEM_CONTEXT);
 
@@ -40,25 +55,29 @@ VOID SetBlackTimerProc(WDFTIMER timer) {
             &workItemAttributes,
             &hWorkItem);
 
-        pWorkItemContext = Get_SetBlackWorkItemContext(hWorkItem);
-        pWorkItemContext->setBlackTimer = timer;
-
         if (!NT_SUCCESS(status)) {
             KdPrintEx((DPFLTR_IHVDRIVER_ID,
                 DPFLTR_ERROR_LEVEL,
                 "TailLight: Workitem creation failure 0x%x\n",
                 status));
-            return; // Maybe better luck next time.
+            return status; // Maybe better luck next time.
         }
+
+        pDeviceContext->pSetBlackWorkItemContext = 
+            Get_SetBlackWorkItemContext(hWorkItem);
     }
 
     WdfWorkItemEnqueue(hWorkItem);
 
     //TRACE_FN_EXIT
+
+    return status;
 }
 
 static NTSTATUS TryToOpenIoTarget(WDFIOTARGET target, 
     DEVICE_CONTEXT& DeviceContext) {
+
+    PAGED_CODE();
 
     WDF_IO_TARGET_OPEN_PARAMS   openParams = {};
     WDF_IO_TARGET_OPEN_PARAMS_INIT_CREATE_BY_NAME(
@@ -83,96 +102,6 @@ static NTSTATUS TryToOpenIoTarget(WDFIOTARGET target,
     return status;
 }
 
-NTSTATUS SetBlack(
-    WDFDEVICE device)
-    /*++
-
-    Routine Description:
-
-        Attempts to set the taillight to the default state of black.
-
-    Arguments:
-
-        Device - Handle to a framework device object.
-
-    Return Value:
-
-        An NT or WDF status code.
-
-    --*/
-{
-    TailLightReport  report = {};
-    NTSTATUS         status = STATUS_UNSUCCESSFUL;
-    WDFREQUEST       request = NULL;
-    WDFIOTARGET      hidTarget = NULL;
-
-    DEVICE_CONTEXT*  pDeviceContext = NULL;
-
-    TRACE_FN_ENTRY
-
-    RETURN_RESULT_IF_SET_OPERATION_NULL(pDeviceContext, 
-        WdfObjectGet_DEVICE_CONTEXT(device), 
-        STATUS_DEVICE_NOT_READY);
-
-    status = WdfIoTargetCreate(
-        device,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &hidTarget);
-
-    if (!NT_SUCCESS(status)) {
-        KdPrintEx((DPFLTR_IHVDRIVER_ID,
-            DPFLTR_ERROR_LEVEL,
-            "TailLight: 0x%x while creating I/O target from worker thread\n",
-            status));
-        return status;
-    }
-
-    status = TryToOpenIoTarget(hidTarget, *pDeviceContext);
-
-    if (NT_SUCCESS(status)) {
-
-        // TODO: Init to black once working.
-        report.Blue = 0x0;
-        report.Green = 0x0;
-        report.Red = 0x0;
-
-        WDF_MEMORY_DESCRIPTOR inputMemDesc;
-        WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputMemDesc, &report, sizeof(TailLightReport));
-
-        WDF_REQUEST_SEND_OPTIONS sendOptions = {};
-        WDF_REQUEST_SEND_OPTIONS_INIT(
-            &sendOptions,
-            WDF_REQUEST_SEND_OPTION_SYNCHRONOUS |
-            WDF_REQUEST_SEND_OPTION_TIMEOUT);
-        WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
-            &sendOptions,
-            WDF_REL_TIMEOUT_IN_SEC(1));
-
-        status = WdfIoTargetSendInternalIoctlSynchronously(
-            hidTarget,
-            NULL,
-            IOCTL_HID_SET_FEATURE,
-            &inputMemDesc,
-            NULL,
-            &sendOptions,
-            NULL);
-
-        KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
-    }
-
-    if (request != NULL) {
-        WdfObjectDelete(request);
-        request = NULL;
-    }
-
-    if (hidTarget != NULL) {
-        WdfObjectDelete(hidTarget);
-        hidTarget = NULL;
-    }
-        
-    return status;
-}
-
 void SetBlackCompletionRoutine(
     _In_ WDFREQUEST Request,
     _In_ WDFIOTARGET Target,
@@ -191,7 +120,6 @@ void SetBlackCompletionRoutine(
     WdfObjectDelete(Request);
 }
 
-
 VOID SetBlackWorkItem(
     WDFWORKITEM workItem)
     /*++
@@ -204,37 +132,32 @@ VOID SetBlackWorkItem(
     Arguments:
 
         Device - Handle to a pre-allocated WDF work item.
-
-    Notes:
-        TODO: The framework might not be fully finished handling the PNP IRP
-        that launched this work item.
     --*/
 {
-    //TRACE_FN_ENTRY
+    TRACE_FN_ENTRY
 
-    PSET_BLACK_WORK_ITEM_CONTEXT pContext = Get_SetBlackWorkItemContext(workItem);
+    PSET_BLACK_WORK_ITEM_CONTEXT pWorkItemContext = Get_SetBlackWorkItemContext(workItem);
+    pWorkItemContext->Init();
+
+    NTSTATUS status = STATUS_UNSUCCESSFUL;
+    auto &remainingTicks = pWorkItemContext->setBlackTimerTicksLeft;
     WDFDEVICE device = static_cast<WDFDEVICE>(WdfWorkItemGetParentObject(workItem));
-    DEVICE_CONTEXT* pDeviceContext = NULL;
+    DEVICE_CONTEXT* pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
-    NTSTATUS status = SetBlackAsync(device);
+    do {
+        status = SetBlackAsync(device);
+        if (NT_SUCCESS(status)) {
+            pDeviceContext->fSetBlackSuccess = TRUE;
+            break;
+        }
 
-    pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
-
-    if (pDeviceContext == NULL) {
-        NT_ASSERTMSG("Device context not passed in", 0);
-        return;
-    }
-
-    auto& remainingTicks = pDeviceContext->ulSetBlackTimerTicksLeft;
-
-    if (remainingTicks)  {
-        remainingTicks--;
-    }
-
-    if (NT_SUCCESS(status) || (!remainingTicks)) {
-        WdfTimerStop(pContext->setBlackTimer, FALSE);
-        pContext->setBlackTimer = NULL;
-    }
+        InterlockedDecrement((PLONG)&remainingTicks);
+        status = pWorkItemContext->Wait();
+        NT_ASSERTMSG("Taillight: delay wait failed\n", NT_SUCCESS(status));
+    } while (remainingTicks);
+    
+    pDeviceContext->pSetBlackWorkItemContext = NULL;
+    NukeWdfHandle(workItem);
 
     //TRACE_FN_EXIT
 }
@@ -246,16 +169,15 @@ NTSTATUS SetBlackAsync(WDFDEVICE device) {
     NTSTATUS        status = STATUS_FAILED_DRIVER_ENTRY;
     WDFIOTARGET     hidTarget = NULL;
 
+    DEVICE_CONTEXT* pDeviceContext = NULL;
+
+    pDeviceContext =
+        WdfObjectGet_DEVICE_CONTEXT(device);
+
+    if (pDeviceContext == NULL) {
+        return STATUS_DEVICE_NOT_READY;
+    }
     {
-        DEVICE_CONTEXT* pDeviceContext = NULL;
-
-        pDeviceContext =
-            WdfObjectGet_DEVICE_CONTEXT(device);
-
-        if (pDeviceContext == NULL) {
-            return STATUS_DEVICE_NOT_READY;
-        }
-
         // Ensure freed if fails.
         status = WdfIoTargetCreate(
             device,
@@ -305,7 +227,7 @@ NTSTATUS SetBlackAsync(WDFDEVICE device) {
         BYTE* pInBuffer = nullptr;
 
         status = WdfMemoryCreate(&mem_attrib,
-            NonPagedPool,
+            NonPagedPoolNx,
             POOL_TAG,
             sizeof(TailLightReport),
             &InBuffer,
@@ -332,6 +254,8 @@ NTSTATUS SetBlackAsync(WDFDEVICE device) {
             KdPrint(("TailLight: WdfIoTargetFormatRequestForIoctl failed: 0x%x\n", status));
             goto ExitAndFree;
         }
+
+        pDeviceContext->previousThread = KeGetCurrentThread();
 
         if (!WdfRequestSend(request, hidTarget, WDF_NO_SEND_OPTIONS)) {
             WdfObjectDelete(request);

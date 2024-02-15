@@ -6,94 +6,12 @@
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
-NTSTATUS StartPeriodicTimerToOpenIoTarget(WDFDEVICE device) {
-    
-    NTSTATUS status = STATUS_UNSUCCESSFUL;
-    WDFTIMER timer = nullptr;
-
-    {
-        // Initialize tail-light to black to have control over HW state
-        WDF_TIMER_CONFIG timerCfg = {};
-        WDF_TIMER_CONFIG_INIT_PERIODIC(
-            &timerCfg, 
-            &SetBlackTimerProc,
-            1);
-
-        WDF_OBJECT_ATTRIBUTES attribs = {};
-        WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
-        attribs.ParentObject = device;
-
-        status = WdfTimerCreate(&timerCfg, &attribs, &timer);
-        if (!NT_SUCCESS(status)) {
-            KdPrint(("WdfTimerCreate failed 0x%x\n", status));
-            return status;
-        }
-    }
-
-    WdfObjectGet_DEVICE_CONTEXT(device)->ulSetBlackTimerTicksLeft = MAX_SET_BLACK_TIMER_TICKS;
-
-    status = WdfTimerStart(timer, 0);
-    KdPrint(("TailLight: Periodic timer started.\n"));
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: WdfTimerStart failed 0x%x\n", status));
-        return status;
-    }
-
-    return status;
-}
-
-void EvtDeviceFileCreate(
-    _In_ WDFDEVICE Device,
-    _In_ WDFREQUEST Request,
-    _In_ WDFFILEOBJECT FileObject) {
-
-    UNREFERENCED_PARAMETER(Device);
-    UNREFERENCED_PARAMETER(FileObject);
-
-    TRACE_FN_ENTRY
-
-    WdfRequestComplete(Request, STATUS_SUCCESS);
-
-    TRACE_FN_EXIT
-}
-
-NTSTATUS StartTimerToOpenDevice(WDFDEVICE device) {
-
-    NTSTATUS status;
-
-    // Initialize tail-light to black to have control over HW state
-    WDF_TIMER_CONFIG timerCfg = {};
-    WDF_TIMER_CONFIG_INIT(&timerCfg, SetBlackTimerProc);
-
-    WDF_OBJECT_ATTRIBUTES attribs = {};
-    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
-    attribs.ParentObject = device;
-    attribs.ExecutionLevel = WdfExecutionLevelPassive; // required to access HID functions
-
-    WDFTIMER timer = nullptr;
-    status = WdfTimerCreate(&timerCfg, &attribs, &timer);
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("WdfTimerCreate failed 0x%x\n", status));
-        return status;
-    }
-
-    WdfObjectGet_DEVICE_CONTEXT(device)->ulSetBlackTimerTicksLeft = MAX_SET_BLACK_TIMER_TICKS;
-
-    status = WdfTimerStart(timer, 0); // no wait
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("WdfTimerStart failed 0x%x\n", status));
-        return status;
-    }
-
-    return status;
-}
-
 NTSTATUS PnpNotifyDeviceInterfaceChange(
     _In_ PVOID pvNotificationStructure,
     _Inout_opt_ PVOID pvContext) {
 
     //KdPrint(("TailLight: PnpNotifyDeviceInterfaceChange enter\n"));
-    ASSERTMSG("WDFDEVICE not passed in!", pvContext);
+    NT_ASSERTMSG("WDFDEVICE not passed in!", pvContext);
 
     if (pvNotificationStructure == NULL) {
         return STATUS_SUCCESS;
@@ -102,14 +20,11 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
     PDEVICE_INTERFACE_CHANGE_NOTIFICATION pDevInterface =
         (PDEVICE_INTERFACE_CHANGE_NOTIFICATION)pvNotificationStructure;
 
+    WDFDEVICE& device = (WDFDEVICE&)pvContext;
+
     ASSERT(IsEqualGUID(*(_GUID*)&(pDevInterface->InterfaceClassGuid),
         *(_GUID*)&GUID_DEVINTERFACE_HID));
 
-    if (IsEqualGUID(*(LPGUID) & (pDevInterface->Event),
-        *(LPGUID)&GUID_DEVICE_INTERFACE_ARRIVAL)) {
-
-        // We don't care about removal or query removes.
-        // If the Pro Intellimouse is removed it goes black, so no work needed.
         auto& symLinkName = pDevInterface->SymbolicLinkName;
         if (symLinkName->Length < sizeof(MSINTELLIMOUSE_USBINTERFACE5_PREFIX)) {
             return STATUS_SUCCESS;
@@ -120,11 +35,35 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
             symLinkName->Buffer,
             sizeof(MSINTELLIMOUSE_USBINTERFACE5_PREFIX) - 2)) {
 
-            // Opening a device may trigger PnP operations. Ensure that either a
-            // timer or a work item is used when opening up a device.
-            // Refer to p356 of Oney and IoGetDeviceObjectPointer.
-            return StartTimerToOpenDevice((WDFDEVICE)pvContext);
-        }
+            //auto& notification = pDevInterface->Event;
+            //KdPrint(("TailLight: Notification 0x%x 0x%x 0x%x 0x%x\n", notification.Data1, notification.Data2, notification.Data3, notification.Data4));
+
+            // Assumption: Device will arrive before removal.
+            if (IsEqualGUID(*(LPGUID)&(pDevInterface->Event),
+                *(LPGUID)&GUID_DEVICE_INTERFACE_ARRIVAL)) {
+
+                // Opening a device may trigger PnP operations. Ensure that either a
+                // timer or a work item is used when opening up a device.
+                // Refer to p356 of Oney and IoGetDeviceObjectPointer.
+                //
+                // NOTE: It is possible for us to get blocked waiting for a system
+                // thread. One solution would be to use a timer that spawns a
+                // system thread on timeout vs. a wait loop.
+                return CreateWorkItemForIoTargetOpenDevice(device);
+            }
+            else
+            {
+                if (IsEqualGUID(*(LPGUID)&(pDevInterface->Event),
+                    *(LPGUID)&GUID_DEVICE_INTERFACE_REMOVAL)) {
+
+                    DEVICE_CONTEXT* pDeviceContext =
+                        WdfObjectGet_DEVICE_CONTEXT((WDFDEVICE)pvContext);
+                    auto& pWorkItemContext = pDeviceContext->pSetBlackWorkItemContext;
+                    if (pWorkItemContext) {
+                        pWorkItemContext->Cancel();
+                    }
+                }
+            }
     }
 
     return STATUS_SUCCESS;
@@ -135,6 +74,8 @@ NTSTATUS SelfManagedIoInit(WDFDEVICE device) {
     WDFDRIVER driver = WdfDeviceGetDriver(device);
     PDRIVER_CONTEXT driverContext = WdfObjectGet_DRIVER_CONTEXT(driver);
     UNREFERENCED_PARAMETER(device);
+
+    //TRACE_FN_ENTRY;
 
     NTSTATUS status = STATUS_SUCCESS;
 
@@ -147,6 +88,8 @@ NTSTATUS SelfManagedIoInit(WDFDEVICE device) {
         (PVOID)device,
         &driverContext->pnpDevInterfaceChangedHandle
     );
+
+    //TRACE_FN_EXIT;
 
     return status;
 }
@@ -169,16 +112,6 @@ Arguments:
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
     //WdfDeviceInitSetExclusive(DeviceInit, TRUE);
-    auto pdo = WdfFdoInitWdmGetPhysicalDevice(DeviceInit);
-
-    { // TODO: Determine how effective
-        WDF_FILEOBJECT_CONFIG fileObjectConfig = {};
-        WDF_FILEOBJECT_CONFIG_INIT(&fileObjectConfig, 
-            EvtDeviceFileCreate, 
-            NULL, 
-            NULL);
-    }
-
     {
         // register PnP callbacks (must be done before WdfDeviceCreate)
         WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
@@ -236,8 +169,6 @@ Arguments:
         deviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
 
         KdPrint(("TailLight: PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083
-
-        deviceContext->pdo = pdo;
     }
 
     {
@@ -261,7 +192,6 @@ Arguments:
     NTSTATUS status = WmiInitialize(device);
     if (!NT_SUCCESS(status)) {
         KdPrint(("TailLight: Error initializing WMI 0x%x\n", status));
-        return status;
     }
 
     return status;
@@ -309,6 +239,7 @@ Arguments:
         status = SetFeatureFilter(device, Request, InputBufferLength);
         break;
     }
+    // No NT_SUCCESS(status) check here since we don't want to fail blocked calls
 
     // Forward the request down the driver stack
     WDF_REQUEST_SEND_OPTIONS options = {};
