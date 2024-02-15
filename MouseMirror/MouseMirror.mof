@@ -1,0 +1,24 @@
+#PRAGMA AUTORECOVER
+
+// Documentation resources:
+// https://learn.microsoft.com/en-us/windows/win32/wmisdk/mof-data-types
+// https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/wmi-class-qualifiers
+// https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/wmi-property-qualifiers
+
+
+[Dynamic, Provider("WMIProv"), WMI,
+ Description("MouseMirror driver information"),
+ guid("{97754ED3-63DF-485E-A7B9-E4BDD92C8BF3}")]
+class MouseMirrorDeviceInformation {
+    [key, read]
+    string InstanceName;
+
+    [read]
+    boolean Active;
+
+    [WmiDataId(1), read, write, Description("Horizontal mirroring of mouse cursor movement")]
+    boolean FlipLeftRight;
+
+    [WmiDataId(2), read, write, Description("Vertical mirroring of mouse cursor movement")]
+    boolean FlipUpDown;
+};
