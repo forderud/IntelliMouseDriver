@@ -116,10 +116,10 @@ VOID MouFilter_ServiceCallback(
     // mirror mouse events in queue
     for (MOUSE_INPUT_DATA* id = InputDataStart; id != InputDataEnd; ++id) {
         if (pInfo->FlipLeftRight)
-            id->LastX = -InputDataStart->LastX;
+            id->LastX = -id->LastX;
 
         if (pInfo->FlipUpDown)
-            id->LastY = -InputDataStart->LastY;
+            id->LastY = -id->LastY;
     }
 
     // UpperConnectData must be called at DISPATCH
