@@ -87,11 +87,16 @@ NTSTATUS EvtWmiInstanceSetItem(
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     NTSTATUS status = STATUS_SUCCESS;
 
-    if (DataItemId == MouseMirrorDeviceInformation_MouseMirror_ID) {
-        if (InBufferSize < MouseMirrorDeviceInformation_MouseMirror_SIZE)
+    if (DataItemId == MouseMirrorDeviceInformation_FlipLeftRight_ID) {
+        if (InBufferSize < MouseMirrorDeviceInformation_FlipLeftRight_SIZE)
             return STATUS_BUFFER_TOO_SMALL;
 
-        pInfo->MouseMirror = *(ULONG*)InBuffer;
+        pInfo->FlipLeftRight = *(BOOLEAN*)InBuffer;
+    } else if (DataItemId == MouseMirrorDeviceInformation_FlipUpDown_ID) {
+        if (InBufferSize < MouseMirrorDeviceInformation_FlipUpDown_SIZE)
+            return STATUS_BUFFER_TOO_SMALL;
+
+        pInfo->FlipUpDown = *(BOOLEAN*)InBuffer;
     } else {
         return STATUS_INVALID_DEVICE_REQUEST;
     }

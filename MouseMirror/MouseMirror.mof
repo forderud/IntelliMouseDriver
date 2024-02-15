@@ -16,6 +16,9 @@ class MouseMirrorDeviceInformation {
     [read]
     boolean Active;
 
-    [WmiDataId(1), read, write, Description("Tail-light in RGB COLORREF format.")]
-    uint32 MouseMirror;
+    [WmiDataId(1), read, write, Description("Horizontal mirroring of mouse cursor movement")]
+    boolean FlipLeftRight;
+
+    [WmiDataId(2), read, write, Description("Vertical mirroring of mouse cursor movement")]
+    boolean FlipUpDown;
 };
