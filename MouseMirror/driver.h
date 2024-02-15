@@ -10,7 +10,6 @@
 
 #include "device.h"
 #include "wmi.h"
-#include "vfeature.h"
 
 
 /** Memory allocation tag name (for debugging leaks). */

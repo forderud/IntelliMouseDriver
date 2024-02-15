@@ -71,11 +71,8 @@ NTSTATUS EvtWmiInstanceSetInstance(
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/pInfo, /*src*/InBuffer, sizeof(*pInfo));
 
-    // call SetFeatureColor to trigger tail-light update
-    NTSTATUS status = SetFeatureColor(WdfWmiInstanceGetDevice(WmiInstance), pInfo->MouseMirror);
-
     KdPrint(("MouseMirror: WMI SetInstance completed\n"));
-    return status;
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS EvtWmiInstanceSetItem(
@@ -95,9 +92,6 @@ NTSTATUS EvtWmiInstanceSetItem(
             return STATUS_BUFFER_TOO_SMALL;
 
         pInfo->MouseMirror = *(ULONG*)InBuffer;
-
-        // call SetFeatureColor to trigger tail-light update
-        status = SetFeatureColor(WdfWmiInstanceGetDevice(WmiInstance), pInfo->MouseMirror);
     } else {
         return STATUS_INVALID_DEVICE_REQUEST;
     }
