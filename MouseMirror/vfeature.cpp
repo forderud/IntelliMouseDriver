@@ -59,14 +59,14 @@ NTSTATUS SetFeatureColor (
     and send to the device.
 --*/
 {
-    KdPrint(("TailLight: SetFeatureColor\n"));
+    KdPrint(("MouseMirror: SetFeatureColor\n"));
 
     WDFIOTARGET_Wrap hidTarget;
     {
         // open "hidTarget" using PdoName
         NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &hidTarget);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfIoTargetCreate failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfIoTargetCreate failed 0x%x\n", status));
             return status;
         }
 
@@ -81,7 +81,7 @@ NTSTATUS SetFeatureColor (
 
         status = WdfIoTargetOpen(hidTarget, &openParams);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfIoTargetOpen failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfIoTargetOpen failed 0x%x\n", status));
             return status;
         }
     }
@@ -100,10 +100,10 @@ NTSTATUS SetFeatureColor (
             NULL,
             NULL);
 
-        KdPrint(("TailLight: ProductID=%x, VendorID=%x, VersionNumber=%u, DescriptorSize=%u\n", collectionInfo.ProductID, collectionInfo.VendorID, collectionInfo.VersionNumber, collectionInfo.DescriptorSize));
+        KdPrint(("MouseMirror: ProductID=%x, VendorID=%x, VersionNumber=%u, DescriptorSize=%u\n", collectionInfo.ProductID, collectionInfo.VendorID, collectionInfo.VersionNumber, collectionInfo.DescriptorSize));
 
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfIoTargetSendIoctlSynchronously1 failed 0x%x\n", status));
             return status;
         }
     }
@@ -127,7 +127,7 @@ NTSTATUS SetFeatureColor (
             NULL);
 
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfIoTargetSendIoctlSynchronously2 failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfIoTargetSendIoctlSynchronously2 failed 0x%x\n", status));
             return status;
         }
     }
@@ -140,20 +140,20 @@ NTSTATUS SetFeatureColor (
             return status;
         }
 
-        //KdPrint(("TailLight: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
+        //KdPrint(("MouseMirror: Usage=%x, UsagePage=%x\n", caps.Usage, caps.UsagePage));
 
-        if (caps.FeatureReportByteLength != sizeof(TailLightReport)) {
-            KdPrint(("TailLight: FeatureReportByteLength mismatch (%u, %Iu).\n", caps.FeatureReportByteLength, sizeof(TailLightReport)));
+        if (caps.FeatureReportByteLength != sizeof(MouseMirrorReport)) {
+            KdPrint(("MouseMirror: FeatureReportByteLength mismatch (%u, %Iu).\n", caps.FeatureReportByteLength, sizeof(MouseMirrorReport)));
             return status;
         }
     }
 
     // Create a report to send to the device.
-    TailLightReport report;
+    MouseMirrorReport report;
     report.SetColor(Color);
 
     {
-        // send TailLightReport to device
+        // send MouseMirrorReport to device
         WDF_MEMORY_DESCRIPTOR reportDesc = {};
         WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&reportDesc, &report, sizeof(report));
         NTSTATUS status = WdfIoTargetSendIoctlSynchronously(hidTarget,
@@ -164,7 +164,7 @@ NTSTATUS SetFeatureColor (
             NULL,
             NULL);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfIoTargetSendIoctlSynchronously3 failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfIoTargetSendIoctlSynchronously3 failed 0x%x\n", status));
             return status;
         }
     }
@@ -190,18 +190,18 @@ Arguments:
     Request - Pointer to Request Packet.
 --*/
 {
-    KdPrint(("TailLight: SetFeatureFilter\n"));
+    KdPrint(("MouseMirror: SetFeatureFilter\n"));
     DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(Device);
 
-    if (InputBufferLength != sizeof(TailLightReport)) {
-        KdPrint(("TailLight: SetFeatureFilter: Incorrect InputBufferLength\n"));
+    if (InputBufferLength != sizeof(MouseMirrorReport)) {
+        KdPrint(("MouseMirror: SetFeatureFilter: Incorrect InputBufferLength\n"));
         return STATUS_BUFFER_TOO_SMALL;
     }
 
-    TailLightReport* packet = nullptr;
-    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(TailLightReport), (void**)&packet, NULL);
+    MouseMirrorReport* packet = nullptr;
+    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(MouseMirrorReport), (void**)&packet, NULL);
     if (!NT_SUCCESS(status) || !packet) {
-        KdPrint(("TailLight: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%p\n", status, packet));
+        KdPrint(("MouseMirror: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%p\n", status, packet));
         return status;
     }
 
@@ -223,13 +223,13 @@ Arguments:
         WCHAR color_adjusted[16] = {};
         swprintf_s(color_adjusted, L"%u,%u,%u", packet->Red, packet->Green, packet->Blue);
 
-        WriteToSystemLog(Device, TailLight_SAFETY, color_requested, color_adjusted);
+        WriteToSystemLog(Device, MouseMirror_SAFETY, color_requested, color_adjusted);
         status =  STATUS_CONTENT_BLOCKED;
     }
 
     // update last written color
-    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(deviceContext->WmiInstance);
-    pInfo->TailLight = packet->GetColor();
+    MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(deviceContext->WmiInstance);
+    pInfo->MouseMirror = packet->GetColor();
 
     return status;
 }

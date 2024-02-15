@@ -1,5 +1,5 @@
 // Where they are described.
-#define MOFRESOURCENAME L"TailLightWMI"
+#define MOFRESOURCENAME L"MouseMirrorWMI"
 
 // Initialize WMI provider
 NTSTATUS WmiInitialize(_In_ WDFDEVICE Device);

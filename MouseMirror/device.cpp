@@ -5,18 +5,18 @@ EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
 
 VOID EvtSetBlackTimer(_In_ WDFTIMER  Timer) {
-    KdPrint(("TailLight: EvtSetBlackTimer begin\n"));
+    KdPrint(("MouseMirror: EvtSetBlackTimer begin\n"));
 
     WDFDEVICE device = (WDFDEVICE)WdfTimerGetParentObject(Timer);
     NT_ASSERTMSG("EvtSetBlackTimer device NULL\n", device);
 
     NTSTATUS status = SetFeatureColor(device, 0);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: EvtSetBlackTimer failure NTSTATUS=0x%x\n", status));
+        KdPrint(("MouseMirror: EvtSetBlackTimer failure NTSTATUS=0x%x\n", status));
         return;
     }
 
-    KdPrint(("TailLight: EvtSetBlackTimer end\n"));
+    KdPrint(("MouseMirror: EvtSetBlackTimer end\n"));
 }
 
 NTSTATUS EvtSelfManagedIoInit(WDFDEVICE device) {
@@ -80,7 +80,7 @@ Arguments:
 
         NTSTATUS status = WdfDeviceCreate(&DeviceInit, &attributes, &device);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfDeviceCreate, Error %x\n", status));
+            KdPrint(("MouseMirror: WdfDeviceCreate, Error %x\n", status));
             return status;
         }
     }
@@ -107,7 +107,7 @@ Arguments:
             &memory);
 
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfDeviceAllocAndQueryProperty failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfDeviceAllocAndQueryProperty failed 0x%x\n", status));
             return STATUS_UNSUCCESSFUL;
         }
 
@@ -120,7 +120,7 @@ Arguments:
         deviceContext->PdoName.MaximumLength = (USHORT)bufferLength;
         deviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
 
-        KdPrint(("TailLight: PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083
+        KdPrint(("MouseMirror: PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083
     }
 
     {
@@ -135,7 +135,7 @@ Arguments:
         NTSTATUS status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
 
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: WdfIoQueueCreate failed 0x%x\n", status));
+            KdPrint(("MouseMirror: WdfIoQueueCreate failed 0x%x\n", status));
             return status;
         }
     }
@@ -143,7 +143,7 @@ Arguments:
     // Initialize WMI provider
     NTSTATUS status = WmiInitialize(device);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: Error initializing WMI 0x%x\n", status));
+        KdPrint(("MouseMirror: Error initializing WMI 0x%x\n", status));
         return status;
     }
 
@@ -181,7 +181,7 @@ Arguments:
 {
     UNREFERENCED_PARAMETER(OutputBufferLength);
 
-    //KdPrint(("TailLight: EvtIoDeviceControl (IoControlCode=0x%x, InputBufferLength=%Iu)\n", IoControlCode, InputBufferLength));
+    //KdPrint(("MouseMirror: EvtIoDeviceControl (IoControlCode=0x%x, InputBufferLength=%Iu)\n", IoControlCode, InputBufferLength));
 
     WDFDEVICE device = WdfIoQueueGetDevice(Queue);
 
@@ -200,7 +200,7 @@ Arguments:
     BOOLEAN ret = WdfRequestSend(Request, WdfDeviceGetIoTarget(device), &options);
     if (ret == FALSE) {
         status = WdfRequestGetStatus(Request);
-        KdPrint(("TailLight: WdfRequestSend failed with status: 0x%x\n", status));
+        KdPrint(("MouseMirror: WdfRequestSend failed with status: 0x%x\n", status));
         WdfRequestComplete(Request, status);
     }
 }

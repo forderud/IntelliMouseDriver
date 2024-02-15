@@ -16,7 +16,7 @@ FacilityNames=(System=0x0
               )
 
 
-MessageId=0x0001 Facility=Io Severity=Error SymbolicName=TailLight_SAFETY
+MessageId=0x0001 Facility=Io Severity=Error SymbolicName=MouseMirror_SAFETY
 Language=English
 Color (%2) exceeded safety threshold. Resetting color to (%3) to indicate failure.
 .

@@ -5,8 +5,8 @@
 #include <initguid.h>
 #include <wdmguid.h>
 
-// Generated WMI class definitions (from TailLight.mof)
-#include "TailLightmof.h"
+// Generated WMI class definitions (from MouseMirror.mof)
+#include "MouseMirrormof.h"
 
 #include "device.h"
 #include "wmi.h"

@@ -14,14 +14,14 @@
 #define VER_FILETYPE              VFT_DRV
 #define VER_FILESUBTYPE           VFT2_DRV_SYSTEM
 #define VER_COMPANYNAME_STR       "" // doesn't show up in file properties
-#define VER_FILEDESCRIPTION_STR   "IntelliMouse TailLight filter driver"
+#define VER_FILEDESCRIPTION_STR   "IntelliMouse MouseMirror filter driver"
 #define VER_INTERNALNAME_STR      "" // doesn't show up in file properties
 #define VER_LEGALCOPYRIGHT_STR   L"\251 IntelliMouse sample project"
-#define VER_ORIGINALFILENAME_STR  "TailLight.sys"
-#define VER_PRODUCTNAME_STR       "TailLight"
+#define VER_ORIGINALFILENAME_STR  "MouseMirror.sys"
+#define VER_PRODUCTNAME_STR       "MouseMirror"
 
 #include <common.ver>
 
 #include "messages.rc"
 
-TailLightWMI MOFDATA TailLight.bmf
+MouseMirrorWMI MOFDATA MouseMirror.bmf

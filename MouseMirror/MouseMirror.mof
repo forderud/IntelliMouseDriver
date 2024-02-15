@@ -7,9 +7,9 @@
 
 
 [Dynamic, Provider("WMIProv"), WMI,
- Description("TailLight driver information"),
+ Description("MouseMirror driver information"),
  guid("{07982702-2086-4B83-9444-34989BB10554}")]
-class TailLightDeviceInformation {
+class MouseMirrorDeviceInformation {
     [key, read]
     string InstanceName;
 
@@ -17,5 +17,5 @@ class TailLightDeviceInformation {
     boolean Active;
 
     [WmiDataId(1), read, write, Description("Tail-light in RGB COLORREF format.")]
-    uint32 TailLight;
+    uint32 MouseMirror;
 };
