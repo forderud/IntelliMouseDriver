@@ -11,6 +11,6 @@ devcon /r remove "HID\VID_045E&PID_082A&MI_01&Col05"
 PNPUTIL /delete-driver MouseMirror.inf /uninstall /force /reboot
 
 :: Delete MouseMirrorDeviceInformation WMI class security descriptor
-reg delete "HKLM\SYSTEM\CurrentControlSet\Control\WMI\Security" /v "07982702-2086-4B83-9444-34989BB10554" /f
+reg delete "HKLM\SYSTEM\CurrentControlSet\Control\WMI\Security" /v "97754ED3-63DF-485E-A7B9-E4BDD92C8BF3" /f
 
 pause

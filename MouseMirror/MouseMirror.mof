@@ -8,7 +8,7 @@
 
 [Dynamic, Provider("WMIProv"), WMI,
  Description("MouseMirror driver information"),
- guid("{07982702-2086-4B83-9444-34989BB10554}")]
+ guid("{97754ED3-63DF-485E-A7B9-E4BDD92C8BF3}")]
 class MouseMirrorDeviceInformation {
     [key, read]
     string InstanceName;
