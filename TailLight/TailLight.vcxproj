@@ -100,7 +100,8 @@ copy ..\IntelliMouse.ps1 $(OutDir)</Command>
     <PostBuildEvent>
       <Command>copy *.bat $(PackageDir)
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\dev*.exe" $(PackageDir)
-copy ..\IntelliMouse.ps1 $(OutDir)</Command>
+copy ..\IntelliMouse.ps1 $(OutDir) 
+copy $(OutDir)$(TargetName).cer $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

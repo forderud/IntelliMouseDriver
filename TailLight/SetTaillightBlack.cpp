@@ -63,8 +63,9 @@ NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device)
             return status; // Maybe better luck next time.
         }
 
-        pDeviceContext->pSetBlackWorkItemContext = 
-            Get_SetBlackWorkItemContext(hWorkItem);
+        
+        InterlockedExchangePointer((PVOID*)(&pDeviceContext->pSetBlackWorkItemContext),
+            Get_SetBlackWorkItemContext(hWorkItem));
     }
 
     WdfWorkItemEnqueue(hWorkItem);
@@ -156,7 +157,8 @@ VOID SetBlackWorkItem(
         NT_ASSERTMSG("Taillight: delay wait failed\n", NT_SUCCESS(status));
     } while (remainingTicks);
     
-    pDeviceContext->pSetBlackWorkItemContext = NULL;
+    InterlockedExchangePointer((PVOID*)&pDeviceContext->pSetBlackWorkItemContext, 
+        NULL);
     NukeWdfHandle(workItem);
 
     //TRACE_FN_EXIT
