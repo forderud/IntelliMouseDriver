@@ -59,8 +59,8 @@ typedef struct _DEVICE_CONTEXT {
     PKTHREAD    previousThread;
 
     BOOLEAN fSetBlackSuccess;
-    WDFWMIINSTANCE WmiInstance;
     PSET_BLACK_WORK_ITEM_CONTEXT alignas(8) pSetBlackWorkItemContext;
+    WDFWMIINSTANCE WmiInstance;
 } DEVICE_CONTEXT;
 
 template<typename T> inline void NukeWdfHandle(T& handle) {
