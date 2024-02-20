@@ -63,7 +63,6 @@ NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device)
             return status; // Maybe better luck next time.
         }
 
-        
         InterlockedExchangePointer((PVOID*)(&pDeviceContext->pSetBlackWorkItemContext),
             Get_SetBlackWorkItemContext(hWorkItem));
     }
