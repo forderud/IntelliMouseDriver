@@ -7,10 +7,6 @@
 EVT_WDF_REQUEST_COMPLETION_ROUTINE  SetBlackCompletionRoutine;
 EVT_WDF_WORKITEM                    SetBlackWorkItem;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(
-    SET_BLACK_WORK_ITEM_CONTEXT,
-    Get_SetBlackWorkItemContext)
-
 NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device)
     /*++
 
@@ -46,9 +42,6 @@ NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device)
             return STATUS_SUCCESS;
         }
 
-        WDF_OBJECT_ATTRIBUTES_SET_CONTEXT_TYPE(&workItemAttributes,
-            SET_BLACK_WORK_ITEM_CONTEXT);
-
         WDF_WORKITEM_CONFIG_INIT(&workItemConfig, SetBlackWorkItem);
 
         status = WdfWorkItemCreate(&workItemConfig,
@@ -63,8 +56,7 @@ NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device)
             return status; // Maybe better luck next time.
         }
 
-        InterlockedExchangePointer((PVOID*)(&pDeviceContext->pSetBlackWorkItemContext),
-            Get_SetBlackWorkItemContext(hWorkItem));
+        InterlockedIncrement((PLONG)(&pDeviceContext->fSetBlackSuccess));
     }
 
     WdfWorkItemEnqueue(hWorkItem);
@@ -131,33 +123,15 @@ VOID SetBlackWorkItem(
 
     Arguments:
 
-        Device - Handle to a pre-allocated WDF work item.
+        workItem - Handle to a pre-allocated WDF work item.
     --*/
 {
     TRACE_FN_ENTRY
 
-    PSET_BLACK_WORK_ITEM_CONTEXT pWorkItemContext = Get_SetBlackWorkItemContext(workItem);
-    pWorkItemContext->Init();
-
     NTSTATUS status = STATUS_UNSUCCESSFUL;
-    auto &remainingTicks = pWorkItemContext->setBlackTimerTicksLeft;
     WDFDEVICE device = static_cast<WDFDEVICE>(WdfWorkItemGetParentObject(workItem));
-    DEVICE_CONTEXT* pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
-    do {
-        status = SetBlackAsync(device);
-        if (NT_SUCCESS(status)) {
-            pDeviceContext->fSetBlackSuccess = TRUE;
-            break;
-        }
-
-        InterlockedDecrement((PLONG)&remainingTicks);
-        status = pWorkItemContext->Wait();
-        NT_ASSERTMSG("Taillight: delay wait failed\n", NT_SUCCESS(status));
-    } while (remainingTicks);
-    
-    InterlockedExchangePointer((PVOID*)&pDeviceContext->pSetBlackWorkItemContext, 
-        NULL);
+    status = SetBlackAsync(device);
     NukeWdfHandle(workItem);
 
     //TRACE_FN_EXIT

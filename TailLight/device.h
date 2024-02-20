@@ -4,50 +4,9 @@
 
 #define MSINTELLIMOUSE_USBINTERFACE5_PREFIX L"\\??\\HID#VID_045E&PID_082A&MI_01&Col05"
 
-#define NANOS_OF_100_TO_WAIT -1
-#define MAX_SET_BLACK_TIMER_TICKS 99
-
 #define BEGIN_WITH(x) { \
         auto &_ = x;
 #define END_WITH() }
-
-typedef struct _SET_BLACK_WORK_ITEM_CONTEXT {
-    LONG        setBlackTimerTicksLeft = MAX_SET_BLACK_TIMER_TICKS;
-    KEVENT      delayEvent;
-    LARGE_INTEGER waitTime100Nanos;
-
-    void Init() {
-        TRACE_FN_ENTRY
-        KeInitializeEvent(&delayEvent, NotificationEvent, FALSE);
-        waitTime100Nanos.QuadPart = NANOS_OF_100_TO_WAIT;
-        setBlackTimerTicksLeft = MAX_SET_BLACK_TIMER_TICKS;
-    }
-
-    NTSTATUS Wait() {
-        TRACE_FN_ENTRY
-        return KeWaitForSingleObject(&delayEvent,
-            Executive,
-            KernelMode,
-            TRUE,
-            &waitTime100Nanos);
-    }
-
-    void Cancel()
-        /*++
-
-     Routine Description:
-
-        Ensures that the SetBlack loop is run down. If we're waiting then
-        we'll exit. If we're not waiting, we may wait a little then exit.
-        Less of the loop is executed this way.
-     --*/
-    {
-        TRACE_FN_ENTRY
-        InterlockedExchange(static_cast<CONST PLONG>(
-            &setBlackTimerTicksLeft), 0);
-        KeSetEvent(&delayEvent, IO_MOUSE_INCREMENT, FALSE);
-    }
-} SET_BLACK_WORK_ITEM_CONTEXT, *PSET_BLACK_WORK_ITEM_CONTEXT;
 
 /** Driver-specific struct for storing instance-specific data. */
 typedef struct _DEVICE_CONTEXT {
@@ -55,11 +14,9 @@ typedef struct _DEVICE_CONTEXT {
     ULONG          TailLight; ///< last written color
 
     // Useful for debugging. This way less need to hunt for the stack that
-    // called IoCallDriver.
-    PKTHREAD    previousThread;
-
-    BOOLEAN fSetBlackSuccess;
-    PSET_BLACK_WORK_ITEM_CONTEXT alignas(8) pSetBlackWorkItemContext;
+    // through all of the system threads after calling IoCallDriver.
+    PKTHREAD       previousThread;
+    BOOLEAN        fSetBlackSuccess;
     WDFWMIINSTANCE WmiInstance;
 } DEVICE_CONTEXT;
 

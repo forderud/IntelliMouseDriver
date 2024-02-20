@@ -51,19 +51,6 @@ NTSTATUS PnpNotifyDeviceInterfaceChange(
                 // system thread on timeout vs. a wait loop.
                 return CreateWorkItemForIoTargetOpenDevice(device);
             }
-            else
-            {
-                if (IsEqualGUID(*(LPGUID)&(pDevInterface->Event),
-                    *(LPGUID)&GUID_DEVICE_INTERFACE_REMOVAL)) {
-
-                    DEVICE_CONTEXT* pDeviceContext =
-                        WdfObjectGet_DEVICE_CONTEXT((WDFDEVICE)pvContext);
-                    auto& pWorkItemContext = pDeviceContext->pSetBlackWorkItemContext;
-                    if (pWorkItemContext) {
-                        pWorkItemContext->Cancel();
-                    }
-                }
-            }
     }
 
     return STATUS_SUCCESS;
