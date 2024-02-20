@@ -177,7 +177,6 @@ NTSTATUS SetFeatureFilter(
     _In_ WDFDEVICE  Device,
     _In_ WDFREQUEST Request,
     _In_ size_t     InputBufferLength
-
 )
 /*++
 Routine Description:
@@ -229,7 +228,8 @@ Arguments:
     }
 
     // update last written color
-    deviceContext->TailLight = packet->GetColor();
+    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(deviceContext->WmiInstance);
+    pInfo->TailLight = packet->GetColor();
 
     return status;
 }

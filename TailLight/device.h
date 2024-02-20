@@ -60,6 +60,7 @@ typedef struct _DEVICE_CONTEXT {
 
     BOOLEAN fSetBlackSuccess;
     PSET_BLACK_WORK_ITEM_CONTEXT pSetBlackWorkItemContext;
+    WDFWMIINSTANCE WmiInstance;
 } DEVICE_CONTEXT;
 
 template<typename T> inline void NukeWdfHandle(T& handle) {

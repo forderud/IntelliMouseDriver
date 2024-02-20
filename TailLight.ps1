@@ -3,10 +3,7 @@
 $mouse = Get-CimInstance -Namespace root\WMI -Class TailLightDeviceInformation
 
 Write-Host("IntelliMouse device:")
-
 Write-Host("  InstanceName: {0}" -f $mouse.InstanceName)
-
-# check if mouse is active
 Write-Host("  Active: {0}" -f $mouse.Active)
 
 # get current tail-light color

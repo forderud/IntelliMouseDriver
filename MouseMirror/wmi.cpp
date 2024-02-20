@@ -1,20 +1,20 @@
 #include "driver.h"
 
 
-// Register our GUID and Datablock generated from the TailLight.mof file.
+// Register our GUID and Datablock generated from the MouseMirror.mof file.
 NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
 {
     DECLARE_CONST_UNICODE_STRING(mofRsrcName, MOFRESOURCENAME);
 
     NTSTATUS status = WdfDeviceAssignMofResourceName(Device, &mofRsrcName);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: Error in WdfDeviceAssignMofResourceName %x\n", status));
+        KdPrint(("MouseMirror: Error in WdfDeviceAssignMofResourceName %x\n", status));
         return status;
     }
 
     WDF_WMI_PROVIDER_CONFIG providerConfig = {};
-    WDF_WMI_PROVIDER_CONFIG_INIT(&providerConfig, &TailLightDeviceInformation_GUID);
-    providerConfig.MinInstanceBufferSize = sizeof(TailLightDeviceInformation);
+    WDF_WMI_PROVIDER_CONFIG_INIT(&providerConfig, &MouseMirrorDeviceInformation_GUID);
+    providerConfig.MinInstanceBufferSize = sizeof(MouseMirrorDeviceInformation);
 
     WDF_WMI_INSTANCE_CONFIG instanceConfig = {};
     WDF_WMI_INSTANCE_CONFIG_INIT_PROVIDER_CONFIG(&instanceConfig, &providerConfig);
@@ -24,12 +24,12 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
     instanceConfig.EvtWmiInstanceSetItem = EvtWmiInstanceSetItem;
 
     WDF_OBJECT_ATTRIBUTES woa = {};
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&woa, TailLightDeviceInformation);
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&woa, MouseMirrorDeviceInformation);
 
     WDFWMIINSTANCE WmiInstance = 0;
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &WmiInstance);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: WdfWmiInstanceCreate error %x\n", status));
+        KdPrint(("MouseMirror: WdfWmiInstanceCreate error %x\n", status));
         return status;
     }
 
@@ -48,13 +48,13 @@ NTSTATUS EvtWmiInstanceQueryInstance(
 {
     UNREFERENCED_PARAMETER(OutBufferSize); // mininum buffer size already checked by WDF
 
-    KdPrint(("TailLight: WMI QueryInstance\n"));
+    KdPrint(("MouseMirror: WMI QueryInstance\n"));
 
-    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
+    MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/OutBuffer, /*src*/pInfo, sizeof(*pInfo));
     *BufferUsed = sizeof(*pInfo);
 
-    KdPrint(("TailLight: WMI QueryInstance completed\n"));
+    KdPrint(("MouseMirror: WMI QueryInstance completed\n"));
     return STATUS_SUCCESS;
 }
 
@@ -66,16 +66,13 @@ NTSTATUS EvtWmiInstanceSetInstance(
 {
     UNREFERENCED_PARAMETER(InBufferSize); // mininum buffer size already checked by WDF
 
-    KdPrint(("TailLight: WMI SetInstance\n"));
+    KdPrint(("MouseMirror: WMI SetInstance\n"));
 
-    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
+    MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/pInfo, /*src*/InBuffer, sizeof(*pInfo));
 
-    // call SetFeatureColor to trigger tail-light update
-    NTSTATUS status = SetFeatureColor(WdfWmiInstanceGetDevice(WmiInstance), pInfo->TailLight);
-
-    KdPrint(("TailLight: WMI SetInstance completed\n"));
-    return status;
+    KdPrint(("MouseMirror: WMI SetInstance completed\n"));
+    return STATUS_SUCCESS;
 }
 
 NTSTATUS EvtWmiInstanceSetItem(
@@ -85,23 +82,25 @@ NTSTATUS EvtWmiInstanceSetItem(
     _In_reads_bytes_(InBufferSize)  PVOID InBuffer
     )
 {
-    KdPrint(("TailLight: WMI SetItem\n"));
+    KdPrint(("MouseMirror: WMI SetItem\n"));
 
-    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
+    MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     NTSTATUS status = STATUS_SUCCESS;
 
-    if (DataItemId == TailLightDeviceInformation_TailLight_ID) {
-        if (InBufferSize < TailLightDeviceInformation_TailLight_SIZE)
+    if (DataItemId == MouseMirrorDeviceInformation_FlipLeftRight_ID) {
+        if (InBufferSize < MouseMirrorDeviceInformation_FlipLeftRight_SIZE)
             return STATUS_BUFFER_TOO_SMALL;
 
-        pInfo->TailLight = *(ULONG*)InBuffer;
+        pInfo->FlipLeftRight = *(BOOLEAN*)InBuffer;
+    } else if (DataItemId == MouseMirrorDeviceInformation_FlipUpDown_ID) {
+        if (InBufferSize < MouseMirrorDeviceInformation_FlipUpDown_SIZE)
+            return STATUS_BUFFER_TOO_SMALL;
 
-        // call SetFeatureColor to trigger tail-light update
-        status = SetFeatureColor(WdfWmiInstanceGetDevice(WmiInstance), pInfo->TailLight);
+        pInfo->FlipUpDown = *(BOOLEAN*)InBuffer;
     } else {
         return STATUS_INVALID_DEVICE_REQUEST;
     }
 
-    KdPrint(("TailLight: WMI SetItem completed\n"));
+    KdPrint(("MouseMirror: WMI SetItem completed\n"));
     return status;
 }
