@@ -15,5 +15,4 @@ Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and 
 
 Please see the **[wiki](../../wiki)** for getting started information.
 
-
-![Prerequisites](Prerequisites.png)
+<img alt="Prerequisites" src="Prerequisites.png" width="50%" height="50%" />  
