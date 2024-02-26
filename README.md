@@ -13,6 +13,6 @@ Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and 
 * Separate computer for driver testing. Needed to avoid crashing or corrupting your main computer in case of driver problems.
 * USB 3 A/A crossover cable for kernel debugging. Can also use a network connection if the machine has a compatible network adapter.
 
-Please see the **[wiki](../../wiki)** for getting started information.
+**Getting started information for [driver testing](../../wiki/Driver-testing)**.
 
 <img alt="Prerequisites" src="Prerequisites.png" width="50%" height="50%" />  
