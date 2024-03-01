@@ -11,6 +11,8 @@
 #include "device.h"
 #include "wmi.h"
 
+/** Memory allocation tag name (for debugging leaks). */
+static constexpr ULONG POOL_TAG = 'iMoM'; // displayed as "MoMi"
 
 extern "C"
 DRIVER_INITIALIZE         DriverEntry;
