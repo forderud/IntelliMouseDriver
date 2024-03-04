@@ -53,7 +53,7 @@
     <ClInclude Include="usbdevice.h" />
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="UDEFX2.inf" />
+    <Inf Include="VirtualMouse.inf" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{474444F1-1628-494C-BBDB-1BD7096B1118}</ProjectGuid>
@@ -62,7 +62,7 @@
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration>Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
-    <RootNamespace>UDEFX2</RootNamespace>
+    <RootNamespace>VirtualMouse</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -212,7 +212,7 @@
       <Command>copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\devgen.exe" $(PackageDir)
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\traceview.exe" $(PackageDir)
 copy $(OutDir)\*.pdb $(PackageDir)
-copy $(OutDir)\UDEFX2.cer $(PackageDir)
+copy $(OutDir)\VirtualMouse.cer $(PackageDir)
 copy "$(WDKBinRoot_x64)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
@@ -234,7 +234,7 @@ copy *.bat $(PackageDir)</Command>
       <Command>copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\devgen.exe" $(PackageDir)
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\traceview.exe" $(PackageDir)
 copy $(OutDir)\*.pdb $(PackageDir)
-copy $(OutDir)\UDEFX2.cer $(PackageDir)
+copy $(OutDir)\VirtualMouse.cer $(PackageDir)
 copy "$(WDKBinRoot_x64)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>

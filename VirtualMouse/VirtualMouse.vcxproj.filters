@@ -19,6 +19,6 @@
     <ClCompile Include="usbdevice.c" />
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="UDEFX2.inf" />
+    <Inf Include="VirtualMouse.inf" />
   </ItemGroup>
 </Project>
