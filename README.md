@@ -1,12 +1,12 @@
 Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and exposes WMI interfaces. Based on the [KMDF filter driver for a HID device](https://github.com/microsoft/Windows-driver-samples/tree/main/hid/firefly) sample from Microsoft that have been updated to work with more recent IntelliMouse models ([backport request](https://github.com/microsoft/Windows-driver-samples/issues/1022)). The mouse should report itself with `VendorID=045E` (Microsoft) and `ProductID=082A` (Pro IntelliMouse).
 
 ### Projects
-* `MouseMirror.sys`: An upper device filter driver for the Mouse class for Microsoft Pro Intellimouse. Registers a [MouseMirrorDeviceInformation](MouseMirror/MouseMirror.mof) WMI class that can be accessed from user mode to mirror mouse movement. Can easily be modified to also work with other mouse models.
+* `MouseMirror`: An upper device filter driver for the Mouse class for Microsoft Pro Intellimouse. Registers a [MouseMirrorDeviceInformation](MouseMirror/MouseMirror.mof) WMI class that can be accessed from user mode to mirror mouse movement. Can easily be modified to also work with other mouse models.
 * `MouseMirror.ps1`: PowerShell script for enabling mirroring of mouse movement through the WMI interface.
-* `TailLight.sys`: An upper device filter driver for the HID class for Microsoft Pro Intellimouse. Registers a [TailLightDeviceInformation](TailLight/TailLight.mof) WMI class that can be accessed from user mode to control the tail-light.
+* `TailLight`: An upper device filter driver for the HID class for Microsoft Pro Intellimouse. Registers a [TailLightDeviceInformation](TailLight/TailLight.mof) WMI class that can be accessed from user mode to control the tail-light.
 * `TailLight.ps1`: PowerShell script for updating the tail-light through the WMI interface.
-* `flicker.exe`: Application for causing the mouse to blink by sending commands through the WMI interface.
-* `HidUtil.exe`: Command-line utility for querying and communicating with HID devices.
+* `flicker`: Application for causing the mouse to blink by sending commands through the WMI interface.
+* `HidUtil`: Command-line utility for querying and communicating with HID devices.
 
 ### Prerequisites
 * Microsoft [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse)
