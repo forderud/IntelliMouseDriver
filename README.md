@@ -11,9 +11,9 @@ Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and 
 * `VirtualMouse`: UDE driver for simulating a USB mouse.
 
 ### Prerequisites
-* Microsoft [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse)
+* Optional: Microsoft [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse) for testing of the `TailLight` driver.
 * Separate computer for driver testing. Needed to avoid crashing or corrupting your main computer in case of driver problems.
-* USB 3 A/A crossover cable for kernel debugging. Can also use a network connection if the machine has a compatible network adapter.
+* USB 3 A/A crossover cable or network connection for for kernel debugging.
 
 **Getting started information for [driver testing](../../wiki/Driver-testing)**.
 
