@@ -3,10 +3,12 @@ Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and 
 ### Projects
 * `MouseMirror`: An upper device filter driver for the Mouse class for Microsoft Pro Intellimouse. Registers a [MouseMirrorDeviceInformation](MouseMirror/MouseMirror.mof) WMI class that can be accessed from user mode to mirror mouse movement. Can easily be modified to also work with other mouse models.
 * `MouseMirror.ps1`: PowerShell script for enabling mirroring of mouse movement through the WMI interface.
+* `MouseMove`: Command-line utility for moving the mouse cursor through the `VirtualMouse` driver. Does unfortunately _not_ work in a VM.
 * `TailLight`: An upper device filter driver for the HID class for Microsoft Pro Intellimouse. Registers a [TailLightDeviceInformation](TailLight/TailLight.mof) WMI class that can be accessed from user mode to control the tail-light.
 * `TailLight.ps1`: PowerShell script for updating the tail-light through the WMI interface.
 * `flicker`: Application for causing the mouse to blink by sending commands through the WMI interface.
 * `HidUtil`: Command-line utility for querying and communicating with HID devices.
+* `VirtualMouse`: UDE driver for simulating a USB mouse.
 
 ### Prerequisites
 * Microsoft [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse)
