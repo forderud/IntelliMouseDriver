@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="BackChannel.h" />
+    <ClInclude Include="Device.h" />
+    <ClInclude Include="Driver.h" />
+    <ClInclude Include="Misc.h" />
+    <ClInclude Include="Public.h" />
+    <ClInclude Include="Trace.h" />
+    <ClInclude Include="USBCom.h" />
+    <ClInclude Include="usbdevice.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BackChannel.c" />
+    <ClCompile Include="Device.c" />
+    <ClCompile Include="Driver.c" />
+    <ClCompile Include="Misc.c" />
+    <ClCompile Include="USBCom.c" />
+    <ClCompile Include="usbdevice.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="VirtualMouse.inf" />
+  </ItemGroup>
+</Project>
