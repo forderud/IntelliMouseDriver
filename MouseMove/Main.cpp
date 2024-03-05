@@ -56,10 +56,13 @@ std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid)
 }
 
 
-static bool GenerateMouseReport(HANDLE dev, USHORT scan_code) {
+static bool GenerateMouseReport(HANDLE dev, USHORT code) {
     // ask virtual USB device to generate a mouse event
     MOUSE_INPUT_REPORT event = {};
-    switch (scan_code) {
+    switch (code) {
+    case 32: // space
+        event.Buttons = 0x01;
+        break;
     case 72: // up
         event.Y = -10;
         break;
@@ -117,14 +120,20 @@ int main() {
     }
 
     printf("Device open.\n");
-    printf("Use arrow keys to generate mouse input reports for cursor movement. Press ESC or Q to quit..\n"); fflush(stdout);
+    printf("Use arrow keys to generate mouse input reports for cursor movement and SPACE to click. Press ESC or Q to quit..\n"); fflush(stdout);
 
     for (;;) {
         wint_t code = _getwch();
 
         if (code == 224) { // prefix for arrow key codes
-            code = _getwch(); // actual scan code
+            code = _getwch(); // actual key code
             GenerateMouseReport(deviceHandle.Get(), code);
+            continue;
+        }
+
+        if (code == 32) { // spacebar
+            GenerateMouseReport(deviceHandle.Get(), code); // left button down
+            GenerateMouseReport(deviceHandle.Get(), 0);    // left button up
             continue;
         }
         
