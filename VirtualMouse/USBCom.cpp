@@ -9,11 +9,10 @@
 
 
 
-typedef struct _ENDPOINTQUEUE_CONTEXT {
+struct ENDPOINTQUEUE_CONTEXT {
     UDECXUSBDEVICE usbDeviceObj;
     WDFDEVICE      backChannelDevice;
-} ENDPOINTQUEUE_CONTEXT, *PENDPOINTQUEUE_CONTEXT;
-
+};
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(ENDPOINTQUEUE_CONTEXT, GetEndpointQueueContext);
 
 
@@ -168,7 +167,6 @@ IoEvtBulkOutUrb(
     WDFREQUEST matchingRead;
     WDFDEVICE backchannel;
     PUDECX_BACKCHANNEL_CONTEXT pBackChannelContext;
-    PENDPOINTQUEUE_CONTEXT pEpQContext;
     NTSTATUS status = STATUS_SUCCESS;
     PUCHAR transferBuffer;
     ULONG transferBufferLength = 0;
@@ -177,7 +175,7 @@ IoEvtBulkOutUrb(
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    pEpQContext = GetEndpointQueueContext(Queue);
+    ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
     backchannel = pEpQContext->backChannelDevice;
     pBackChannelContext = GetBackChannelContext(backchannel);
 
@@ -254,7 +252,6 @@ IoEvtBulkInUrb(
     NTSTATUS status = STATUS_SUCCESS;
     WDFDEVICE backchannel;
     PUDECX_BACKCHANNEL_CONTEXT pBackChannelContext;
-    PENDPOINTQUEUE_CONTEXT pEpQContext;
     BOOLEAN bReady = FALSE;
     PUCHAR transferBuffer;
     ULONG transferBufferLength;
@@ -263,7 +260,7 @@ IoEvtBulkInUrb(
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    pEpQContext = GetEndpointQueueContext(Queue);
+    ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
     backchannel = pEpQContext->backChannelDevice;
     pBackChannelContext = GetBackChannelContext(backchannel);
 
@@ -405,7 +402,6 @@ IoEvtInterruptInUrb(
     UDECXUSBDEVICE tgtDevice;
     NTSTATUS status = STATUS_SUCCESS;
     MOUSE_INPUT_REPORT LatestStatus = {};
-    PENDPOINTQUEUE_CONTEXT pEpQContext;
 
     BOOLEAN bHasData = FALSE;
 
@@ -414,7 +410,7 @@ IoEvtInterruptInUrb(
     UNREFERENCED_PARAMETER(InputBufferLength);
 
 
-    pEpQContext = GetEndpointQueueContext(Queue);
+    ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
 
     tgtDevice = pEpQContext->usbDeviceObj;
 
@@ -599,7 +595,6 @@ Io_RetrieveEpQueue(
     }
 
     if ( (*pQueueRecord)  == NULL) {
-        PENDPOINTQUEUE_CONTEXT pEPQContext;
         WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchSequential);
 
         //Sequential must specify this callback
@@ -611,7 +606,7 @@ Io_RetrieveEpQueue(
             &attributes,
             pQueueRecord);
 
-        pEPQContext = GetEndpointQueueContext(*pQueueRecord);
+        ENDPOINTQUEUE_CONTEXT* pEPQContext = GetEndpointQueueContext(*pQueueRecord);
         pEPQContext->usbDeviceObj      = Device;
         pEPQContext->backChannelDevice = wdfController; // this is a dirty little secret, so we contain it.
 
