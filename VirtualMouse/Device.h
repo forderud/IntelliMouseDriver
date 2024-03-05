@@ -37,30 +37,19 @@ struct UDECX_USBCONTROLLER_CONTEXT {
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(UDECX_USBCONTROLLER_CONTEXT, GetUsbControllerContext);
 
 
-typedef struct _REQUEST_CONTEXT {
+struct REQUEST_CONTEXT {
 	UINT32 unused;
-} REQUEST_CONTEXT, *PREQUEST_CONTEXT;
-
+};
 WDF_DECLARE_CONTEXT_TYPE(REQUEST_CONTEXT);
 
 
 
 
-
-
-
-
-
-
-
-//
 // Function to initialize the device and its callbacks
-//
 NTSTATUS
 UDEFX2CreateDevice(
     _Inout_ PWDFDEVICE_INIT WdfDeviceInit
     );
-
 
 
 EVT_WDF_DEVICE_PREPARE_HARDWARE                 ControllerWdfEvtDevicePrepareHardware;
