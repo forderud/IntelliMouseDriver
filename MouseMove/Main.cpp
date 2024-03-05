@@ -156,13 +156,16 @@ int main()
 
     printf("Device open, will generate interrupt...\n"); fflush(stdout);
 
-    DEVICE_INTR_FLAGS value = 0;
-    ULONG           index = 0;
+    // ask virtual USB device to generate a mouse event
+    MOUSE_INPUT_REPORT event = {};
+    event.X = 20;
+    event.Y = 20;
 
+    ULONG index = 0;
     if (!DeviceIoControl(deviceHandle,
         IOCTL_UDEFX2_GENERATE_INTERRUPT,
-        &value,                // Ptr to InBuffer
-        sizeof(value),         // Length of InBuffer
+        &event,                // Ptr to InBuffer
+        sizeof(event),         // Length of InBuffer
         NULL,                  // Ptr to OutBuffer
         0,                     // Length of OutBuffer
         &index,                // BytesReturned
