@@ -4,6 +4,7 @@
 #include <initguid.h>
 #include "../VirtualMouse/Public.h"
 #include <iostream>
+#include <vector>
 
 #pragma comment(lib, "mincore.lib") // for CM_Get_Device_Interface_List..
 
@@ -16,12 +17,7 @@ BOOL GetDevicePath(
     _Out_writes_z_(BufLen) PWCHAR DevicePath,
     _In_ size_t BufLen)
 {
-    PWSTR deviceInterfaceList = NULL;
     ULONG deviceInterfaceListLength = 0;
-    PWSTR nextInterface;
-    HRESULT hr = E_FAIL;
-    BOOL bRet = TRUE;
-
     CONFIGRET cr = CM_Get_Device_Interface_List_Size(
         &deviceInterfaceListLength,
         InterfaceGuid,
@@ -29,57 +25,41 @@ BOOL GetDevicePath(
         CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list size.\n", cr);
-        goto clean0;
+        return FALSE;
     }
 
     if (deviceInterfaceListLength <= 1) {
-        bRet = FALSE;
         printf("Error: No active device interfaces found.\n"
             " Is the sample driver loaded?");
-        goto clean0;
+        return FALSE;
     }
 
-    deviceInterfaceList = (PWSTR)malloc(deviceInterfaceListLength * sizeof(WCHAR));
-    if (deviceInterfaceList == NULL) {
-        bRet = FALSE;
-        printf("Error allocating memory for device interface list.\n");
-        goto clean0;
-    }
-    ZeroMemory(deviceInterfaceList, deviceInterfaceListLength * sizeof(WCHAR));
+    std::vector<WCHAR> deviceInterfaceList(deviceInterfaceListLength, L'\0');
 
     cr = CM_Get_Device_Interface_List(
         InterfaceGuid,
         NULL,
-        deviceInterfaceList,
+        deviceInterfaceList.data(),
         deviceInterfaceListLength,
         CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list.\n", cr);
-        goto clean0;
+        return FALSE;
     }
 
-    nextInterface = deviceInterfaceList + wcslen(deviceInterfaceList) + 1;
+    PWSTR nextInterface = deviceInterfaceList.data() + wcslen(deviceInterfaceList.data()) + 1;
     if (*nextInterface != UNICODE_NULL) {
         printf("Warning: More than one device interface instance found. \n"
             "Selecting first matching device.\n\n");
     }
 
-    hr = StringCchCopy(DevicePath, BufLen, deviceInterfaceList);
+    HRESULT hr = StringCchCopy(DevicePath, BufLen, deviceInterfaceList.data());
     if (FAILED(hr)) {
-        bRet = FALSE;
         printf("Error: StringCchCopy failed with HRESULT 0x%x", hr);
-        goto clean0;
+        return FALSE;
     }
 
-clean0:
-    if (deviceInterfaceList != NULL) {
-        free(deviceInterfaceList);
-    }
-    if (CR_SUCCESS != cr) {
-        bRet = FALSE;
-    }
-
-    return bRet;
+    return TRUE;
 }
 
 _Check_return_ _Ret_notnull_ _Success_(return != INVALID_HANDLE_VALUE)
