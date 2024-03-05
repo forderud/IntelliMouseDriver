@@ -23,13 +23,8 @@ const USHORT AMERICAN_ENGLISH = 0x409;
 
 const UCHAR g_LanguageDescriptor[] = { 4,3,9,4 };
 
-// Mouse HID 
-#define ELAN_DEVICE_VENDOR_ID  0xF3, 0x04 // little endian
-#define ELAN_DEVICE_PRODUCT_ID 0x35, 0x02 // little endian
 
-
-const UCHAR g_UsbDeviceDescriptor[18] =
-{
+const UCHAR g_UsbDeviceDescriptor[18] = {
     0x12,                            // Descriptor size
     USB_DEVICE_DESCRIPTOR_TYPE,      // Device descriptor type
     0x10, 0x01,                      // USB 1.1
@@ -37,8 +32,8 @@ const UCHAR g_UsbDeviceDescriptor[18] =
     0x00,                            // Device subclass
     0x00,                            // Device protocol
     0x08,                            // Maxpacket size for EP0
-    ELAN_DEVICE_VENDOR_ID,           // Vendor ID
-    ELAN_DEVICE_PRODUCT_ID,          // Product ID
+    0xF3, 0x04,                      // Vendor ID (VID_04F3 -Elan Microelectronics)
+    0x35, 0x02,                      // Product ID (PID_0235 - Optical Mouse)
     0x58,                            // LSB of firmware revision
     0x24,                            // MSB of firmware revision
     0x00,                            // Manufacture string index
@@ -47,8 +42,7 @@ const UCHAR g_UsbDeviceDescriptor[18] =
     0x01                             // Number of configurations
 };
 
-const UCHAR g_UsbConfigDescriptorSet[] =
-{
+const UCHAR g_UsbConfigDescriptorSet[] = {
     // Configuration Descriptor Type
     0x9,                               // Descriptor Size
     USB_CONFIGURATION_DESCRIPTOR_TYPE, // Configuration Descriptor Type
@@ -90,10 +84,7 @@ const UCHAR g_UsbConfigDescriptorSet[] =
 
 
 // Interface 0 HID Report Descriptor Mouse
-
-const UCHAR g_HIDMouseUsbReportDescriptor[] =
-{
-
+const UCHAR g_HIDMouseUsbReportDescriptor[] = {
     0x05, 0x01, // Usage Page (Generic Desktop)
     0x09, 0x02, // Usage(Mouse)
     0xA1, 0x01, // Collection(Application)
