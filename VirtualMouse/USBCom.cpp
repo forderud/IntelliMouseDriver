@@ -1,15 +1,3 @@
-/*++
-Copyright (c) Microsoft Corporation
-
-Module Name:
-
-USBCom.c
-
-Abstract:
-    Implementation of functions defined in USBCom.h
-
---*/
-
 #include "Misc.h"
 #include "Driver.h"
 #include "Device.h"

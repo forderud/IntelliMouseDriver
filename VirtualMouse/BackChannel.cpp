@@ -1,12 +1,8 @@
 /*++
-
-Module Name:
-
 BackChannel.c - Offers interface for talking to the driver "offline", 
                 for texst pourposes
 
 Abstract:
-
     Implementation of interfaces declared in BackChannel.h.
 
     Notice that we are taking a shortcut here, by not explicitly creating
@@ -16,11 +12,6 @@ Abstract:
     But that's okay for the purposes of the demo. No point complicating
     the back-channel for this semantic issue, when it will likely
     be removed completely by any real product.
-
-Environment:
-
-Kernel-mode Driver Framework
-
 --*/
 
 #include "driver.h"

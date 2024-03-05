@@ -1,15 +1,3 @@
-/*++
-Copyright (c) Microsoft Corporation
-
-Module Name:
-
-misc.h
-
-Abstract:
-
-
---*/
-
 #pragma once
 
 #include <ntddk.h>
@@ -36,13 +24,6 @@ typedef struct _USB_CONTEXT {
 } USB_CONTEXT, *PUSB_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USB_CONTEXT, GetUsbDeviceContext);
-
-
-
-
-
-
-
 
 
 

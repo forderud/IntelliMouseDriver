@@ -1,25 +1,10 @@
 /*++
-
-Module Name:
-
-    Trace.h
-
-Abstract:
-
     Header file for the debug tracing related function defintions and macros.
-
-Environment:
-
-    Kernel mode
-
 --*/
 
-//
 // Define the tracing flags.
 //
 // Tracing GUID - b687abf7-f962-4198-aa4d-becfef41a4c6
-//
-
 #define WPP_CONTROL_GUIDS                                              \
     WPP_DEFINE_CONTROL_GUID(                                           \
         UDEFX2TraceGuid, (b687abf7,f962,4198,aa4d,becfef41a4c6), \
@@ -52,11 +37,9 @@ Environment:
 #define TL_VERBOSE      TRACE_LEVEL_VERBOSE
 
 
-//           
 // WPP orders static parameters before dynamic parameters. To support the Trace function
 // defined below which sets FLAGS=MYDRIVER_ALL_INFO, a custom macro must be defined to
 // reorder the arguments to what the .tpl configuration file expects.
-//
 #define WPP_RECORDER_FLAGS_LEVEL_ARGS(flags, lvl) WPP_RECORDER_LEVEL_FLAGS_ARGS(lvl, flags)
 #define WPP_RECORDER_FLAGS_LEVEL_FILTER(flags, lvl) WPP_RECORDER_LEVEL_FLAGS_FILTER(lvl, flags)
 

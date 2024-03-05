@@ -1,17 +1,7 @@
 #pragma once
-
-
 /*++
-Copyright (c) Microsoft Corporation
-
-Module Name:
-
-USBCom.h
-
-Abstract:
      This module contains the core USB-side transfer logic
      (business logic, just a bit above hardware interfaces)
-
 --*/
 
 #pragma once

@@ -1,15 +1,3 @@
-/*++
-Copyright (c) Microsoft Corporation
-
-Module Name:
-
-misc.h
-
-Abstract:
-
-
---*/
-
 #pragma once
 
 #include <ntddk.h>

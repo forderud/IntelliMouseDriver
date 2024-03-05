@@ -1,15 +1,3 @@
-/*++
-Copyright (c) Microsoft Corporation
-
-Module Name:
-
-usbdevice.cpp
-
-Abstract:
-
-
---*/
-
 #include "Misc.h"
 #include "Driver.h"
 #include "Device.h"
