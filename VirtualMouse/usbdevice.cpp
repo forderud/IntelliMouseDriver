@@ -291,7 +291,7 @@ Usb_ReadDescriptorsAndPlugIn(
     PUSB_CONFIGURATION_DESCRIPTOR     pComputedConfigDescSet;
     WDF_OBJECT_ATTRIBUTES             attributes;
     PUDECX_USBCONTROLLER_CONTEXT      controllerContext;
-    PUSB_CONTEXT                      deviceContext = NULL;
+    USB_CONTEXT*                      deviceContext = NULL;
     UDECX_USB_DEVICE_PLUG_IN_OPTIONS  pluginOptions;
 
     controllerContext = GetUsbControllerContext(WdfControllerDevice);
@@ -501,13 +501,10 @@ UsbCreateEndpointObj(
 )
 {
     NTSTATUS                      status;
-    PUSB_CONTEXT                  pUsbContext;
     WDFQUEUE                      epQueue;
     UDECX_USB_ENDPOINT_CALLBACKS  callbacks;
     PUDECXUSBENDPOINT_INIT        endpointInit;
 
-
-    pUsbContext = GetUsbDeviceContext(WdfUsbChildDevice);
     endpointInit = NULL;
 
     status = Io_RetrieveEpQueue(WdfUsbChildDevice, epAddr, &epQueue);
@@ -588,10 +585,9 @@ UsbDevice_EvtUsbDeviceLinkPowerEntry(
     _In_ WDFDEVICE       UdecxWdfDevice,
     _In_ UDECXUSBDEVICE    UdecxUsbDevice )
 {
-    PUSB_CONTEXT pUsbContext;
     UNREFERENCED_PARAMETER(UdecxWdfDevice);
 
-    pUsbContext = GetUsbDeviceContext(UdecxUsbDevice);
+    USB_CONTEXT* pUsbContext = GetUsbDeviceContext(UdecxUsbDevice);
     Io_DeviceWokeUp(UdecxUsbDevice);
     pUsbContext->IsAwake = TRUE;
     LogInfo(TRACE_DEVICE, "USB Device power ENTRY");
@@ -605,10 +601,9 @@ UsbDevice_EvtUsbDeviceLinkPowerExit(
     _In_ UDECXUSBDEVICE UdecxUsbDevice,
     _In_ UDECX_USB_DEVICE_WAKE_SETTING WakeSetting )
 {
-    PUSB_CONTEXT pUsbContext;
     UNREFERENCED_PARAMETER(UdecxWdfDevice);
 
-    pUsbContext = GetUsbDeviceContext(UdecxUsbDevice);
+    USB_CONTEXT* pUsbContext = GetUsbDeviceContext(UdecxUsbDevice);
     pUsbContext->IsAwake = FALSE;
 
     Io_DeviceSlept(UdecxUsbDevice);

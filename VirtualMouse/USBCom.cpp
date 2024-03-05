@@ -556,7 +556,6 @@ Io_RetrieveEpQueue(
 {
     NTSTATUS status;
     PIO_CONTEXT pIoContext;
-    PUSB_CONTEXT pUsbContext;
     WDF_IO_QUEUE_CONFIG queueConfig;
     WDFDEVICE wdfController;
     WDFQUEUE *pQueueRecord = NULL;
@@ -565,7 +564,7 @@ Io_RetrieveEpQueue(
 
     status = STATUS_SUCCESS;
     pIoContext = WdfDeviceGetIoContext(Device);
-    pUsbContext = GetUsbDeviceContext(Device);
+    USB_CONTEXT* pUsbContext = GetUsbDeviceContext(Device);
 
     wdfController = pUsbContext->ControllerDevice;
 
