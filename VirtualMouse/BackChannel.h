@@ -14,7 +14,7 @@ All the code in here is for testing purpose, and it is NOT related to UDE direct
 // magic to re-use the controller context without creating
 // explict dependencies on the controller where we only want to use
 // the back-channel
-typedef UDECX_USBCONTROLLER_CONTEXT UDECX_BACKCHANNEL_CONTEXT, *PUDECX_BACKCHANNEL_CONTEXT;
+typedef UDECX_USBCONTROLLER_CONTEXT UDECX_BACKCHANNEL_CONTEXT;
 #define GetBackChannelContext GetUsbControllerContext
 
 NTSTATUS

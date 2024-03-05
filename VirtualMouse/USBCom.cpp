@@ -166,7 +166,6 @@ IoEvtBulkOutUrb(
 {
     WDFREQUEST matchingRead;
     WDFDEVICE backchannel;
-    PUDECX_BACKCHANNEL_CONTEXT pBackChannelContext;
     NTSTATUS status = STATUS_SUCCESS;
     PUCHAR transferBuffer;
     ULONG transferBufferLength = 0;
@@ -177,7 +176,7 @@ IoEvtBulkOutUrb(
 
     ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
     backchannel = pEpQContext->backChannelDevice;
-    pBackChannelContext = GetBackChannelContext(backchannel);
+    UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
 
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)
     {
@@ -251,7 +250,6 @@ IoEvtBulkInUrb(
 {
     NTSTATUS status = STATUS_SUCCESS;
     WDFDEVICE backchannel;
-    PUDECX_BACKCHANNEL_CONTEXT pBackChannelContext;
     BOOLEAN bReady = FALSE;
     PUCHAR transferBuffer;
     ULONG transferBufferLength;
@@ -262,7 +260,7 @@ IoEvtBulkInUrb(
 
     ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
     backchannel = pEpQContext->backChannelDevice;
-    pBackChannelContext = GetBackChannelContext(backchannel);
+    UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
 
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)
     {
