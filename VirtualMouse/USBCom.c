@@ -330,18 +330,10 @@ IoEvtCancelInterruptInUrb(
     UdecxUrbCompleteWithNtStatus(Request, STATUS_CANCELLED);
 }
 
-#pragma pack(push, 1)
-typedef struct _MOUSE_INPUT_REPORT {
-    UINT8 Buttons;
-    INT8 X;
-    INT8 Y;
-    INT8 Wheel;
-} MOUSE_INPUT_REPORT;
-#pragma pack(pop)
 
 static VOID
 IoCompletePendingRequest(
-    _In_ WDFREQUEST request)
+    _In_ WDFREQUEST request, MOUSE_INPUT_REPORT report)
 {
     NTSTATUS status = STATUS_SUCCESS;
     PUCHAR transferBuffer;
@@ -361,13 +353,7 @@ IoCompletePendingRequest(
         goto exit;
     }
 
-    // move mouse diagnally
-    MOUSE_INPUT_REPORT report;
-    report.Buttons = 0x00;
-    report.Wheel = 0;
-    report.X = 10;
-    report.Y = 10;
-
+    // generate input report
     memcpy(transferBuffer, &report, sizeof(MOUSE_INPUT_REPORT));
     transferBufferLength = sizeof(MOUSE_INPUT_REPORT);
 
@@ -387,7 +373,7 @@ exit:
 NTSTATUS
 Io_RaiseInterrupt(
     _In_ UDECXUSBDEVICE    Device,
-    _In_ DEVICE_INTR_FLAGS LatestStatus )
+    _In_ MOUSE_INPUT_REPORT LatestStatus)
 {
     PIO_CONTEXT pIoContext;
     WDFREQUEST request;
@@ -412,7 +398,7 @@ Io_RaiseInterrupt(
         UdecxUsbDeviceSignalWake(Device);
         status = STATUS_SUCCESS;
     } else {
-        IoCompletePendingRequest(request);
+        IoCompletePendingRequest(request, LatestStatus);
     }
 
     return status;
@@ -432,7 +418,8 @@ IoEvtInterruptInUrb(
     PIO_CONTEXT pIoContext;
     UDECXUSBDEVICE tgtDevice;
     NTSTATUS status = STATUS_SUCCESS;
-    DEVICE_INTR_FLAGS LatestStatus = 0;
+    MOUSE_INPUT_REPORT LatestStatus;
+    memset(&LatestStatus, 0, sizeof(MOUSE_INPUT_REPORT));
     PENDPOINTQUEUE_CONTEXT pEpQContext;
 
     BOOLEAN bHasData = FALSE;
@@ -462,14 +449,14 @@ IoEvtInterruptInUrb(
         bHasData = TRUE;
         LatestStatus = pIoContext->IntrState.latestStatus;
     }
-    pIoContext->IntrState.latestStatus = 0;
+    memset(&pIoContext->IntrState.latestStatus, 0, sizeof(MOUSE_INPUT_REPORT));
     pIoContext->IntrState.numUnreadUpdates = 0;
     WdfSpinLockRelease(pIoContext->IntrState.sync);
 
 
     if (bHasData)  {
 
-        IoCompletePendingRequest(Request);
+        IoCompletePendingRequest(Request, LatestStatus);
 
     } else {
 
@@ -496,7 +483,7 @@ Io_CreateDeferredIntrQueue(
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG queueConfig;
 
-    pIoContext->IntrState.latestStatus = 0;
+    memset(&pIoContext->IntrState.latestStatus, 0, sizeof(MOUSE_INPUT_REPORT));
     pIoContext->IntrState.numUnreadUpdates = 0;
 
     //

@@ -25,11 +25,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_UDE_BACKCHANNEL,
 
 
 
-typedef ULONG DEVICE_INTR_FLAGS;
-typedef DEVICE_INTR_FLAGS* PDEVICE_INTR_FLAGS;
-
-
-
 #define IOCTL_INDEX_UDEFX2C   0x900
 #define FILE_DEVICE_UDEFX2C   65600U
 
@@ -37,3 +32,13 @@ typedef DEVICE_INTR_FLAGS* PDEVICE_INTR_FLAGS;
                                                   IOCTL_INDEX_UDEFX2C + 5,     \
                                                   METHOD_BUFFERED,         \
                                                   FILE_READ_ACCESS)
+
+
+#pragma pack(push, 1)
+typedef struct _MOUSE_INPUT_REPORT {
+    UINT8 Buttons;
+    INT8 X;
+    INT8 Y;
+    INT8 Wheel;
+} MOUSE_INPUT_REPORT;
+#pragma pack(pop)

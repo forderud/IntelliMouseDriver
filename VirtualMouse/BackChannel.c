@@ -206,7 +206,7 @@ BackChannelIoctl(
 {
     BOOLEAN handled = FALSE;
     NTSTATUS status;
-    PDEVICE_INTR_FLAGS pflags = 0;
+    MOUSE_INPUT_REPORT* pflags = 0;
     size_t pblen;
     PUDECX_USBCONTROLLER_CONTEXT pControllerContext;
 
@@ -217,7 +217,7 @@ BackChannelIoctl(
     {
     case IOCTL_UDEFX2_GENERATE_INTERRUPT:
         status = WdfRequestRetrieveInputBuffer(Request,
-            sizeof(DEVICE_INTR_FLAGS),
+            sizeof(MOUSE_INPUT_REPORT),
             &pflags,
             &pblen);// BufferLength
 
@@ -227,9 +227,9 @@ BackChannelIoctl(
                 TRACE_QUEUE,
                 "%!FUNC! Unable to retrieve input buffer");
         }
-        else if (pblen == sizeof(DEVICE_INTR_FLAGS) && (pflags != NULL)) {
-            DEVICE_INTR_FLAGS flags;
-            memcpy(&flags, pflags, sizeof(DEVICE_INTR_FLAGS));
+        else if (pblen == sizeof(MOUSE_INPUT_REPORT) && (pflags != NULL)) {
+            MOUSE_INPUT_REPORT flags;
+            memcpy(&flags, pflags, sizeof(MOUSE_INPUT_REPORT));
             TraceEvents(TRACE_LEVEL_INFORMATION,
                 TRACE_QUEUE,
                 "%!FUNC! Will generate interrupt");

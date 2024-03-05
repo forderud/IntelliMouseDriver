@@ -25,7 +25,7 @@ Abstract:
 #define INTR_STATE_MAX_CACHED_UPDATES 100
 
 typedef struct _DEVICE_INTR_STATE {
-    DEVICE_INTR_FLAGS latestStatus;
+    MOUSE_INPUT_REPORT latestStatus;
     ULONG             numUnreadUpdates;
     WDFSPINLOCK       sync;
 } DEVICE_INTR_STATE, *PDEVICE_INTR_STATE;
@@ -61,7 +61,7 @@ Io_AllocateContext(
 NTSTATUS
 Io_RaiseInterrupt(
     _In_ UDECXUSBDEVICE    Device,
-    _In_ DEVICE_INTR_FLAGS LatestStatus
+    _In_ MOUSE_INPUT_REPORT LatestStatus
 );
 
 
