@@ -40,7 +40,7 @@ Return Value:
 	WDF_OBJECT_ATTRIBUTES               wdfDeviceAttributes;
 	UDECX_WDF_DEVICE_CONFIG             controllerConfig;
 	WDF_FILEOBJECT_CONFIG               fileConfig;
-    PUDECX_USBCONTROLLER_CONTEXT        pControllerContext;
+	UDECX_USBCONTROLLER_CONTEXT*        pControllerContext;
 	WDF_IO_QUEUE_CONFIG                 defaultQueueConfig;
 	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS
 		idleSettings;
@@ -396,7 +396,7 @@ ControllerWdfEvtDeviceD0Entry(
 )
 {
 	FuncEntry(TRACE_DEVICE);
-	PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(WdfDevice);
+	UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(WdfDevice);
 
 	NTSTATUS status = STATUS_SUCCESS;
 	if (PreviousState == WdfPowerDeviceD3Final) {

@@ -30,7 +30,7 @@ BackChannelInit(
     _In_ WDFDEVICE ctrdevice
 )
 {
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(ctrdevice);
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
 
     NTSTATUS status = WRQueueInit(ctrdevice, &(pControllerContext->missionRequest), FALSE);
     if (!NT_SUCCESS(status)) {
@@ -54,7 +54,7 @@ BackChannelDestroy(
     _In_ WDFDEVICE ctrdevice
 )
 {
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(ctrdevice);
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
 
     WRQueueDestroy(&(pControllerContext->missionCompletion));
     WRQueueDestroy(&(pControllerContext->missionRequest));
@@ -75,7 +75,7 @@ BackChannelEvtRead(
     UNREFERENCED_PARAMETER(Length);
 
     WDFDEVICE controller = WdfIoQueueGetDevice(Queue); /// WdfIoQueueGetDevice
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(controller);
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(controller);
 
     NTSTATUS status = WdfRequestRetrieveOutputBuffer(Request, 1, &transferBuffer, &transferBufferLength);
     if (!NT_SUCCESS(status))
@@ -122,7 +122,7 @@ BackChannelEvtWrite(
     SIZE_T completeBytes = 0;
 
     WDFDEVICE controller = WdfIoQueueGetDevice(Queue); /// WdfIoQueueGetDevice
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(controller);
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(controller);
 
     PVOID transferBuffer = 0;
     SIZE_T transferBufferLength = 0;
@@ -185,7 +185,7 @@ BackChannelIoctl(
 )
 {
     BOOLEAN handled = FALSE;
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(ctrdevice);
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
 
     switch (IoControlCode)
     {

@@ -176,18 +176,11 @@ Usb_Initialize(
 )
 {
     NTSTATUS                                status;
-    PUDECX_USBCONTROLLER_CONTEXT            controllerContext;
     UDECX_USB_DEVICE_STATE_CHANGE_CALLBACKS   callbacks;
 
-
-
-    //
     // Allocate per-controller private contexts used by other source code modules (I/O,
     // etc.)
-    //
-
-
-    controllerContext = GetUsbControllerContext(WdfDevice);
+    UDECX_USBCONTROLLER_CONTEXT* controllerContext = GetUsbControllerContext(WdfDevice);
 
     UsbValidateConstants();
 
@@ -290,11 +283,10 @@ Usb_ReadDescriptorsAndPlugIn(
     NTSTATUS                          status;
     PUSB_CONFIGURATION_DESCRIPTOR     pComputedConfigDescSet;
     WDF_OBJECT_ATTRIBUTES             attributes;
-    PUDECX_USBCONTROLLER_CONTEXT      controllerContext;
     USB_CONTEXT*                      deviceContext = NULL;
     UDECX_USB_DEVICE_PLUG_IN_OPTIONS  pluginOptions;
 
-    controllerContext = GetUsbControllerContext(WdfControllerDevice);
+    UDECX_USBCONTROLLER_CONTEXT* controllerContext = GetUsbControllerContext(WdfControllerDevice);
     pComputedConfigDescSet = NULL;
 
     //
@@ -427,11 +419,9 @@ Usb_Disconnect(
 )
 {
     NTSTATUS status;
-    PUDECX_USBCONTROLLER_CONTEXT controllerCtx;
     IO_CONTEXT ioContextCopy;
 
-
-    controllerCtx = GetUsbControllerContext(WdfDevice);
+    UDECX_USBCONTROLLER_CONTEXT* controllerCtx = GetUsbControllerContext(WdfDevice);
 
     Io_StopDeferredProcessing(controllerCtx->ChildDevice, &ioContextCopy);
 
@@ -460,13 +450,9 @@ Usb_Destroy(
     _In_ WDFDEVICE WdfDevice
 )
 {
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext;
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(WdfDevice);
 
-    pControllerContext = GetUsbControllerContext(WdfDevice);
-
-    //
     // Free device init in case we didn't successfully create the device.
-    //
     if (pControllerContext != NULL && pControllerContext->ChildDeviceInit != NULL) {
 
         UdecxUsbDeviceInitFree(pControllerContext->ChildDeviceInit);

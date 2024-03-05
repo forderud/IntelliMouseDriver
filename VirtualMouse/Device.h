@@ -23,7 +23,7 @@
 
 
 // controller context 
-typedef struct _UDECX_USBCONTROLLER_CONTEXT {
+struct UDECX_USBCONTROLLER_CONTEXT {
     LIST_ENTRY ControllerListEntry;
     KEVENT ResetCompleteEvent;
     BOOLEAN AllowOnlyResetInterrupts;
@@ -33,8 +33,7 @@ typedef struct _UDECX_USBCONTROLLER_CONTEXT {
 
     PUDECXUSBDEVICE_INIT  ChildDeviceInit;
     UDECXUSBDEVICE        ChildDevice;
-} UDECX_USBCONTROLLER_CONTEXT, *PUDECX_USBCONTROLLER_CONTEXT;
-
+};
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(UDECX_USBCONTROLLER_CONTEXT, GetUsbControllerContext);
 
 
