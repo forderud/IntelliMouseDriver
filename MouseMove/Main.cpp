@@ -56,6 +56,43 @@ std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid)
 }
 
 
+static bool GenerateMouseReport(HANDLE dev, USHORT scan_code) {
+    // ask virtual USB device to generate a mouse event
+    MOUSE_INPUT_REPORT event = {};
+    switch (scan_code) {
+    case 72: // up
+        event.Y = -10;
+        break;
+    case 75: // left
+        event.X = -10;
+        break;
+    case 77: // right
+        event.X = +10;
+        break;
+    case 80: // down
+        event.Y = +10;
+        break;
+    }
+
+    ULONG index = 0;
+    if (!DeviceIoControl(dev,
+        IOCTL_UDEFX2_GENERATE_INTERRUPT,
+        &event,                // Ptr to InBuffer
+        sizeof(event),         // Length of InBuffer
+        NULL,                  // Ptr to OutBuffer
+        0,                     // Length of OutBuffer
+        &index,                // BytesReturned
+        0)) {                  // Ptr to Overlapped structure
+
+        DWORD code = GetLastError();
+        printf("DeviceIoControl failed with error 0x%x\n", code);
+        return false;
+    }
+
+    printf("DeviceIoControl SUCCESS , returned bytes=%d\n", index);
+    return true;
+}
+
 int main() {
     printf("About to open device\n"); fflush(stdout);
 
@@ -79,28 +116,21 @@ int main() {
         return -1;
     }
 
-    printf("Device open, will generate interrupt...\n"); fflush(stdout);
+    printf("Device open.\n");
+    printf("Use arrow keys to generate mouse input reports for cursor movement. Press ESC or Q to quit..\n"); fflush(stdout);
 
-    // ask virtual USB device to generate a mouse event
-    MOUSE_INPUT_REPORT event = {};
-    event.X = 20;
-    event.Y = 20;
+    for (;;) {
+        wint_t code = _getwch();
 
-    ULONG index = 0;
-    if (!DeviceIoControl(deviceHandle.Get(),
-        IOCTL_UDEFX2_GENERATE_INTERRUPT,
-        &event,                // Ptr to InBuffer
-        sizeof(event),         // Length of InBuffer
-        NULL,                  // Ptr to OutBuffer
-        0,                     // Length of OutBuffer
-        &index,                // BytesReturned
-        0)) {                  // Ptr to Overlapped structure
-
-        DWORD code = GetLastError();
-        printf("DeviceIoControl failed with error 0x%x\n", code);
-        return -1;
+        if (code == 224) { // prefix for arrow key codes
+            code = _getwch(); // actual scan code
+            GenerateMouseReport(deviceHandle.Get(), code);
+            continue;
+        }
+        
+        if ((code == 27) || (code == 113)) // ESC or 'Q'
+            break;
     }
 
-    printf("DeviceIoControl SUCCESS , returned bytes=%d\n", index);
     return 0;
 }
