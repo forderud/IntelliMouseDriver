@@ -8,12 +8,12 @@
 #define MINLEN(__a, __b)  ( ((__a) < (__b)) ? (__a) : (__b) )
 
 
-typedef struct _BUFFER_CONTENT
+struct BUFFER_CONTENT
 {
     LIST_ENTRY  BufferLink;
     SIZE_T      BufferLength;
     UCHAR       BufferStart; // variable-size structure, first byte of last field
-} BUFFER_CONTENT, *PBUFFER_CONTENT;
+};
 
 
 typedef struct _WRITE_BUFFER_TO_READ_REQUEST_QUEUE

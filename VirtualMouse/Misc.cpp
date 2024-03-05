@@ -93,7 +93,7 @@ WRQueueDestroy(
     WdfSpinLockAcquire( pQ->qsync );
     while ((e = RemoveHeadList(&(pQ->WriteBufferQueue))) != (&(pQ->WriteBufferQueue)) ) {
 
-        PBUFFER_CONTENT pWriteEntry = CONTAINING_RECORD(e, BUFFER_CONTENT, BufferLink);
+        BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(e, BUFFER_CONTENT, BufferLink);
         ExFreePool(pWriteEntry);
 
     }
@@ -172,7 +172,6 @@ WRQueuePullRead(
 {
     NTSTATUS status;
     PLIST_ENTRY firstPendingWrite;
-    PBUFFER_CONTENT pWriteEntry = NULL;
 
     if (pbReadyToComplete == NULL) {
         status = STATUS_INVALID_PARAMETER;
@@ -207,7 +206,7 @@ WRQueuePullRead(
 
     } else {
         size_t minlen;
-        pWriteEntry = CONTAINING_RECORD(firstPendingWrite, BUFFER_CONTENT, BufferLink);
+        BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(firstPendingWrite, BUFFER_CONTENT, BufferLink);
 
         minlen = MINLEN(pWriteEntry->BufferLength, rlen);
         memcpy(rbuffer, &(pWriteEntry->BufferStart), minlen);
