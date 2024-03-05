@@ -2,6 +2,7 @@
 #include <cfgmgr32.h>
 #include <strsafe.h>
 #include <initguid.h>
+#include <wrl/wrappers/corewrappers.h>
 #include "../VirtualMouse/Public.h"
 #include <iostream>
 #include <vector>
@@ -10,6 +11,8 @@
 
 #define MAX_DEVPATH_LENGTH 256
 
+// RAII wrapper of file HANDLE objects
+using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
 
 _Success_(return)
 BOOL GetDevicePath(
@@ -18,7 +21,7 @@ BOOL GetDevicePath(
     _In_ size_t BufLen)
 {
     ULONG deviceInterfaceListLength = 0;
-    CONFIGRET cr = CM_Get_Device_Interface_List_Size(
+    CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(
         &deviceInterfaceListLength,
         InterfaceGuid,
         NULL,
@@ -36,7 +39,7 @@ BOOL GetDevicePath(
 
     std::vector<WCHAR> deviceInterfaceList(deviceInterfaceListLength, L'\0');
 
-    cr = CM_Get_Device_Interface_List(
+    cr = CM_Get_Device_Interface_ListW(
         InterfaceGuid,
         NULL,
         deviceInterfaceList.data(),
@@ -53,7 +56,7 @@ BOOL GetDevicePath(
             "Selecting first matching device.\n\n");
     }
 
-    HRESULT hr = StringCchCopy(DevicePath, BufLen, deviceInterfaceList.data());
+    HRESULT hr = StringCchCopyW(DevicePath, BufLen, deviceInterfaceList.data());
     if (FAILED(hr)) {
         printf("Error: StringCchCopy failed with HRESULT 0x%x", hr);
         return FALSE;
@@ -62,8 +65,8 @@ BOOL GetDevicePath(
     return TRUE;
 }
 
-_Check_return_ _Ret_notnull_ _Success_(return != INVALID_HANDLE_VALUE)
-HANDLE OpenDevice(_In_ LPCGUID pguid)
+
+FileHandle OpenDevice(_In_ LPCGUID pguid)
 /*++
 Routine Description:
     Called by main() to open an instance of our device.
@@ -77,40 +80,35 @@ Return Value:
 {
     WCHAR completeDeviceName[MAX_DEVPATH_LENGTH];
     if (!GetDevicePath((LPGUID)pguid, completeDeviceName, sizeof(completeDeviceName)/sizeof(completeDeviceName[0]))) {
-        return  INVALID_HANDLE_VALUE;
+        return FileHandle();
     }
 
     printf("DeviceName = (%S)\n", completeDeviceName); fflush(stdout);
 
-    HANDLE hDev = CreateFile(completeDeviceName,
+    FileHandle hDev(CreateFileW(completeDeviceName,
         GENERIC_WRITE | GENERIC_READ,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
         NULL, // default security
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
-        NULL);
+        NULL));
 
-    if (hDev == INVALID_HANDLE_VALUE) {
+    if (!hDev.IsValid()) {
         printf("Failed to open the device, error - %d", GetLastError()); fflush(stdout);
-    } else {
-        printf("Opened the device successfully.\n"); fflush(stdout);
+        return FileHandle();
     }
 
+    printf("Opened the device successfully.\n"); fflush(stdout);
     return hDev;
 }
 
-int main()
-{
+int main() {
     printf("About to open device\n"); fflush(stdout);
 
-    HANDLE deviceHandle = OpenDevice((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL);
-
-    if (deviceHandle == INVALID_HANDLE_VALUE) {
-
+    FileHandle deviceHandle = OpenDevice((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL);
+    if (!deviceHandle.IsValid()) {
         printf("Unable to find virtual controller device!\n"); fflush(stdout);
-
         return FALSE;
-
     }
 
     printf("Device open, will generate interrupt...\n"); fflush(stdout);
@@ -121,7 +119,7 @@ int main()
     event.Y = 20;
 
     ULONG index = 0;
-    if (!DeviceIoControl(deviceHandle,
+    if (!DeviceIoControl(deviceHandle.Get(),
         IOCTL_UDEFX2_GENERATE_INTERRUPT,
         &event,                // Ptr to InBuffer
         sizeof(event),         // Length of InBuffer
@@ -132,11 +130,9 @@ int main()
 
         DWORD code = GetLastError();
         printf("DeviceIoControl failed with error 0x%x\n", code);
-    }
-    else
-    {
-        printf("DeviceIoControl SUCCESS , returned bytes=%d\n", index);
+        return -1;
     }
 
-    CloseHandle(deviceHandle);
+    printf("DeviceIoControl SUCCESS , returned bytes=%d\n", index);
+    return 0;
 }
