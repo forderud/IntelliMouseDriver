@@ -16,7 +16,10 @@
 
 
 DECLARE_CONST_UNICODE_STRING(g_ManufacturerStringEnUs, L"Microsoft");
+#define g_ManufacturerIndex   0
+
 DECLARE_CONST_UNICODE_STRING(g_ProductStringEnUs, L"UDE Client");
+#define g_ProductIndex        0
 
 
 const USHORT AMERICAN_ENGLISH = 0x409;
