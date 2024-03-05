@@ -36,19 +36,14 @@ WRQueueInit(
     _In_    BOOLEAN bUSBReqQueue
 )
 {
-    NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG queueConfig;
-
     memset(pQ, 0, sizeof(*pQ));
 
-    status = STATUS_SUCCESS;
+    WDF_IO_QUEUE_CONFIG queueConfig = {};
     WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchManual);
-
     // when a request gets canceled, this is where we want to do the completion
     queueConfig.EvtIoCanceledOnQueue = (bUSBReqQueue ? _WQQCancelUSBRequest : _WQQCancelRequest );
 
-
-    status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &(pQ->qsync));
+    NTSTATUS status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &(pQ->qsync));
     if (!NT_SUCCESS(status) )  {
         pQ->qsync = NULL;
         TraceEvents(TRACE_LEVEL_ERROR,
@@ -84,19 +79,19 @@ WRQueueDestroy(
     _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ
 )
 {
-    PLIST_ENTRY e;
     if (pQ->qsync == NULL)  {
         return; // init has not even started
     }
 
     // clean up the entire list
-    WdfSpinLockAcquire( pQ->qsync );
-    while ((e = RemoveHeadList(&(pQ->WriteBufferQueue))) != (&(pQ->WriteBufferQueue)) ) {
+    WdfSpinLockAcquire(pQ->qsync);
 
+    LIST_ENTRY* e = nullptr;
+    while ((e = RemoveHeadList(&(pQ->WriteBufferQueue))) != (&(pQ->WriteBufferQueue)) ) {
         BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(e, BUFFER_CONTENT, BufferLink);
         ExFreePool(pWriteEntry);
-
     }
+
     WdfSpinLockRelease(pQ->qsync);
 
     WdfObjectDelete(pQ->ReadBufferQueue);
@@ -116,16 +111,14 @@ WRQueuePushWrite(
 )
 {
     NTSTATUS status;
-    WDFREQUEST firstPendingRead;
-
     if (rqReadToComplete == NULL) {
         status = STATUS_INVALID_PARAMETER;
         goto Exit;
     }
 
-    (*rqReadToComplete) = NULL;
+    *rqReadToComplete = NULL;
 
-
+    WDFREQUEST firstPendingRead = 0;
     status = WdfIoQueueRetrieveNextRequest(pQ->ReadBufferQueue, &firstPendingRead);
     if ( NT_SUCCESS(status) )  {
         (*rqReadToComplete) = firstPendingRead;
@@ -171,7 +164,6 @@ WRQueuePullRead(
 )
 {
     NTSTATUS status;
-    PLIST_ENTRY firstPendingWrite;
 
     if (pbReadyToComplete == NULL) {
         status = STATUS_INVALID_PARAMETER;
@@ -191,11 +183,10 @@ WRQueuePullRead(
     (*completedBytes) = 0;
 
     WdfSpinLockAcquire(pQ->qsync);
-    firstPendingWrite = RemoveHeadList( &(pQ->WriteBufferQueue) );
+    PLIST_ENTRY firstPendingWrite = RemoveHeadList( &(pQ->WriteBufferQueue) );
     WdfSpinLockRelease(pQ->qsync);
 
     if (firstPendingWrite == &(pQ->WriteBufferQueue) ) {
-
         // no dangling writes found, must pend this read
         status = WdfRequestForwardToIoQueue(rqRead, pQ->ReadBufferQueue);
         if (!NT_SUCCESS(status)) {
@@ -203,7 +194,6 @@ WRQueuePullRead(
                 TRACE_QUEUE,
                 "Unable to foward pending read, err= %!STATUS!", status);
         }
-
     } else {
         size_t minlen;
         BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(firstPendingWrite, BUFFER_CONTENT, BufferLink);
