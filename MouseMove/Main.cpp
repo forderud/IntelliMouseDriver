@@ -66,49 +66,27 @@ BOOL GetDevicePath(
 }
 
 
-FileHandle OpenDevice(_In_ LPCGUID pguid)
-/*++
-Routine Description:
-    Called by main() to open an instance of our device.
+int main() {
+    printf("About to open device\n"); fflush(stdout);
 
-Arguments:
-    pguid - Device interface
-
-Return Value:
-    Device handle on success else INVALID_HANDLE_VALUE
---*/
-{
     WCHAR completeDeviceName[MAX_DEVPATH_LENGTH];
-    if (!GetDevicePath((LPGUID)pguid, completeDeviceName, sizeof(completeDeviceName)/sizeof(completeDeviceName[0]))) {
-        return FileHandle();
+    if (!GetDevicePath((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL, completeDeviceName, sizeof(completeDeviceName) / sizeof(completeDeviceName[0]))) {
+        printf("Unable to find virtual controller device!\n"); fflush(stdout);
+        return -2;
     }
 
     printf("DeviceName = (%S)\n", completeDeviceName); fflush(stdout);
 
-    FileHandle hDev(CreateFileW(completeDeviceName,
+    FileHandle deviceHandle(CreateFileW(completeDeviceName,
         GENERIC_WRITE | GENERIC_READ,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
         NULL, // default security
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
         NULL));
-
-    if (!hDev.IsValid()) {
-        printf("Failed to open the device, error - %d", GetLastError()); fflush(stdout);
-        return FileHandle();
-    }
-
-    printf("Opened the device successfully.\n"); fflush(stdout);
-    return hDev;
-}
-
-int main() {
-    printf("About to open device\n"); fflush(stdout);
-
-    FileHandle deviceHandle = OpenDevice((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL);
     if (!deviceHandle.IsValid()) {
-        printf("Unable to find virtual controller device!\n"); fflush(stdout);
-        return FALSE;
+        printf("Failed to open the device, error - %d", GetLastError()); fflush(stdout);
+        return -1;
     }
 
     printf("Device open, will generate interrupt...\n"); fflush(stdout);
