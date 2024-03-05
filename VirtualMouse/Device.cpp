@@ -45,11 +45,8 @@ Return Value:
 
 --*/
 {
-	NTSTATUS                            status;
 	WDFDEVICE                           wdfDevice;
-	WDF_PNPPOWER_EVENT_CALLBACKS        wdfPnpPowerCallbacks;
 	WDF_OBJECT_ATTRIBUTES               wdfDeviceAttributes;
-	WDF_OBJECT_ATTRIBUTES               wdfRequestAttributes;
 	UDECX_WDF_DEVICE_CONFIG             controllerConfig;
 	WDF_FILEOBJECT_CONFIG               fileConfig;
     PUDECX_USBCONTROLLER_CONTEXT        pControllerContext;
@@ -60,6 +57,7 @@ Return Value:
 
 	FuncEntry(TRACE_DEVICE);
 
+	WDF_PNPPOWER_EVENT_CALLBACKS wdfPnpPowerCallbacks = {};
 	WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&wdfPnpPowerCallbacks);
 	wdfPnpPowerCallbacks.EvtDevicePrepareHardware = ControllerWdfEvtDevicePrepareHardware;
 	wdfPnpPowerCallbacks.EvtDeviceReleaseHardware = ControllerWdfEvtDeviceReleaseHardware;
@@ -72,6 +70,7 @@ Return Value:
 
 	WdfDeviceInitSetPnpPowerEventCallbacks(WdfDeviceInit, &wdfPnpPowerCallbacks);
 
+	WDF_OBJECT_ATTRIBUTES wdfRequestAttributes = {};
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&wdfRequestAttributes, REQUEST_CONTEXT);
 	WdfDeviceInitSetRequestAttributes(WdfDeviceInit, &wdfRequestAttributes);
 
@@ -99,7 +98,7 @@ Return Value:
 	//
 	// Set the security descriptor for the device.
 	//
-	status = WdfDeviceInitAssignSDDLString(WdfDeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RW_RES_R);
+	NTSTATUS status = WdfDeviceInitAssignSDDLString(WdfDeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RW_RES_R);
 
 	if (!NT_SUCCESS(status)) {
 
@@ -284,8 +283,6 @@ NTSTATUS
 --*/
 {
 	NTSTATUS status;
-	UINT32 instanceNumber;
-	BOOLEAN isCreated;
 
 	DECLARE_UNICODE_STRING_SIZE(uniDeviceName, DeviceNameSize);
 	DECLARE_UNICODE_STRING_SIZE(uniSymLinkName, SymLinkNameSize);
@@ -293,12 +290,11 @@ NTSTATUS
 
 	*WdfDevice = NULL;
 
-	//
 	// Generate a unique static device name in order to provide compatibility to look like with
 	// existing USB host controller driver implementations.
-	//
-	isCreated = FALSE;
+	BOOLEAN isCreated = FALSE;
 
+	UINT32 instanceNumber = 0;
 	for (instanceNumber = 0; instanceNumber < MAXUINT32; instanceNumber++) {
 
 		status = RtlUnicodeStringPrintf(&uniDeviceName,
@@ -345,16 +341,13 @@ NTSTATUS
 	}
 
 	if (!isCreated) {
-
 		status = STATUS_OBJECT_NAME_COLLISION;
 		LogError(TRACE_DEVICE, "All instance numbers of USB host controller are already used %!STATUS!",
 			status);
 		goto exit;
 	}
 
-	//
 	// Create the symbolic link (also for compatibility).
-	//
 	status = RtlUnicodeStringPrintf(&uniSymLinkName,
 		L"%ws%d",
 		BASE_SYMBOLIC_LINK_NAME,
@@ -411,21 +404,17 @@ ControllerWdfEvtDeviceD0Entry(
 	WDF_POWER_DEVICE_STATE PreviousState
 )
 {
-	NTSTATUS status = STATUS_SUCCESS;
-    PUDECX_USBCONTROLLER_CONTEXT pControllerContext;
-
 	FuncEntry(TRACE_DEVICE);
-	pControllerContext = GetUsbControllerContext(WdfDevice);
+	PUDECX_USBCONTROLLER_CONTEXT pControllerContext = GetUsbControllerContext(WdfDevice);
 
+	NTSTATUS status = STATUS_SUCCESS;
 	if (PreviousState == WdfPowerDeviceD3Final) {
-
 		NT_ASSERT(!pControllerContext->AllowOnlyResetInterrupts);
 		pControllerContext->AllowOnlyResetInterrupts = TRUE;
 
 		status = Usb_ReadDescriptorsAndPlugIn(WdfDevice);
 
 		if (!NT_SUCCESS(status)) {
-
 			goto exit;
 		}
 	}
@@ -476,8 +465,7 @@ ControllerWdfEvtDeviceD0Exit(
 {
 	FuncEntry(TRACE_DEVICE);
 
-	if (TargetState == WdfPowerDeviceD3Final)
-	{
+	if (TargetState == WdfPowerDeviceD3Final) {
 		Usb_Disconnect(WdfDevice);
 	}
 
@@ -511,7 +499,6 @@ ControllerWdfEvtCleanupCallback(
 	FuncEntry(TRACE_DEVICE);
 
 	Usb_Destroy((WDFDEVICE)WdfDevice);
-
     BackChannelDestroy((WDFDEVICE)WdfDevice);
 
 	FuncExit(TRACE_DEVICE, 0);
@@ -528,7 +515,6 @@ ControllerEvtIoDeviceControl(
 	_In_ ULONG IoControlCode
 )
 {
-	BOOLEAN handled;
     NTSTATUS status = STATUS_SUCCESS;
     WDFDEVICE ctrdevice = WdfIoQueueGetDevice(Queue);
 
@@ -536,20 +522,15 @@ ControllerEvtIoDeviceControl(
     UNREFERENCED_PARAMETER(OutputBufferLength);
 	UNREFERENCED_PARAMETER(InputBufferLength);
 
-	handled = UdecxWdfDeviceTryHandleUserIoctl(ctrdevice,
-		Request);
-
+	BOOLEAN handled = UdecxWdfDeviceTryHandleUserIoctl(ctrdevice, Request);
 	if (handled) {
 		goto exit;
 	}
 
     handled = BackChannelIoctl(IoControlCode, ctrdevice, Request);
-
-
     if (handled) {
         goto exit;
     }
-
 
 	status = STATUS_INVALID_DEVICE_REQUEST;
 	LogError(TRACE_DEVICE, "Unexpected I/O control code 0x%x %!STATUS!", IoControlCode, status);
@@ -557,7 +538,6 @@ ControllerEvtIoDeviceControl(
 	WdfRequestComplete(Request, status);
 
 exit:
-
 	return;
 }
 
@@ -579,12 +559,7 @@ ControllerEvtUdecxWdfDeviceQueryUsbCapability(
 	UNREFERENCED_PARAMETER(OutputBuffer);
 	UNREFERENCED_PARAMETER(ResultLength);
 
-	if (RtlCompareMemory(
-		CapabilityType,
-		&GUID_USB_CAPABILITY_DEVICE_CONNECTION_HIGH_SPEED_COMPATIBLE,
-		sizeof(GUID)
-	) == sizeof(GUID))
-	{
+	if (RtlCompareMemory(CapabilityType, &GUID_USB_CAPABILITY_DEVICE_CONNECTION_HIGH_SPEED_COMPATIBLE, sizeof(GUID)) == sizeof(GUID)) {
 		return STATUS_SUCCESS;
 	}
 	return STATUS_UNSUCCESSFUL;
