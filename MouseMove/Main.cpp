@@ -9,16 +9,11 @@
 
 #pragma comment(lib, "mincore.lib") // for CM_Get_Device_Interface_List..
 
-#define MAX_DEVPATH_LENGTH 256
-
 // RAII wrapper of file HANDLE objects
 using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
 
-_Success_(return)
-BOOL GetDevicePath(
-    _In_  LPGUID InterfaceGuid,
-    _Out_writes_z_(BufLen) PWCHAR DevicePath,
-    _In_ size_t BufLen)
+
+std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid)
 {
     ULONG deviceInterfaceListLength = 0;
     CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(
@@ -28,13 +23,13 @@ BOOL GetDevicePath(
         CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list size.\n", cr);
-        return FALSE;
+        return {};
     }
 
     if (deviceInterfaceListLength <= 1) {
         printf("Error: No active device interfaces found.\n"
             " Is the sample driver loaded?");
-        return FALSE;
+        return {};
     }
 
     std::vector<WCHAR> deviceInterfaceList(deviceInterfaceListLength, L'\0');
@@ -47,7 +42,7 @@ BOOL GetDevicePath(
         CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list.\n", cr);
-        return FALSE;
+        return {};
     }
 
     PWSTR nextInterface = deviceInterfaceList.data() + wcslen(deviceInterfaceList.data()) + 1;
@@ -56,28 +51,23 @@ BOOL GetDevicePath(
             "Selecting first matching device.\n\n");
     }
 
-    HRESULT hr = StringCchCopyW(DevicePath, BufLen, deviceInterfaceList.data());
-    if (FAILED(hr)) {
-        printf("Error: StringCchCopy failed with HRESULT 0x%x", hr);
-        return FALSE;
-    }
-
-    return TRUE;
+    std::wstring result(deviceInterfaceList.data());
+    return result;
 }
 
 
 int main() {
     printf("About to open device\n"); fflush(stdout);
 
-    WCHAR completeDeviceName[MAX_DEVPATH_LENGTH];
-    if (!GetDevicePath((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL, completeDeviceName, sizeof(completeDeviceName) / sizeof(completeDeviceName[0]))) {
+    std::wstring completeDeviceName = GetDevicePath((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL);
+    if (completeDeviceName.empty()) {
         printf("Unable to find virtual controller device!\n"); fflush(stdout);
         return -2;
     }
 
-    printf("DeviceName = (%S)\n", completeDeviceName); fflush(stdout);
+    printf("DeviceName = (%S)\n", completeDeviceName.c_str()); fflush(stdout);
 
-    FileHandle deviceHandle(CreateFileW(completeDeviceName,
+    FileHandle deviceHandle(CreateFileW(completeDeviceName.c_str(),
         GENERIC_WRITE | GENERIC_READ,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
         NULL, // default security
