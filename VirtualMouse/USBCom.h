@@ -14,15 +14,15 @@
 // in case it becomes a queue one day, an arbitrary limit
 #define INTR_STATE_MAX_CACHED_UPDATES 100
 
-typedef struct _DEVICE_INTR_STATE {
+struct DEVICE_INTR_STATE {
     MOUSE_INPUT_REPORT latestStatus;
     ULONG             numUnreadUpdates;
     WDFSPINLOCK       sync;
-} DEVICE_INTR_STATE, *PDEVICE_INTR_STATE;
+};
 
 
 
-typedef struct _IO_CONTEXT {
+struct IO_CONTEXT {
     WDFQUEUE          ControlQueue;
     WDFQUEUE          BulkOutQueue;
     WDFQUEUE          BulkInQueue;
@@ -31,8 +31,7 @@ typedef struct _IO_CONTEXT {
     BOOLEAN           bStopping;
 
     DEVICE_INTR_STATE IntrState;
-} IO_CONTEXT, *PIO_CONTEXT;
-
+};
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(IO_CONTEXT, WdfDeviceGetIoContext);
 
 
@@ -63,14 +62,14 @@ Io_RetrieveEpQueue(
 VOID
 Io_StopDeferredProcessing(
     _In_ UDECXUSBDEVICE  Device,
-    _Out_ PIO_CONTEXT   pIoContextCopy
+    _Out_ IO_CONTEXT*   pIoContextCopy
 );
 
 
 
 VOID
 Io_FreeEndpointQueues(
-    _In_ PIO_CONTEXT   pIoContext
+    _In_ IO_CONTEXT* pIoContext
 );
 
 

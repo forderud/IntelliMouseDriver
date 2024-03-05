@@ -363,11 +363,10 @@ Io_RaiseInterrupt(
     _In_ UDECXUSBDEVICE    Device,
     _In_ MOUSE_INPUT_REPORT LatestStatus)
 {
-    PIO_CONTEXT pIoContext;
     WDFREQUEST request;
     NTSTATUS status = STATUS_SUCCESS;
 
-    pIoContext = WdfDeviceGetIoContext(Device);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
 
     status = WdfIoQueueRetrieveNextRequest( pIoContext->IntrDeferredQueue, &request);
 
@@ -403,7 +402,6 @@ IoEvtInterruptInUrb(
     _In_ ULONG IoControlCode
 )
 {
-    PIO_CONTEXT pIoContext;
     UDECXUSBDEVICE tgtDevice;
     NTSTATUS status = STATUS_SUCCESS;
     MOUSE_INPUT_REPORT LatestStatus = {};
@@ -420,7 +418,7 @@ IoEvtInterruptInUrb(
 
     tgtDevice = pEpQContext->usbDeviceObj;
 
-    pIoContext = WdfDeviceGetIoContext(tgtDevice);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(tgtDevice);
 
 
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)   {
@@ -465,7 +463,7 @@ exit:
 static NTSTATUS
 Io_CreateDeferredIntrQueue(
     _In_ WDFDEVICE   ControllerDevice,
-    _In_ PIO_CONTEXT pIoContext )
+    _In_ IO_CONTEXT* pIoContext )
 {
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG queueConfig;
@@ -520,8 +518,7 @@ Io_DeviceSlept(
     _In_ UDECXUSBDEVICE  Device
 )
 {
-    PIO_CONTEXT pIoContext;
-    pIoContext = WdfDeviceGetIoContext(Device);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
 
     // thi will result in all current requests being canceled
     LogInfo(TRACE_DEVICE, "About to purge deferred request queue" );
@@ -536,8 +533,7 @@ Io_DeviceWokeUp(
     _In_ UDECXUSBDEVICE  Device
 )
 {
-    PIO_CONTEXT pIoContext;
-    pIoContext = WdfDeviceGetIoContext(Device);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
 
     // thi will result in all current requests being canceled
     LogInfo(TRACE_DEVICE, "About to re-start paused deferred queue");
@@ -555,7 +551,6 @@ Io_RetrieveEpQueue(
 )
 {
     NTSTATUS status;
-    PIO_CONTEXT pIoContext;
     WDF_IO_QUEUE_CONFIG queueConfig;
     WDFDEVICE wdfController;
     WDFQUEUE *pQueueRecord = NULL;
@@ -563,7 +558,7 @@ Io_RetrieveEpQueue(
     PFN_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL pIoCallback = NULL;
 
     status = STATUS_SUCCESS;
-    pIoContext = WdfDeviceGetIoContext(Device);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
     USB_CONTEXT* pUsbContext = GetUsbDeviceContext(Device);
 
     wdfController = pUsbContext->ControllerDevice;
@@ -639,10 +634,10 @@ exit:
 VOID
 Io_StopDeferredProcessing(
     _In_ UDECXUSBDEVICE  Device,
-    _Out_ PIO_CONTEXT   pIoContextCopy
+    _Out_ IO_CONTEXT* pIoContextCopy
 )
 {
-    PIO_CONTEXT pIoContext = WdfDeviceGetIoContext(Device);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
 
     pIoContext->bStopping = TRUE;
     // plus this queue will no longer accept incoming requests
@@ -654,7 +649,7 @@ Io_StopDeferredProcessing(
 
 VOID
 Io_FreeEndpointQueues(
-    _In_ PIO_CONTEXT   pIoContext
+    _In_ IO_CONTEXT* pIoContext
 )
 {
 
