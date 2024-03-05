@@ -47,10 +47,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(IO_CONTEXT, WdfDeviceGetIoContext);
 
 
 
-
-EXTERN_C_START
-
-
 NTSTATUS
 Io_AllocateContext(
     _In_ UDECXUSBDEVICE Object
@@ -100,5 +96,3 @@ NTSTATUS
 Io_DeviceWokeUp(
     _In_ UDECXUSBDEVICE  Device
 );
-
-EXTERN_C_END

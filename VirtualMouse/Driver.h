@@ -29,15 +29,11 @@ Environment:
 
 #define UDEFX_POOL_TAG 'UDEX'
 
-
-EXTERN_C_START
-
 //
 // WDFDRIVER Events
 //
-
+extern "C"
 DRIVER_INITIALIZE DriverEntry;
+
 EVT_WDF_DRIVER_DEVICE_ADD UDEFX2EvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP UDEFX2EvtDriverContextCleanup;
-
-EXTERN_C_END

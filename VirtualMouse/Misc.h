@@ -17,11 +17,7 @@ Abstract:
 #include "trace.h"
 
 
-
 #define MINLEN(__a, __b)  ( ((__a) < (__b)) ? (__a) : (__b) )
-
-
-EXTERN_C_START
 
 
 typedef struct _BUFFER_CONTENT
@@ -70,6 +66,3 @@ WRQueuePullRead(
     _Out_ PBOOLEAN pbReadyToComplete,
     _Out_ PSIZE_T completedBytes
 );
-
-
-EXTERN_C_END

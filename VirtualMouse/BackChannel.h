@@ -24,7 +24,6 @@ Kernel-mode Driver Framework
 #include "public.h"
 #include "Misc.h"
 
-EXTERN_C_START
 
 // magic to re-use the controller context without creating
 // explict dependencies on the controller where we only want to use
@@ -53,6 +52,3 @@ BackChannelIoctl(
 
 EVT_WDF_IO_QUEUE_IO_READ                        BackChannelEvtRead;
 EVT_WDF_IO_QUEUE_IO_WRITE                       BackChannelEvtWrite;
-
-EXTERN_C_END
-

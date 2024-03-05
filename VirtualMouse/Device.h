@@ -19,8 +19,6 @@ Environment:
 #include "public.h"
 #include "Misc.h"
 
-EXTERN_C_START
-
 
 #define USB_HOST_DEVINTERFACE_REF_STRING L"GUID_DEVINTERFACE_USB_HOST_CONTROLLER"
 
@@ -96,6 +94,3 @@ ControllerCreateWdfDeviceWithNameAndSymLink(
 	_In_	PWDF_OBJECT_ATTRIBUTES WdfDeviceAttributes,
 	_Out_	WDFDEVICE * WdfDevice
 );
-
-
-EXTERN_C_END

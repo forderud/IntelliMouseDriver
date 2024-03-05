@@ -62,14 +62,6 @@ extern const USHORT g_HIDMouseUsbReportDescriptor_len;
 // ------------------------------------------------
 
 
-
-
-
-
-
-EXTERN_C_START
-
-
 NTSTATUS
 Usb_Initialize(
 	_In_ WDFDEVICE WdfControllerDevice
@@ -107,8 +99,3 @@ EVT_UDECX_USB_DEVICE_D0_ENTRY                         UsbDevice_EvtUsbDeviceLink
 EVT_UDECX_USB_DEVICE_D0_EXIT                          UsbDevice_EvtUsbDeviceLinkPowerExit;
 EVT_UDECX_USB_DEVICE_SET_FUNCTION_SUSPEND_AND_WAKE    UsbDevice_EvtUsbDeviceSetFunctionSuspendAndWake;
 EVT_UDECX_USB_ENDPOINT_RESET                          UsbEndpointReset;
-
-
-EXTERN_C_END
-
-
