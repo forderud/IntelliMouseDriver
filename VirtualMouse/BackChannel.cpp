@@ -218,7 +218,7 @@ BackChannelIoctl(
     case IOCTL_UDEFX2_GENERATE_INTERRUPT:
         status = WdfRequestRetrieveInputBuffer(Request,
             sizeof(MOUSE_INPUT_REPORT),
-            &pflags,
+            (void**)&pflags,
             &pblen);// BufferLength
 
         if (!NT_SUCCESS(status))

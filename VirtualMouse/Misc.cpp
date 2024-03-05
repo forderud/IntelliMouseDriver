@@ -143,11 +143,10 @@ WRQueuePushWrite(
         (*rqReadToComplete) = firstPendingRead;
         goto Exit;
     } else {
-        PBUFFER_CONTENT pNewEntry;
         status = STATUS_SUCCESS; // til proven otherwise
 
         // allocate
-        pNewEntry = ExAllocatePool2(POOL_FLAG_PAGED, sizeof(BUFFER_CONTENT) + wlen, UDEFX_POOL_TAG);
+        BUFFER_CONTENT* pNewEntry = (BUFFER_CONTENT*)ExAllocatePool2(POOL_FLAG_PAGED, sizeof(BUFFER_CONTENT) + wlen, UDEFX_POOL_TAG);
         if (pNewEntry == NULL) {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_QUEUE,
