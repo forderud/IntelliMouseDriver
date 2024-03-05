@@ -275,8 +275,8 @@ NTSTATUS
 {
 	NTSTATUS status;
 
-	DECLARE_UNICODE_STRING_SIZE(uniDeviceName, DeviceNameSize);
-	DECLARE_UNICODE_STRING_SIZE(uniSymLinkName, SymLinkNameSize);
+	DECLARE_UNICODE_STRING_SIZE(uniDeviceName, sizeof(BASE_DEVICE_NAME) + MAX_SUFFIX_SIZE); // DeviceNameSize
+	DECLARE_UNICODE_STRING_SIZE(uniSymLinkName, sizeof(BASE_SYMBOLIC_LINK_NAME) + MAX_SUFFIX_SIZE); // SymLinkNameSize
 	FuncEntry(TRACE_DEVICE);
 
 	*WdfDevice = NULL;

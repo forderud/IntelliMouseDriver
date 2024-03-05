@@ -14,8 +14,6 @@
 
 #define BASE_DEVICE_NAME                        L"\\Device\\MBIMUDEClient"
 #define BASE_SYMBOLIC_LINK_NAME                 L"\\DosDevices\\MBIMUDEClient"
-#define DeviceNameSize                          (sizeof(BASE_DEVICE_NAME) + MAX_SUFFIX_SIZE)
-#define SymLinkNameSize                         sizeof(BASE_SYMBOLIC_LINK_NAME)+MAX_SUFFIX_SIZE
 //
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
