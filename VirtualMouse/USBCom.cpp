@@ -418,8 +418,7 @@ IoEvtInterruptInUrb(
     PIO_CONTEXT pIoContext;
     UDECXUSBDEVICE tgtDevice;
     NTSTATUS status = STATUS_SUCCESS;
-    MOUSE_INPUT_REPORT LatestStatus;
-    memset(&LatestStatus, 0, sizeof(MOUSE_INPUT_REPORT));
+    MOUSE_INPUT_REPORT LatestStatus = {};
     PENDPOINTQUEUE_CONTEXT pEpQContext;
 
     BOOLEAN bHasData = FALSE;
@@ -449,7 +448,7 @@ IoEvtInterruptInUrb(
         bHasData = TRUE;
         LatestStatus = pIoContext->IntrState.latestStatus;
     }
-    memset(&pIoContext->IntrState.latestStatus, 0, sizeof(MOUSE_INPUT_REPORT));
+    pIoContext->IntrState.latestStatus = {};
     pIoContext->IntrState.numUnreadUpdates = 0;
     WdfSpinLockRelease(pIoContext->IntrState.sync);
 
@@ -483,7 +482,7 @@ Io_CreateDeferredIntrQueue(
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG queueConfig;
 
-    memset(&pIoContext->IntrState.latestStatus, 0, sizeof(MOUSE_INPUT_REPORT));
+    pIoContext->IntrState.latestStatus = {};
     pIoContext->IntrState.numUnreadUpdates = 0;
 
     //
