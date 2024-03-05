@@ -11,21 +11,18 @@
 
 
 _Success_(return)
-BOOL
-GetDevicePath(
+BOOL GetDevicePath(
     _In_  LPGUID InterfaceGuid,
     _Out_writes_z_(BufLen) PWCHAR DevicePath,
-    _In_ size_t BufLen
-)
+    _In_ size_t BufLen)
 {
-    CONFIGRET cr = CR_SUCCESS;
     PWSTR deviceInterfaceList = NULL;
     ULONG deviceInterfaceListLength = 0;
     PWSTR nextInterface;
     HRESULT hr = E_FAIL;
     BOOL bRet = TRUE;
 
-    cr = CM_Get_Device_Interface_List_Size(
+    CONFIGRET cr = CM_Get_Device_Interface_List_Size(
         &deviceInterfaceListLength,
         InterfaceGuid,
         NULL,
@@ -85,44 +82,27 @@ clean0:
     return bRet;
 }
 
-_Check_return_
-_Ret_notnull_
-_Success_(return != INVALID_HANDLE_VALUE)
-HANDLE
-OpenDevice(
-    _In_ LPCGUID pguid
-)
-
+_Check_return_ _Ret_notnull_ _Success_(return != INVALID_HANDLE_VALUE)
+HANDLE OpenDevice(_In_ LPCGUID pguid)
 /*++
 Routine Description:
-
     Called by main() to open an instance of our device.
 
 Arguments:
-
     pguid - Device interface
 
 Return Value:
-
     Device handle on success else INVALID_HANDLE_VALUE
-
 --*/
-
 {
-    HANDLE hDev;
     WCHAR completeDeviceName[MAX_DEVPATH_LENGTH];
-
-    if (!GetDevicePath(
-        (LPGUID)pguid,
-        completeDeviceName,
-        sizeof(completeDeviceName) / sizeof(completeDeviceName[0])))
-    {
+    if (!GetDevicePath((LPGUID)pguid, completeDeviceName, sizeof(completeDeviceName)/sizeof(completeDeviceName[0]))) {
         return  INVALID_HANDLE_VALUE;
     }
 
     printf("DeviceName = (%S)\n", completeDeviceName); fflush(stdout);
 
-    hDev = CreateFile(completeDeviceName,
+    HANDLE hDev = CreateFile(completeDeviceName,
         GENERIC_WRITE | GENERIC_READ,
         FILE_SHARE_WRITE | FILE_SHARE_READ,
         NULL, // default security
@@ -132,8 +112,7 @@ Return Value:
 
     if (hDev == INVALID_HANDLE_VALUE) {
         printf("Failed to open the device, error - %d", GetLastError()); fflush(stdout);
-    }
-    else {
+    } else {
         printf("Opened the device successfully.\n"); fflush(stdout);
     }
 
@@ -180,5 +159,4 @@ int main()
     }
 
     CloseHandle(deviceHandle);
-
 }
