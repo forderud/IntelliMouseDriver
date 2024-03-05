@@ -164,20 +164,15 @@ IoEvtBulkOutUrb(
     _In_ ULONG IoControlCode
 )
 {
-    WDFREQUEST matchingRead;
-    WDFDEVICE backchannel;
-    NTSTATUS status = STATUS_SUCCESS;
-    PUCHAR transferBuffer;
-    ULONG transferBufferLength = 0;
-    SIZE_T completeBytes = 0;
-
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
     ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
-    backchannel = pEpQContext->backChannelDevice;
+    WDFDEVICE backchannel = pEpQContext->backChannelDevice;
     UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
+    ULONG transferBufferLength = 0;
 
+    NTSTATUS status = STATUS_SUCCESS;
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)
     {
         LogError(TRACE_DEVICE, "WdfRequest BOUT %p Incorrect IOCTL %x, %!STATUS!",
@@ -186,6 +181,7 @@ IoEvtBulkOutUrb(
         goto exit;
     }
 
+    UCHAR* transferBuffer = nullptr;
     status = UdecxUrbRetrieveBuffer(Request, &transferBuffer, &transferBufferLength);
     if (!NT_SUCCESS(status))
     {
@@ -195,6 +191,7 @@ IoEvtBulkOutUrb(
     }
 
     // try to get us information about a request that may be waiting for this info
+    WDFREQUEST matchingRead = 0;
     status = WRQueuePushWrite(
         &(pBackChannelContext->missionRequest),
         transferBuffer,
@@ -209,11 +206,9 @@ IoEvtBulkOutUrb(
         // this is a back-channel read, not a USB read!
         status = WdfRequestRetrieveOutputBuffer(matchingRead, 1, &rbuffer, &rlen);
 
+        SIZE_T completeBytes = 0;
         if (!NT_SUCCESS(status))  {
-
-            LogError(TRACE_DEVICE, "WdfRequest %p cannot retrieve mission completion buffer %!STATUS!",
-                matchingRead, status);
-
+            LogError(TRACE_DEVICE, "WdfRequest %p cannot retrieve mission completion buffer %!STATUS!", matchingRead, status);
         } else  {
             completeBytes = MINLEN(rlen, transferBufferLength);
             memcpy(rbuffer, transferBuffer, completeBytes);
@@ -225,8 +220,6 @@ IoEvtBulkOutUrb(
     } else {
         LogInfo(TRACE_DEVICE, "Mission request %p enqueued", Request);
     }
-
-
 
 exit:
     // writes never pended, always completed
