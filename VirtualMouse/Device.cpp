@@ -65,45 +65,31 @@ Return Value:
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&wdfRequestAttributes, REQUEST_CONTEXT);
 	WdfDeviceInitSetRequestAttributes(WdfDeviceInit, &wdfRequestAttributes);
 
-	//
 	// To distinguish I/O sent to GUID_DEVINTERFACE_USB_HOST_CONTROLLER, we will enable
 	// interface reference strings. This requires calling WdfDeviceInitSetFileObjectConfig
 	// with FileObjectClass WdfFileObjectWdfXxx.
-	//
 	WDF_FILEOBJECT_CONFIG_INIT(&fileConfig,
 		WDF_NO_EVENT_CALLBACK,
 		WDF_NO_EVENT_CALLBACK,
 		WDF_NO_EVENT_CALLBACK // No cleanup callback function
 	);
 
-	//
 	// Safest value forces WDF to track handles separately. If the driver stack allows it, then
 	// for performance, we should change this to a different option.
-	//
 	fileConfig.FileObjectClass = WdfFileObjectWdfCannotUseFsContexts;
 
-	WdfDeviceInitSetFileObjectConfig(WdfDeviceInit,
-		&fileConfig,
-		WDF_NO_OBJECT_ATTRIBUTES);
+	WdfDeviceInitSetFileObjectConfig(WdfDeviceInit, &fileConfig, WDF_NO_OBJECT_ATTRIBUTES);
 
-	//
 	// Set the security descriptor for the device.
-	//
 	NTSTATUS status = WdfDeviceInitAssignSDDLString(WdfDeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RW_RES_R);
-
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "WdfDeviceInitAssignSDDLString Failed %!STATUS!", status);
 		goto exit;
 	}
 
-	//
 	// Do additional setup required for USB controllers.
-	//
 	status = UdecxInitializeWdfDeviceInit(WdfDeviceInit);
-
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "UdecxInitializeDeviceInit failed %!STATUS!", status);
 		goto exit;
 	}
@@ -111,43 +97,29 @@ Return Value:
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&wdfDeviceAttributes, UDECX_USBCONTROLLER_CONTEXT);
 	wdfDeviceAttributes.EvtCleanupCallback = ControllerWdfEvtCleanupCallback;
 
-	//
 	// Call WdfDeviceCreate with a few extra compatibility steps to ensure this device looks
 	// exactly like other USB host controllers.
-	//
 	status = ControllerCreateWdfDeviceWithNameAndSymLink(&WdfDeviceInit,
 		&wdfDeviceAttributes,
 		&wdfDevice);
-
 	if (!NT_SUCCESS(status)) {
-
 		goto exit;
 	}
 
-	//
 	// Create the device interface.
-	//
-	RtlInitUnicodeString(&refString,
-		USB_HOST_DEVINTERFACE_REF_STRING);
+	RtlInitUnicodeString(&refString, USB_HOST_DEVINTERFACE_REF_STRING);
 
-	status = WdfDeviceCreateDeviceInterface(wdfDevice,
-		(LPGUID)&GUID_DEVINTERFACE_USB_HOST_CONTROLLER,
-		&refString);
-
+	status = WdfDeviceCreateDeviceInterface(wdfDevice, (LPGUID)&GUID_DEVINTERFACE_USB_HOST_CONTROLLER, &refString);
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "WdfDeviceCreateDeviceInterface Failed %!STATUS!", status);
 		goto exit;
 	}
-
 
     // create a 2nd interface for back-channel interaction with the controller
     status = WdfDeviceCreateDeviceInterface(wdfDevice,
         (LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL,
         NULL);
-
     if (!NT_SUCCESS(status)) {
-
         LogError(TRACE_DEVICE, "WdfDeviceCreateDeviceInterface (backchannel) Failed %!STATUS!", status);
         goto exit;
     }
@@ -160,27 +132,20 @@ Return Value:
         LogError(TRACE_DEVICE, "Unable to add USB device emulation, err= %!STATUS!", status);
         goto exit;
     }
-	//
-	// Initialize controller data members.
 
+	// Initialize controller data members.
 	pControllerContext = GetUsbControllerContext(wdfDevice);
 
     status = BackChannelInit(wdfDevice);
-    if (!NT_SUCCESS(status))
-    {
+    if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "Unable to initialize backchannel err=%!STATUS!", status);
         goto exit;
     }
 
+	KeInitializeEvent(&pControllerContext->ResetCompleteEvent, NotificationEvent, FALSE /* initial state: not signaled */);
 
-	KeInitializeEvent(&pControllerContext->ResetCompleteEvent,
-		NotificationEvent,
-		FALSE /* initial state: not signaled */);
-
-	//
 	// Create default queue. It only supports USB controller IOCTLs. (USB I/O will come through
 	// in separate USB device queues.)
-	//
 	WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&defaultQueueConfig, WdfIoQueueDispatchSequential);
 	defaultQueueConfig.EvtIoDeviceControl = ControllerEvtIoDeviceControl;
     defaultQueueConfig.EvtIoRead = BackChannelEvtRead;
@@ -191,36 +156,24 @@ Return Value:
 		&defaultQueueConfig,
 		WDF_NO_OBJECT_ATTRIBUTES,
 		&pControllerContext->DefaultQueue);
-
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "Default queue creation failed %!STATUS!", status);
 		goto exit;
 	}
 
-
-
-	//
 	// Initialize virtual USB device software objects.
-	//
 	status = Usb_Initialize(wdfDevice);
-
 	if (!NT_SUCCESS(status)) {
-
 		goto exit;
 	}
 
-	//
 	// Setup the S0 Idle settings just so that we get registered with power
 	// framework as some SOC platforms depend on it. 
-	//
 	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS_INIT(&idleSettings, IdleCannotWakeFromS0); // TODO:can
-
 																					 //idleSettings.IdleTimeoutType = SystemManagedIdleTimeoutWithHint;
 																					 //idleSettings.Enabled = WdfFalse;
 
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "WdfDeviceAssignS0IdleSettings failed %!STATUS!", status);
 		goto exit;
 	}
@@ -228,8 +181,6 @@ Return Value:
 exit:
 	FuncExit(TRACE_DEVICE, status);
 	return status;
-
-
 }
 
 
@@ -288,44 +239,29 @@ NTSTATUS
 	UINT32 instanceNumber = 0;
 	for (instanceNumber = 0; instanceNumber < MAXUINT32; instanceNumber++) {
 
-		status = RtlUnicodeStringPrintf(&uniDeviceName,
-			L"%ws%d",
-			BASE_DEVICE_NAME,
-			instanceNumber);
-
+		status = RtlUnicodeStringPrintf(&uniDeviceName, L"%ws%d", BASE_DEVICE_NAME, instanceNumber);
 		if (!NT_SUCCESS(status)) {
-
 			LogError(TRACE_DEVICE, "RtlUnicodeStringPrintf (uniDeviceName) failed %!STATUS!", status);
 			goto exit;
 		}
 
 		status = WdfDeviceInitAssignName(*WdfDeviceInit, &uniDeviceName);
-
 		if (!NT_SUCCESS(status)) {
-
 			LogError(TRACE_DEVICE, "WdfDeviceInitAssignName Failed %!STATUS!", status);
 			goto exit;
 		}
 
 		status = WdfDeviceCreate(WdfDeviceInit, WdfDeviceAttributes, WdfDevice);
-
 		if (status == STATUS_OBJECT_NAME_COLLISION) {
-
-			//
 			// This is expected to happen at least once when another USB host controller
 			// already exists on the system.
-			//
 			LogVerbose(TRACE_DEVICE, "WdfDeviceCreate Object Name Collision %d", instanceNumber);
-
 		}
 		else if (!NT_SUCCESS(status)) {
-
 			LogError(TRACE_DEVICE, "WdfDeviceCreate Failed %!STATUS!", status);
 			goto exit;
-
 		}
 		else {
-
 			isCreated = TRUE;
 			break;
 		}
@@ -333,27 +269,19 @@ NTSTATUS
 
 	if (!isCreated) {
 		status = STATUS_OBJECT_NAME_COLLISION;
-		LogError(TRACE_DEVICE, "All instance numbers of USB host controller are already used %!STATUS!",
-			status);
+		LogError(TRACE_DEVICE, "All instance numbers of USB host controller are already used %!STATUS!", status);
 		goto exit;
 	}
 
 	// Create the symbolic link (also for compatibility).
-	status = RtlUnicodeStringPrintf(&uniSymLinkName,
-		L"%ws%d",
-		BASE_SYMBOLIC_LINK_NAME,
-		instanceNumber);
-
+	status = RtlUnicodeStringPrintf(&uniSymLinkName, L"%ws%d", BASE_SYMBOLIC_LINK_NAME, instanceNumber);
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "RtlUnicodeStringPrintf (SymLinkName) Failed %!STATUS!", status);
 		goto exit;
 	}
 
 	status = WdfDeviceCreateSymbolicLink(*WdfDevice, &uniSymLinkName);
-
 	if (!NT_SUCCESS(status)) {
-
 		LogError(TRACE_DEVICE, "WdfDeviceCreateSymbolicLink Failed %!STATUS!", status);
 		goto exit;
 	}
@@ -362,7 +290,6 @@ exit:
 	FuncExit(TRACE_DEVICE, status);
 	return status;
 }
-
 
 
 NTSTATUS
@@ -382,9 +309,6 @@ ControllerWdfEvtDevicePrepareHardware(
 	FuncExit(TRACE_DEVICE, 0);
 	return STATUS_SUCCESS;
 }
-
-
-
 
 
 NTSTATUS
@@ -509,7 +433,6 @@ ControllerEvtIoDeviceControl(
     NTSTATUS status = STATUS_SUCCESS;
     WDFDEVICE ctrdevice = WdfIoQueueGetDevice(Queue);
 
-    
     UNREFERENCED_PARAMETER(OutputBufferLength);
 	UNREFERENCED_PARAMETER(InputBufferLength);
 
