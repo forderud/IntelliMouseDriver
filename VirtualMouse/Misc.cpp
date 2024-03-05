@@ -32,7 +32,7 @@ _WQQCancelUSBRequest(
 NTSTATUS
 WRQueueInit(
     _In_    WDFDEVICE parent,
-    _Inout_ PWRITE_BUFFER_TO_READ_REQUEST_QUEUE pQ,
+    _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
     _In_    BOOLEAN bUSBReqQueue
 )
 {
@@ -81,7 +81,7 @@ Exit:
 
 VOID
 WRQueueDestroy(
-    _Inout_ PWRITE_BUFFER_TO_READ_REQUEST_QUEUE pQ
+    _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ
 )
 {
     PLIST_ENTRY e;
@@ -109,7 +109,7 @@ WRQueueDestroy(
 
 NTSTATUS
 WRQueuePushWrite(
-    _In_ PWRITE_BUFFER_TO_READ_REQUEST_QUEUE pQ,
+    _In_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
     _In_ PVOID wbuffer,
     _In_ SIZE_T wlen,
     _Out_ WDFREQUEST *rqReadToComplete
@@ -162,7 +162,7 @@ Exit:
 
 NTSTATUS
 WRQueuePullRead(
-    _In_  PWRITE_BUFFER_TO_READ_REQUEST_QUEUE pQ,
+    _In_  WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
     _In_  WDFREQUEST rqRead,
     _Out_ PVOID rbuffer,
     _In_  SIZE_T rlen,
@@ -220,6 +220,3 @@ WRQueuePullRead(
 Exit:
     return status;
 }
-
-
-
