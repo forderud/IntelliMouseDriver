@@ -35,10 +35,10 @@ DEFINE_GUID(GUID_DEVINTERFACE_UDE_BACKCHANNEL,
 
 
 #pragma pack(push, 1)
-typedef struct _MOUSE_INPUT_REPORT {
+struct MOUSE_INPUT_REPORT {
     UINT8 Buttons;
     INT8 X;
     INT8 Y;
     INT8 Wheel;
-} MOUSE_INPUT_REPORT;
+};
 #pragma pack(pop)
