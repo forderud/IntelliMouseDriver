@@ -13,5 +13,5 @@ Write-Host("  Color: {0:x}" -f $mouse.TailLight) # display as hex string
 $mouse.TailLight = 0xFF0000 # 0xBBGGRR format
 Write-Host("  Changing color to {0:x}" -f $mouse.TailLight) # display as hex string
 
-Write-Host("Storing changes...")
+Write-Host("Storing changes.")
 Set-CimInstance -CimInstance $mouse
