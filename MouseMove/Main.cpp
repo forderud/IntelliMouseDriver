@@ -13,33 +13,22 @@
 using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
 
 
-std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid)
-{
+std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid) {
+    const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
+
     ULONG deviceInterfaceListLength = 0;
-    CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(
-        &deviceInterfaceListLength,
-        InterfaceGuid,
-        NULL,
-        CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
+    CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, InterfaceGuid, NULL, searchScope);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list size.\n", cr);
         return {};
     }
-
     if (deviceInterfaceListLength <= 1) {
-        printf("Error: No active device interfaces found.\n"
-            " Is the sample driver loaded?");
+        printf("Error: No active device interfaces found.\nIs the sample driver loaded?");
         return {};
     }
 
     std::vector<WCHAR> deviceInterfaceList(deviceInterfaceListLength, L'\0');
-
-    cr = CM_Get_Device_Interface_ListW(
-        InterfaceGuid,
-        NULL,
-        deviceInterfaceList.data(),
-        deviceInterfaceListLength,
-        CM_GET_DEVICE_INTERFACE_LIST_PRESENT);
+    cr = CM_Get_Device_Interface_ListW(InterfaceGuid, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list.\n", cr);
         return {};
@@ -47,8 +36,7 @@ std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid)
 
     PWSTR nextInterface = deviceInterfaceList.data() + wcslen(deviceInterfaceList.data()) + 1;
     if (*nextInterface != UNICODE_NULL) {
-        printf("Warning: More than one device interface instance found. \n"
-            "Selecting first matching device.\n\n");
+        printf("Warning: More than one device interface instance found. \nSelecting first matching device.\n\n");
     }
 
     std::wstring result(deviceInterfaceList.data());
