@@ -27,7 +27,7 @@ std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid) {
         return {};
     }
 
-    std::vector<WCHAR> deviceInterfaceList(deviceInterfaceListLength, L'\0');
+    std::wstring deviceInterfaceList(deviceInterfaceListLength, L'\0');
     cr = CM_Get_Device_Interface_ListW(InterfaceGuid, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list.\n", cr);
