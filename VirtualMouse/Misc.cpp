@@ -113,7 +113,7 @@ WRQueuePushWrite(
     NTSTATUS status;
     if (rqReadToComplete == NULL) {
         status = STATUS_INVALID_PARAMETER;
-        goto Exit;
+        return status;
     }
 
     *rqReadToComplete = NULL;
@@ -122,7 +122,7 @@ WRQueuePushWrite(
     status = WdfIoQueueRetrieveNextRequest(pQ->ReadBufferQueue, &firstPendingRead);
     if ( NT_SUCCESS(status) )  {
         (*rqReadToComplete) = firstPendingRead;
-        goto Exit;
+        return status;
     } else {
         status = STATUS_SUCCESS; // til proven otherwise
 
@@ -133,7 +133,7 @@ WRQueuePushWrite(
                 TRACE_QUEUE,
                 "Not enough memory to queue write, err= %!STATUS!", status);
             status = STATUS_INSUFFICIENT_RESOURCES;
-            goto Exit;
+            return status;
         }
 
         // copy
@@ -148,7 +148,6 @@ WRQueuePushWrite(
         WdfSpinLockRelease(pQ->qsync);
     }
 
-Exit:
     return status;
 }
 
@@ -167,15 +166,15 @@ WRQueuePullRead(
 
     if (pbReadyToComplete == NULL) {
         status = STATUS_INVALID_PARAMETER;
-        goto Exit;
+        return status;
     }
     if (completedBytes == NULL) {
         status = STATUS_INVALID_PARAMETER;
-        goto Exit;
+        return status;
     }
     if (rbuffer == NULL) {
         status = STATUS_INVALID_PARAMETER;
-        goto Exit;
+        return status;
     }
 
     // defaults
@@ -190,9 +189,7 @@ WRQueuePullRead(
         // no dangling writes found, must pend this read
         status = WdfRequestForwardToIoQueue(rqRead, pQ->ReadBufferQueue);
         if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "Unable to foward pending read, err= %!STATUS!", status);
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "Unable to foward pending read, err= %!STATUS!", status);
         }
     } else {
         size_t minlen;
@@ -207,6 +204,5 @@ WRQueuePullRead(
         status = STATUS_SUCCESS;
     }
 
-Exit:
     return status;
 }
