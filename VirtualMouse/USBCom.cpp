@@ -86,8 +86,6 @@ IoEvtControlUrb(
     _In_ ULONG IoControlCode
 )
 {
-    WDF_USB_CONTROL_SETUP_PACKET setupPacket;
-    NTSTATUS status;
     UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
@@ -99,8 +97,8 @@ IoEvtControlUrb(
         // These are on the control pipe.
         // We don't do anything special with these requests,
         // but this is where we would add processing for vendor-specific commands.
-
-        status = UdecxUrbRetrieveControlSetupPacket(Request, &setupPacket);
+        WDF_USB_CONTROL_SETUP_PACKET setupPacket;
+        NTSTATUS status = UdecxUrbRetrieveControlSetupPacket(Request, &setupPacket);
 
         if (!NT_SUCCESS(status))
         {
@@ -236,18 +234,17 @@ IoEvtBulkInUrb(
     _In_ ULONG IoControlCode
 )
 {
+    UNREFERENCED_PARAMETER(OutputBufferLength);
+    UNREFERENCED_PARAMETER(InputBufferLength);
+
     NTSTATUS status = STATUS_SUCCESS;
-    WDFDEVICE backchannel;
     BOOLEAN bReady = FALSE;
     PUCHAR transferBuffer;
     ULONG transferBufferLength;
     SIZE_T completeBytes = 0;
 
-    UNREFERENCED_PARAMETER(OutputBufferLength);
-    UNREFERENCED_PARAMETER(InputBufferLength);
-
     ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
-    backchannel = pEpQContext->backChannelDevice;
+    WDFDEVICE backchannel = pEpQContext->backChannelDevice;
     UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
 
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)
@@ -306,11 +303,9 @@ static VOID
 IoCompletePendingRequest(
     _In_ WDFREQUEST request, MOUSE_INPUT_REPORT report)
 {
-    NTSTATUS status = STATUS_SUCCESS;
     PUCHAR transferBuffer;
     ULONG transferBufferLength;
-
-    status = UdecxUrbRetrieveBuffer(request, &transferBuffer, &transferBufferLength);
+    NTSTATUS status = UdecxUrbRetrieveBuffer(request, &transferBuffer, &transferBufferLength);
     if (!NT_SUCCESS(status))
     {
         LogError(TRACE_DEVICE, "WdfRequest  %p unable to retrieve buffer %!STATUS!", request, status);
@@ -346,12 +341,10 @@ Io_RaiseInterrupt(
     _In_ UDECXUSBDEVICE    Device,
     _In_ MOUSE_INPUT_REPORT LatestStatus)
 {
-    WDFREQUEST request;
-    NTSTATUS status = STATUS_SUCCESS;
-
     IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
 
-    status = WdfIoQueueRetrieveNextRequest( pIoContext->IntrDeferredQueue, &request);
+    WDFREQUEST request;
+    NTSTATUS status = WdfIoQueueRetrieveNextRequest( pIoContext->IntrDeferredQueue, &request);
 
     // no items in the queue?  it is safe to assume the device is sleeping
     if (!NT_SUCCESS(status))    {
@@ -385,23 +378,17 @@ IoEvtInterruptInUrb(
     _In_ ULONG IoControlCode
 )
 {
-    UDECXUSBDEVICE tgtDevice;
     NTSTATUS status = STATUS_SUCCESS;
     MOUSE_INPUT_REPORT LatestStatus = {};
-
     BOOLEAN bHasData = FALSE;
 
     UNREFERENCED_PARAMETER(Request);
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-
     ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
-
-    tgtDevice = pEpQContext->usbDeviceObj;
-
+    UDECXUSBDEVICE tgtDevice = pEpQContext->usbDeviceObj;
     IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(tgtDevice);
-
 
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)   {
         LogError(TRACE_DEVICE, "Invalid Interrupt/IN out IOCTL code %x", IoControlCode);
