@@ -17,9 +17,7 @@
 
 #define UDEFX_POOL_TAG 'UDEX'
 
-//
 // WDFDRIVER Events
-//
 extern "C"
 DRIVER_INITIALIZE DriverEntry;
 

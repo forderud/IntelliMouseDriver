@@ -8,16 +8,14 @@
 #define MINLEN(__a, __b)  ( ((__a) < (__b)) ? (__a) : (__b) )
 
 
-struct BUFFER_CONTENT
-{
+struct BUFFER_CONTENT {
     LIST_ENTRY  BufferLink;
     SIZE_T      BufferLength;
     UCHAR       BufferStart; // variable-size structure, first byte of last field
 };
 
 
-struct WRITE_BUFFER_TO_READ_REQUEST_QUEUE
-{
+struct WRITE_BUFFER_TO_READ_REQUEST_QUEUE {
     LIST_ENTRY WriteBufferQueue; // write data comes in, keep it here to complete a read request
     WDFQUEUE   ReadBufferQueue; // read request comes in, stays here til a matching write buffer arrives
     WDFSPINLOCK qsync;

@@ -5,8 +5,6 @@ to the virtual USB device, so it knows what/when to answer to queries from the h
 All the code in here is for testing purpose, and it is NOT related to UDE directly.
 --*/
 
-#pragma once
-
 #include "public.h"
 #include "Misc.h"
 
@@ -36,5 +34,5 @@ BackChannelIoctl(
 
 
 
-EVT_WDF_IO_QUEUE_IO_READ                        BackChannelEvtRead;
-EVT_WDF_IO_QUEUE_IO_WRITE                       BackChannelEvtWrite;
+EVT_WDF_IO_QUEUE_IO_READ  BackChannelEvtRead;
+EVT_WDF_IO_QUEUE_IO_WRITE BackChannelEvtWrite;

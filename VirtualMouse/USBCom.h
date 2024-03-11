@@ -4,8 +4,6 @@
      (business logic, just a bit above hardware interfaces)
 --*/
 
-#pragma once
-
 #include <ntddk.h>
 #include <wdf.h>
 #include "trace.h"
@@ -19,7 +17,6 @@ struct DEVICE_INTR_STATE {
     ULONG             numUnreadUpdates;
     WDFSPINLOCK       sync;
 };
-
 
 
 struct IO_CONTEXT {
@@ -50,7 +47,6 @@ Io_RaiseInterrupt(
 );
 
 
-
 NTSTATUS
 Io_RetrieveEpQueue(
     _In_ UDECXUSBDEVICE  Device,
@@ -71,8 +67,6 @@ VOID
 Io_FreeEndpointQueues(
     _In_ IO_CONTEXT* pIoContext
 );
-
-
 
 
 NTSTATUS

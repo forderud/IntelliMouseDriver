@@ -12,7 +12,6 @@
 #include "trace.h"
 
 
-
 // device context
 struct USB_CONTEXT {
     WDFDEVICE             ControllerDevice;
@@ -27,7 +26,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USB_CONTEXT, GetUsbDeviceContext);
 
 
 // ----- descriptor constants/strings/indexes
-#define g_BulkOutEndpointAddress 2
+#define g_BulkOutEndpointAddress   2
 #define g_BulkInEndpointAddress    0x84
 #define g_InterruptEndpointAddress 0x86
 
@@ -38,7 +37,6 @@ extern const UCHAR g_HIDMouseUsbReportDescriptor[];
 extern const USHORT g_HIDMouseUsbReportDescriptor_len;
 
 // ------------------------------------------------
-
 
 NTSTATUS
 Usb_Initialize(
@@ -61,16 +59,13 @@ Usb_Destroy(
 	_In_ WDFDEVICE WdfDevice
 );
 
-//
 // Private functions
-//
 NTSTATUS
 UsbCreateEndpointObj(
 	_In_   UDECXUSBDEVICE    WdfUsbChildDevice,
     _In_   UCHAR             epAddr,
     _Out_  UDECXUSBENDPOINT *pNewEpObjAddr
 );
-
 
 EVT_UDECX_USB_DEVICE_ENDPOINTS_CONFIGURE              UsbDevice_EvtUsbDeviceEndpointsConfigure;
 EVT_UDECX_USB_DEVICE_D0_ENTRY                         UsbDevice_EvtUsbDeviceLinkPowerEntry;

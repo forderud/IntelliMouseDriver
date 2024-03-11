@@ -1,7 +1,6 @@
 /*++
     This file contains the device definitions.
 --*/
-
 #pragma once
 
 #include "public.h"
@@ -39,7 +38,6 @@ struct REQUEST_CONTEXT {
 	UINT32 unused;
 };
 WDF_DECLARE_CONTEXT_TYPE(REQUEST_CONTEXT);
-
 
 
 
