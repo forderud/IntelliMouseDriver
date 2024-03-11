@@ -424,21 +424,18 @@ ControllerEvtIoDeviceControl(
 
 	BOOLEAN handled = UdecxWdfDeviceTryHandleUserIoctl(ctrdevice, Request);
 	if (handled) {
-		goto exit;
+		return;
 	}
 
     handled = BackChannelIoctl(IoControlCode, ctrdevice, Request);
     if (handled) {
-        goto exit;
+		return;
     }
 
 	status = STATUS_INVALID_DEVICE_REQUEST;
 	LogError(TRACE_DEVICE, "Unexpected I/O control code 0x%x %!STATUS!", IoControlCode, status);
 	NT_ASSERTMSG("Unexpected I/O", FALSE);
 	WdfRequestComplete(Request, status);
-
-exit:
-	return;
 }
 
 

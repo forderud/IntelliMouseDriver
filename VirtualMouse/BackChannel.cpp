@@ -35,16 +35,15 @@ BackChannelInit(
     NTSTATUS status = WRQueueInit(ctrdevice, &(pControllerContext->missionRequest), FALSE);
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "Unable to initialize mission completion, err= %!STATUS!", status);
-        goto exit;
+        return status;
     }
 
     status = WRQueueInit(ctrdevice, &(pControllerContext->missionCompletion), TRUE);
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "Unable to initialize mission request, err= %!STATUS!", status);
-        goto exit;
+        return status;
     }
 
-exit:
     return status;
 }
 
@@ -80,33 +79,20 @@ BackChannelEvtRead(
     NTSTATUS status = WdfRequestRetrieveOutputBuffer(Request, 1, &transferBuffer, &transferBufferLength);
     if (!NT_SUCCESS(status))
     {
-        LogError(TRACE_DEVICE, "BCHAN WdfRequest read %p unable to retrieve buffer %!STATUS!",
-            Request, status);
-        goto exit;
+        LogError(TRACE_DEVICE, "BCHAN WdfRequest read %p unable to retrieve buffer %!STATUS!", Request, status);
+        return;
     }
 
     // try to get us information about a request that may be waiting for this info
-    status = WRQueuePullRead(
-        &(pControllerContext->missionRequest),
-        Request,
-        transferBuffer,
-        transferBufferLength,
-        &bReady,
-        &completeBytes);
+    status = WRQueuePullRead(&(pControllerContext->missionRequest), Request,
+        transferBuffer, transferBufferLength, &bReady, &completeBytes);
 
-    if (bReady)
-    {
+    if (bReady) {
         WdfRequestCompleteWithInformation(Request, status, completeBytes);
         LogInfo(TRACE_DEVICE, "BCHAN Mission request %p filed with pre-existing data", Request);
-    }
-    else {
+    } else {
         LogInfo(TRACE_DEVICE, "BCHAN Mission request %p pended", Request);
     }
-
-
-exit:
-    return;
-
 }
 
 VOID
