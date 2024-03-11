@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
-#include <cfgmgr32.h> // for CM_Get_Device_Interface_List
 #include <hidsdi.h>
+#include <SetupAPI.h>
 #include <wrl/wrappers/corewrappers.h>
 
 #include <cassert>
@@ -9,7 +9,7 @@
 #include <vector>
 
 #pragma comment(lib, "hid.lib")
-#pragma comment(lib, "mincore.lib")
+#pragma comment (lib, "Setupapi.lib")
 
 
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */
@@ -63,28 +63,83 @@ public:
         GUID hidguid = {};
         HidD_GetHidGuid(&hidguid);
 
-        const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
-
-        ULONG deviceInterfaceListLength = 0;
-        CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, &hidguid, NULL, searchScope);
-        assert(cr == CR_SUCCESS);
-
-        // symbolic link name of interface instances
-        std::wstring deviceInterfaceList(deviceInterfaceListLength, L'\0');
-        cr = CM_Get_Device_Interface_ListW(&hidguid, NULL, const_cast<wchar_t*>(deviceInterfaceList.data()), deviceInterfaceListLength, searchScope);
-        assert(cr == CR_SUCCESS);
+        // Retrieve a list of all present USB devices with a device interface.
+        HDEVINFO devInfoSet = SetupDiGetClassDevsW(&hidguid, NULL, 0, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+        assert(devInfoSet != INVALID_HANDLE_VALUE);
 
         std::vector<Match> results;
-        for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
-            auto result = CheckDevice(currentInterface, query, verbose);
+        for (DWORD devIdx = 0;; ++devIdx) {
+            // get device information
+            SP_DEVINFO_DATA devInfoData = {};
+            devInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+            if (!SetupDiEnumDeviceInfo(devInfoSet, devIdx, &devInfoData))
+                break;
+
+            // list of hardware IDs 
+            auto hw_id_list = GetHWIds(devInfoSet, &devInfoData);
+            if (verbose) {
+                for (const auto& hw_id :  hw_id_list)
+                    printf("  HW ID: %ls\n", hw_id.c_str());
+            }
+
+            // get device interfaces
+            SP_DEVICE_INTERFACE_DATA devIfData = {};
+            devIfData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+            BOOL ok = SetupDiEnumDeviceInterfaces(devInfoSet, NULL, &hidguid, devIdx, &devIfData);
+            assert(ok);
+
+            std::vector<BYTE> devIfcDetailDataBuf;
+            SP_DEVICE_INTERFACE_DETAIL_DATA_W* devIfcDetailData = nullptr;
+            {
+                DWORD size = 0;
+                SetupDiGetDeviceInterfaceDetailW(devInfoSet, &devIfData, NULL, 0, &size, NULL); // expected to fail
+
+                devIfcDetailDataBuf.resize(size, (BYTE)0);
+                devIfcDetailData = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)devIfcDetailDataBuf.data();
+                devIfcDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_W);
+
+                // get details about a device interface
+                ok = SetupDiGetDeviceInterfaceDetailW(devInfoSet, &devIfData, devIfcDetailData, size, &size, NULL);
+                assert(ok);
+            }
+
+            auto result = CheckDevice(devIfcDetailData->DevicePath, query, verbose);
             if (!result.name.empty())
                 results.push_back(std::move(result));
         }
+
+        SetupDiDestroyDeviceInfoList(devInfoSet);
 
         return results;
     }
 
 private:
+    /** Get list of hardware IDs for a device. */
+    static std::vector<std::wstring> GetHWIds(HDEVINFO devInfoSet, SP_DEVINFO_DATA* devInfoData) {
+        // Get required size for device property
+        DWORD type = 0;
+        DWORD size = 0;
+        SetupDiGetDeviceRegistryPropertyW(devInfoSet, devInfoData, SPDRP_HARDWAREID, &type, NULL, 0, &size); // expected to fail
+
+        // Get SPDRP_HARDWAREID device property in REG_MULTI_SZ string format
+        std::vector<wchar_t> hw_ids(size/sizeof(wchar_t), L'\0');
+        BOOL ok = SetupDiGetDeviceRegistryPropertyW(devInfoSet, devInfoData, SPDRP_HARDWAREID, &type, (BYTE*)hw_ids.data(), size, NULL);
+        assert(ok);
+
+        return ParseMultiSz(hw_ids.data());
+    }
+
+    /** Parse REG_MULTI_SZ string into a list of strings. */
+    static std::vector<std::wstring> ParseMultiSz(const wchar_t* ptr) {
+        std::vector<std::wstring> result;
+        // parse list of zero-terminated strings that are terminated by a null-pointer
+        while (*ptr) {
+            result.emplace_back(ptr);
+            ptr += lstrlenW(ptr) + 1; // advance to next string
+        }
+        return result;
+    }
+
     static Match CheckDevice(const wchar_t* deviceName, const Query& query, bool verbose) {
         FileHandle hid_dev(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
