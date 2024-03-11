@@ -36,21 +36,16 @@ NTSTATUS. Could fail on allocation failure or the same context type already exis
 
 --*/
 {
-    NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attributes;
-
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, IO_CONTEXT);
 
-    status = WdfObjectAllocateContext(Object, &attributes, NULL);
-
+    NTSTATUS status = WdfObjectAllocateContext(Object, &attributes, NULL);
     if (!NT_SUCCESS(status)) {
-
         LogError(TRACE_DEVICE, "Unable to allocate new context for WDF object %p", Object);
         goto exit;
     }
 
 exit:
-
     return status;
 }
 
