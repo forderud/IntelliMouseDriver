@@ -75,8 +75,8 @@ static bool GenerateMouseReport(HANDLE dev, USHORT code) {
         &index,                // BytesReturned
         0)) {                  // Ptr to Overlapped structure
 
-        DWORD code = GetLastError();
-        printf("DeviceIoControl failed with error 0x%x\n", code);
+        DWORD err = GetLastError();
+        printf("DeviceIoControl failed with error 0x%x\n", err);
         return false;
     }
 
