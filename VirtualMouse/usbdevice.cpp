@@ -164,10 +164,9 @@ Usb_Initialize(
     controllerContext->ChildDeviceInit = UdecxUsbDeviceInitAllocate(WdfDevice);
 
     if (controllerContext->ChildDeviceInit == NULL) {
-
         status = STATUS_INSUFFICIENT_RESOURCES;
         LogError(TRACE_DEVICE, "Failed to allocate UDECXUSBDEVICE_INIT %!STATUS!", status);
-        goto exit;
+        return status;
     }
 
     // State changed callbacks
@@ -185,34 +184,29 @@ Usb_Initialize(
     UdecxUsbDeviceInitSetEndpointsType(controllerContext->ChildDeviceInit, UdecxEndpointTypeSimple);
 
     // Device descriptor
-    status = UdecxUsbDeviceInitAddDescriptor(controllerContext->ChildDeviceInit,
-        (PUCHAR)g_UsbDeviceDescriptor,
-        sizeof(g_UsbDeviceDescriptor));
-
+    status = UdecxUsbDeviceInitAddDescriptor(controllerContext->ChildDeviceInit, (PUCHAR)g_UsbDeviceDescriptor, sizeof(g_UsbDeviceDescriptor));
     if (!NT_SUCCESS(status)) {
-
-        goto exit;
+        return status;
     }
 
     // String descriptors
     status = UdecxUsbDeviceInitAddDescriptorWithIndex(controllerContext->ChildDeviceInit, (PUCHAR)g_LanguageDescriptor, sizeof(g_LanguageDescriptor), 0);
     if (!NT_SUCCESS(status)) {
-        goto exit;
+        return status;
     }
 
     status = UdecxUsbDeviceInitAddStringDescriptor(controllerContext->ChildDeviceInit, &g_ManufacturerStringEnUs, g_ManufacturerIndex, AMERICAN_ENGLISH);
     if (!NT_SUCCESS(status)) {
-        goto exit;
+        return status;
     }
 
     status = UdecxUsbDeviceInitAddStringDescriptor(controllerContext->ChildDeviceInit, &g_ProductStringEnUs, g_ProductIndex, AMERICAN_ENGLISH);
     if (!NT_SUCCESS(status)) {
-        goto exit;
+        return status;
     }
 
     // Remaining init requires lower edge interaction.  Postpone to Usb_ReadDescriptorsAndPlugIn.
 
-exit:
     // On failure in this function (or later but still before creating the UDECXUSBDEVICE),
     // UdecxUsbDeviceInit will be freed by Usb_Destroy.
     return status;
@@ -332,14 +326,12 @@ Usb_Disconnect(
 
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "UdecxUsbDevicePlugOutAndDelete failed with %!STATUS!", status);
-        goto exit;
+        return status;
     }
 
     Io_FreeEndpointQueues(&ioContextCopy);
 
     LogInfo(TRACE_DEVICE, "Usb_Disconnect ends successfully");
-
-exit:
     return status;
 }
 
