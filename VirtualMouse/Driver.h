@@ -15,7 +15,7 @@
 #include "trace.h"
 
 
-#define UDEFX_POOL_TAG 'UDEX'
+#define POOL_TAG 'UDEX'
 
 // WDFDRIVER Events
 extern "C"

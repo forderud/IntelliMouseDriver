@@ -42,7 +42,7 @@ Parameters Description:
     WDF_DRIVER_CONFIG_INIT(&config,
                            UDEFX2EvtDeviceAdd
                            );
-	config.DriverPoolTag = UDEFX_POOL_TAG;
+	config.DriverPoolTag = POOL_TAG;
 
     NTSTATUS status = WdfDriverCreate(DriverObject,
                              RegistryPath,

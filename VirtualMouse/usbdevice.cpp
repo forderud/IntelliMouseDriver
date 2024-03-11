@@ -6,8 +6,6 @@
 #include "ucx/1.4/ucxobjects.h"
 #include "usbdevice.tmh"
 
-#define UDECXMBIM_POOL_TAG 'UDEI'
-
 
 // START ------------------ descriptor -------------------------------
 
@@ -236,7 +234,7 @@ Usb_ReadDescriptorsAndPlugIn(
     pComputedConfigDescSet = NULL;
 
     // Compute configuration descriptor dynamically.
-    pComputedConfigDescSet = (PUSB_CONFIGURATION_DESCRIPTOR)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(g_UsbConfigDescriptorSet), UDECXMBIM_POOL_TAG);
+    pComputedConfigDescSet = (PUSB_CONFIGURATION_DESCRIPTOR)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(g_UsbConfigDescriptorSet), POOL_TAG);
 
     if (pComputedConfigDescSet == NULL) {
         status = STATUS_INSUFFICIENT_RESOURCES;
@@ -308,7 +306,7 @@ Usb_ReadDescriptorsAndPlugIn(
 exit:
     // Free temporary allocation always.
     if (pComputedConfigDescSet != NULL) {
-        ExFreePoolWithTag(pComputedConfigDescSet, UDECXMBIM_POOL_TAG);
+        ExFreePoolWithTag(pComputedConfigDescSet, POOL_TAG);
         pComputedConfigDescSet = NULL;
     }
 
