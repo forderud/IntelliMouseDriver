@@ -1,7 +1,6 @@
 /*++
     This file contains the driver entry points and callbacks.
 --*/
-
 #include "driver.h"
 #include "driver.tmh"
 
@@ -27,10 +26,6 @@ Parameters Description:
     RegistryPath - represents the driver specific path in the Registry.
     The function driver can use the path to store driver related data between
     reboots. The path does not store hardware instance specific data.
-
-Return Value:
-    STATUS_SUCCESS if successful,
-    STATUS_UNSUCCESSFUL otherwise.
 --*/
 {
     // Initialize WPP Tracing

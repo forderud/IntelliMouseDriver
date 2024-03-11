@@ -19,21 +19,13 @@ UDEFX2CreateDevice(
     _Inout_ PWDFDEVICE_INIT WdfDeviceInit
     )
 /*++
-
 Routine Description:
-
     Worker routine called to create a device and its software resources.
 
 Arguments:
-
     DeviceInit - Pointer to an opaque init structure. Memory for this
                     structure will be freed by the framework when the WdfDeviceCreate
                     succeeds. So don't access the structure after that point.
-
-Return Value:
-
-    NTSTATUS
-
 --*/
 {
 	WDFDEVICE                           wdfDevice;
@@ -194,7 +186,6 @@ ControllerCreateWdfDeviceWithNameAndSymLink(
 	WDFDEVICE * WdfDevice
 )
 /*++
-
 Routine Description:
 
 Create the WDFDEVICE with a few extra compatibility steps, to ensure this device looks exactly
@@ -217,11 +208,6 @@ WdfDevice - The created WdfDevice. Note, when failure is returned this may be NU
 Non-NULL indicates the function encountered a failure after successfully calling
 WdfDeviceCreate. WDF will delete the WdfDevice itself if EvtDriverDeviceAdd returns
 a failure.
-
-Return Value:
-
-NTSTATUS
-
 --*/
 {
 	NTSTATUS status;

@@ -21,19 +21,14 @@ Io_AllocateContext(
     _In_ UDECXUSBDEVICE Object
 )
 /*++
-
 Routine Description:
-
-Object context allocation helper
+  Object context allocation helper
 
 Arguments:
-
-Object - WDF object upon which to allocate the new context
+  Object - WDF object upon which to allocate the new context
 
 Return value:
-
-NTSTATUS. Could fail on allocation failure or the same context type already exists on the object
-
+  NTSTATUS. Could fail on allocation failure or the same context type already exists on the object
 --*/
 {
     WDF_OBJECT_ATTRIBUTES attributes;
@@ -144,10 +139,6 @@ exit:
     return;
 }
 
-
-static int _Test_rebound = 0;
-
-
 static VOID
 IoEvtBulkOutUrb(
     _In_ WDFQUEUE Queue,
@@ -220,9 +211,6 @@ exit:
     UdecxUrbCompleteWithNtStatus(Request, status);
     return;
 }
-
-
-
 
 
 static VOID
@@ -335,7 +323,6 @@ exit:
 }
 
 
-
 NTSTATUS
 Io_RaiseInterrupt(
     _In_ UDECXUSBDEVICE    Device,
@@ -366,7 +353,6 @@ Io_RaiseInterrupt(
 
     return status;
 }
-
 
 
 static VOID
