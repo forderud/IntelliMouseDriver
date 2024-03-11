@@ -65,12 +65,10 @@ WRQueueInit(
         goto Error;
     }
 
-    goto Exit;
+    return status;
 
 Error: // free anything done half-way
     WRQueueDestroy(pQ);
-
-Exit:
     return status;
 }
 

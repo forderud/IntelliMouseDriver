@@ -37,10 +37,9 @@ Return value:
     NTSTATUS status = WdfObjectAllocateContext(Object, &attributes, NULL);
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "Unable to allocate new context for WDF object %p", Object);
-        goto exit;
+        return status;
     }
 
-exit:
     return status;
 }
 
@@ -100,7 +99,7 @@ IoEvtControlUrb(
             LogError(TRACE_DEVICE, "WdfRequest %p is not a control URB? UdecxUrbRetrieveControlSetupPacket %!STATUS!",
                 Request, status);
             UdecxUrbCompleteWithNtStatus(Request, status);
-            goto exit;
+            return;
         }
 
         // if Get descriptor request (0x06)
@@ -111,7 +110,7 @@ IoEvtControlUrb(
                 // check if driver now really emulating HID device
                 status = CompleteRequestWithDescriptor(Request, g_HIDMouseUsbReportDescriptor, g_HIDMouseUsbReportDescriptor_len);
                 UdecxUrbCompleteWithNtStatus(Request, status);
-                goto exit;
+                return;
             }
         }
 
@@ -135,8 +134,6 @@ IoEvtControlUrb(
     {
         LogError(TRACE_DEVICE, "control NO submit code is %x", IoControlCode);
     }
-exit:
-    return;
 }
 
 static VOID
@@ -240,7 +237,7 @@ IoEvtBulkInUrb(
         LogError(TRACE_DEVICE, "WdfRequest BIN %p Incorrect IOCTL %x, %!STATUS!",
             Request, IoControlCode, status);
         status = STATUS_INVALID_PARAMETER;
-        goto exit;
+        return;
     }
 
     status = UdecxUrbRetrieveBuffer(Request, &transferBuffer, &transferBufferLength);
@@ -248,7 +245,7 @@ IoEvtBulkInUrb(
     {
         LogError(TRACE_DEVICE, "WdfRequest BIN %p unable to retrieve buffer %!STATUS!",
             Request, status);
-        goto exit;
+        return;
     }
 
     // try to get us information about a request that may be waiting for this info
@@ -268,10 +265,6 @@ IoEvtBulkInUrb(
     } else {
         LogInfo(TRACE_DEVICE, "Mission response %p pended", Request);
     }
-
-
-exit:
-    return;
 }
 
 
@@ -317,9 +310,6 @@ IoCompletePendingRequest(
 
 exit:
     UdecxUrbCompleteWithNtStatus(request, status);
-
-    return;
-
 }
 
 
@@ -379,7 +369,7 @@ IoEvtInterruptInUrb(
     if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)   {
         LogError(TRACE_DEVICE, "Invalid Interrupt/IN out IOCTL code %x", IoControlCode);
         status = STATUS_ACCESS_DENIED;
-        goto exit;
+        return;
     }
 
     // gate cached data we may have and clear it
@@ -393,13 +383,9 @@ IoEvtInterruptInUrb(
     pIoContext->IntrState.numUnreadUpdates = 0;
     WdfSpinLockRelease(pIoContext->IntrState.sync);
 
-
     if (bHasData)  {
-
         IoCompletePendingRequest(Request, LatestStatus);
-
     } else {
-
         status = WdfRequestForwardToIoQueue(Request, pIoContext->IntrDeferredQueue);
         if (NT_SUCCESS(status)) {
             LogInfo(TRACE_DEVICE, "Request %p forwarded for later", Request);
@@ -407,11 +393,7 @@ IoEvtInterruptInUrb(
             LogError(TRACE_DEVICE, "ERROR: Unable to forward Request %p error %!STATUS!", Request, status);
             UdecxUrbCompleteWithNtStatus(Request, status);
         }
-
     }
-
-exit:
-    return;
 }
 
 
