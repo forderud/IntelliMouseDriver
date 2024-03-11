@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
 #include <cfgmgr32.h> // for CM_Get_Device_Interface_List
+#include <Hidclass.h> // combine with INITGUID define
 #include <hidsdi.h>
 #include <wrl/wrappers/corewrappers.h>
 
@@ -60,18 +61,15 @@ public:
     };
 
     static std::vector<Match> FindDevices (const Query& query, bool verbose) {
-        GUID hidguid = {};
-        HidD_GetHidGuid(&hidguid);
-
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
         ULONG deviceInterfaceListLength = 0;
-        CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, &hidguid, NULL, searchScope);
+        CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, (GUID*)&GUID_DEVINTERFACE_HID, NULL, searchScope);
         assert(cr == CR_SUCCESS);
 
         // symbolic link name of interface instances
         std::wstring deviceInterfaceList(deviceInterfaceListLength, L'\0');
-        cr = CM_Get_Device_Interface_ListW(&hidguid, NULL, const_cast<wchar_t*>(deviceInterfaceList.data()), deviceInterfaceListLength, searchScope);
+        cr = CM_Get_Device_Interface_ListW((GUID*)&GUID_DEVINTERFACE_HID, NULL, const_cast<wchar_t*>(deviceInterfaceList.data()), deviceInterfaceListLength, searchScope);
         assert(cr == CR_SUCCESS);
 
         std::vector<Match> results;
