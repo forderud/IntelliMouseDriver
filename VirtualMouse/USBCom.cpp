@@ -426,16 +426,15 @@ Io_CreateDeferredIntrQueue(
 
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "WdfIoQueueCreate failed 0x%x\n", status);
-        goto Error;
+        return status;
     }
 
     status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &(pIoContext->IntrState.sync));
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "WdfSpinLockCreate failed  %!STATUS!\n", status);
-        goto Error;
+        return status;
     }
 
-Error:
     return status;
 }
 
@@ -514,13 +513,12 @@ Io_RetrieveEpQueue(
     default:
         LogError(TRACE_DEVICE, "Io_RetrieveEpQueue received unrecognized ep %x", EpAddr);
         status = STATUS_ILLEGAL_FUNCTION;
-        goto exit;
+        return status;
     }
-
 
     *Queue = NULL;
     if (!NT_SUCCESS(status)) {
-        goto exit;
+        return status;
     }
 
     if ( (*pQueueRecord)  == NULL) {
@@ -538,14 +536,11 @@ Io_RetrieveEpQueue(
 
         if (!NT_SUCCESS(status)) {
             LogError(TRACE_DEVICE, "WdfIoQueueCreate failed for queue of ep %x %!STATUS!", EpAddr, status);
-            goto exit;
+            return status;
         }
     }
 
     *Queue = (*pQueueRecord);
-
-exit:
-
     return status;
 }
 
