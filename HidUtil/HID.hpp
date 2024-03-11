@@ -69,7 +69,7 @@ public:
 
         // symbolic link name of interface instances
         std::wstring deviceInterfaceList(deviceInterfaceListLength, L'\0');
-        cr = CM_Get_Device_Interface_ListW((GUID*)&GUID_DEVINTERFACE_HID, NULL, const_cast<wchar_t*>(deviceInterfaceList.data()), deviceInterfaceListLength, searchScope);
+        cr = CM_Get_Device_Interface_ListW((GUID*)&GUID_DEVINTERFACE_HID, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
         assert(cr == CR_SUCCESS);
 
         std::vector<Match> results;
@@ -96,7 +96,7 @@ private:
             //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
             //assert(err != ERROR_SHARING_VIOLATION); // (32)
             //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
-            return {};
+            return Match();
         }
 
         HIDD_ATTRIBUTES attr = {};
@@ -112,14 +112,14 @@ private:
         //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
 
         if (query.VendorID && (query.VendorID != attr.VendorID))
-            return {};
+            return Match();
         if (query.ProductID && (query.ProductID != attr.ProductID))
-            return {};
+            return Match();
 
         if (query.Usage && (query.Usage != caps.Usage))
-            return {};
+            return Match();
         if (query.UsagePage && (query.UsagePage != caps.UsagePage))
-            return {};
+            return Match();
 
         //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
 #if 0
