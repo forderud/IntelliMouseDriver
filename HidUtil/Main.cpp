@@ -9,9 +9,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    BYTE red = atoi(argv[1]);
-    BYTE green = atoi(argv[2]);
-    BYTE blue = atoi(argv[3]);
+    auto red = (BYTE)atoi(argv[1]);
+    auto green = (BYTE)atoi(argv[2]);
+    auto blue = (BYTE)atoi(argv[3]);
 
     HID::Query query;
     query.VendorID = 0x045E;  // Microsoft
