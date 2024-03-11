@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     query.UsagePage = 0xFF07; //
 
     wprintf(L"Searching for matching HID devices...\n");
-    auto matches = HID::FindDevices(query, false);
+    auto matches = HID::FindDevices(query);
     if (matches.empty()) {
         wprintf(L"No matching devices found.\n");
         return -3;

@@ -60,7 +60,7 @@ public:
         HIDP_CAPS caps = {};
     };
 
-    static std::vector<Match> FindDevices (const Query& query, bool verbose) {
+    static std::vector<Match> FindDevices (const Query& query) {
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
         ULONG deviceInterfaceListLength = 0;
@@ -74,7 +74,7 @@ public:
 
         std::vector<Match> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
-            auto result = CheckDevice(currentInterface, query, verbose);
+            auto result = CheckDevice(currentInterface, query);
             if (!result.name.empty())
                 results.push_back(std::move(result));
         }
@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    static Match CheckDevice(const wchar_t* deviceName, const Query& query, bool verbose) {
+    static Match CheckDevice(const wchar_t* deviceName, const Query& query) {
         FileHandle hid_dev(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -92,12 +92,10 @@ private:
             0,
             NULL));
         if (!hid_dev.IsValid()) {
-            DWORD err = GetLastError();
+            DWORD err = GetLastError(); err;
             //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
             //assert(err != ERROR_SHARING_VIOLATION); // (32)
-            if (verbose)
-                wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
-
+            //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
             return {};
         }
 
@@ -111,8 +109,7 @@ private:
         if (HidP_GetCaps(reportDesc, &caps) != HIDP_STATUS_SUCCESS)
             abort();
 
-        if (verbose)
-            wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
+        //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
 
         if (query.VendorID && (query.VendorID != attr.VendorID))
             return {};
@@ -124,8 +121,7 @@ private:
         if (query.UsagePage && (query.UsagePage != caps.UsagePage))
             return {};
 
-        if (verbose)
-            wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
+        //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
 #if 0
         wchar_t man_buffer[128] = L"<unknown>";
         HidD_GetManufacturerString(hid_dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
