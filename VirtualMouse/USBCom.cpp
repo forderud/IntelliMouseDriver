@@ -434,46 +434,36 @@ Io_CreateDeferredIntrQueue(
     _In_ WDFDEVICE   ControllerDevice,
     _In_ IO_CONTEXT* pIoContext )
 {
-    NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG queueConfig;
-
     pIoContext->IntrState.latestStatus = {};
     pIoContext->IntrState.numUnreadUpdates = 0;
 
-    //
     // Register a manual I/O queue for handling Interrupt Message Read Requests.
     // This queue will be used for storing Requests that need to wait for an
     // interrupt to occur before they can be completed.
-    //
+    WDF_IO_QUEUE_CONFIG queueConfig;
     WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchManual);
 
     // when a request gets canceled, this is where we want to do the completion
     queueConfig.EvtIoCanceledOnQueue = IoEvtCancelInterruptInUrb;
 
-    //
     // We shouldn't have to power-manage this queue, as we will manually 
     // purge it and de-queue from it whenever we get power indications.
-    //
     queueConfig.PowerManaged = WdfFalse;
 
-    status = WdfIoQueueCreate(ControllerDevice,
+    NTSTATUS status = WdfIoQueueCreate(ControllerDevice,
         &queueConfig,
         WDF_NO_OBJECT_ATTRIBUTES,
         &(pIoContext->IntrDeferredQueue)
     );
 
     if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE,
-            "WdfIoQueueCreate failed 0x%x\n", status);
+        LogError(TRACE_DEVICE, "WdfIoQueueCreate failed 0x%x\n", status);
         goto Error;
     }
 
-
-    status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES,
-        &(pIoContext->IntrState.sync));
+    status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &(pIoContext->IntrState.sync));
     if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE,
-            "WdfSpinLockCreate failed  %!STATUS!\n", status);
+        LogError(TRACE_DEVICE, "WdfSpinLockCreate failed  %!STATUS!\n", status);
         goto Error;
     }
 
@@ -519,18 +509,16 @@ Io_RetrieveEpQueue(
     _Out_ WDFQUEUE     * Queue
 )
 {
-    NTSTATUS status;
     WDF_IO_QUEUE_CONFIG queueConfig;
-    WDFDEVICE wdfController;
     WDFQUEUE *pQueueRecord = NULL;
     WDF_OBJECT_ATTRIBUTES  attributes;
     PFN_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL pIoCallback = NULL;
 
-    status = STATUS_SUCCESS;
+    NTSTATUS status = STATUS_SUCCESS;
     IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
     USB_CONTEXT* pUsbContext = GetUsbDeviceContext(Device);
 
-    wdfController = pUsbContext->ControllerDevice;
+    WDFDEVICE wdfController = pUsbContext->ControllerDevice;
 
     switch (EpAddr)
     {
@@ -574,17 +562,13 @@ Io_RetrieveEpQueue(
         queueConfig.EvtIoInternalDeviceControl = pIoCallback;
         WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, ENDPOINTQUEUE_CONTEXT);
 
-        status = WdfIoQueueCreate(wdfController,
-            &queueConfig,
-            &attributes,
-            pQueueRecord);
+        status = WdfIoQueueCreate(wdfController, &queueConfig, &attributes, pQueueRecord);
 
         ENDPOINTQUEUE_CONTEXT* pEPQContext = GetEndpointQueueContext(*pQueueRecord);
         pEPQContext->usbDeviceObj      = Device;
         pEPQContext->backChannelDevice = wdfController; // this is a dirty little secret, so we contain it.
 
         if (!NT_SUCCESS(status)) {
-
             LogError(TRACE_DEVICE, "WdfIoQueueCreate failed for queue of ep %x %!STATUS!", EpAddr, status);
             goto exit;
         }
@@ -620,7 +604,6 @@ Io_FreeEndpointQueues(
     _In_ IO_CONTEXT* pIoContext
 )
 {
-
     WdfObjectDelete(pIoContext->IntrDeferredQueue);
 
     WdfIoQueuePurgeSynchronously(pIoContext->ControlQueue);
@@ -634,8 +617,4 @@ Io_FreeEndpointQueues(
 
     WdfIoQueuePurgeSynchronously(pIoContext->BulkOutQueue);
     WdfObjectDelete(pIoContext->BulkOutQueue);
-
 }
-
-
-
