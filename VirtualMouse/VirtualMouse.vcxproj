@@ -79,7 +79,7 @@
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
-copy "$(WDKBinRoot_x64)\certmgr.exe" $(PackageDir)
+copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -101,7 +101,7 @@ copy *.bat $(PackageDir)</Command>
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
-copy "$(WDKBinRoot_x64)\certmgr.exe" $(PackageDir)
+copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
