@@ -75,8 +75,8 @@
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>
     <PostBuildEvent>
-      <Command>copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\devgen.exe" $(PackageDir)
-copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\traceview.exe" $(PackageDir)
+      <Command>copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\devgen.exe" $(PackageDir)
+copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
 copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
@@ -97,8 +97,8 @@ copy *.bat $(PackageDir)</Command>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>
     <PostBuildEvent>
-      <Command>copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\devgen.exe" $(PackageDir)
-copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\x64\traceview.exe" $(PackageDir)
+      <Command>copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\devgen.exe" $(PackageDir)
+copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
 copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
