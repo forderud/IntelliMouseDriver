@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);ole32.lib;oleaut32.lib;wbemuuid.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -51,7 +51,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);ole32.lib;oleaut32.lib;wbemuuid.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
