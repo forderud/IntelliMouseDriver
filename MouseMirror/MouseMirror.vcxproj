@@ -59,10 +59,10 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemGroup>
     <MofComp Include="MouseMirror.mof">
-      <CreateBinaryMofFile>"$(IntDir)\MouseMirror.bmf"</CreateBinaryMofFile>
+      <CreateBinaryMofFile>"$(IntDir)MouseMirror.bmf"</CreateBinaryMofFile>
     </MofComp>
-    <Wmimofck Include="$(IntDir)\MouseMirror.bmf">
-      <HeaderOutputFile>$(IntDir)\MouseMirrormof.h</HeaderOutputFile>
+    <Wmimofck Include="$(IntDir)MouseMirror.bmf">
+      <HeaderOutputFile>$(IntDir)MouseMirrormof.h</HeaderOutputFile>
     </Wmimofck>
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
