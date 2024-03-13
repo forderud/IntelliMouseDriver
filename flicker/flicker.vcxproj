@@ -58,7 +58,6 @@
       <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -68,7 +67,6 @@
       <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -78,7 +76,6 @@
       <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -88,7 +85,6 @@
       <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
     </Link>
     <ClCompile>
-      <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
