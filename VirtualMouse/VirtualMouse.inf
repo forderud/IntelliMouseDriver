@@ -74,7 +74,6 @@ KmdfLibraryVersion = $KMDFVERSION$
 [Strings]
 SPSVCINST_ASSOCSERVICE= 0x00000002
 ManufacturerName="SurfaceBiz Education"
-ClassName="VirtualFX2"
 DiskName = "VirtualMouse Installation Disk"
 VirtualMouse.DeviceDesc = "VirtualMouse Device"
 VirtualMouse.SVCDESC = "VirtualMouse Service"
