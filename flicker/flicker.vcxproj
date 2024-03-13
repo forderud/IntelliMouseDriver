@@ -37,12 +37,6 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="luminous.cpp" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>flicker</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>flicker</TargetName>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);ole32.lib;oleaut32.lib;wbemuuid.lib</AdditionalDependencies>
