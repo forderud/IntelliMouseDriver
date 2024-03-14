@@ -1,6 +1,9 @@
 #include "luminous.hpp"
 #include <stdexcept>
 
+#pragma comment(lib, "wbemuuid.lib")
+
+
 const wchar_t NAMESPACE[] = L"root\\WMI"; // namespace for hardware drivers (https://learn.microsoft.com/en-us/windows/win32/wmicoreprov/wdm-provider)
 const wchar_t CLASS_NAME[] = L"TailLightDeviceInformation";
 const wchar_t PROPERTY_NAME[] = L"TailLight";

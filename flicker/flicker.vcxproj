@@ -54,36 +54,24 @@
     <ClCompile Include="luminous.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
-    </Link>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
-    </Link>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
-    </Link>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);wbemuuid.lib</AdditionalDependencies>
-    </Link>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
