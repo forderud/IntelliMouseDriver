@@ -13,7 +13,6 @@ PnpLockdown=1
 
 [DestinationDirs]
 DefaultDestDir = 12
-VirtualMouse_Device_CoInstaller_CopyFiles = 11
 
 ; ================= Class section =====================
 
@@ -22,7 +21,6 @@ VirtualMouse_Device_CoInstaller_CopyFiles = 11
 
 [SourceDisksFiles]
 VirtualMouse.sys  = 1,,
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
 
 ;*****************************************
 ; Install Section
@@ -51,20 +49,6 @@ ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
 StartType      = 3               ; SERVICE_DEMAND_START
 ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %12%\VirtualMouse.sys
-
-;
-;--- VirtualMouse_Device Coinstaller installation ------
-;
-
-[VirtualMouse_Device.NT.CoInstallers]
-AddReg=VirtualMouse_Device_CoInstaller_AddReg
-CopyFiles=VirtualMouse_Device_CoInstaller_CopyFiles
-
-[VirtualMouse_Device_CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[VirtualMouse_Device_CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
 [VirtualMouse_Device.NT.Wdf]
 KmdfService =  VirtualMouse, VirtualMouse_wdfsect
