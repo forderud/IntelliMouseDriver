@@ -45,9 +45,9 @@ AddService = VirtualMouse,%SPSVCINST_ASSOCSERVICE%, VirtualMouse_Service_Inst
 ; -------------- VirtualMouse driver install sections
 [VirtualMouse_Service_Inst]
 DisplayName    = "VirtualMouse Service"
-ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
-StartType      = 3               ; SERVICE_DEMAND_START
-ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceType    = %SERVICE_KERNEL_DRIVER%
+StartType      = %SERVICE_DEMAND_START%
+ErrorControl   = %SERVICE_ERROR_NORMAL%
 ServiceBinary  = %12%\VirtualMouse.sys
 
 [VirtualMouse_Device.NT.Wdf]
@@ -56,5 +56,13 @@ KmdfService =  VirtualMouse, VirtualMouse_wdfsect
 KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
+; Strings for macro replacement
+SERVICE_KERNEL_DRIVER = 1
+SERVICE_BOOT_START    = 0
+SERVICE_SYSTEM_START  = 1
+SERVICE_AUTO_START    = 2
+SERVICE_DEMAND_START  = 3
+SERVICE_ERROR_IGNORE  = 0
+SERVICE_ERROR_NORMAL  = 1
 SPSVCINST_ASSOCSERVICE= 0x00000002
 ManufacturerName="SurfaceBiz Education"
