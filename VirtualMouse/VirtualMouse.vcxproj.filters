@@ -19,6 +19,6 @@
     <ClCompile Include="usbdevice.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="VirtualMouse.inf" />
+    <Inf Include="VirtualMouse.inx" />
   </ItemGroup>
 </Project>

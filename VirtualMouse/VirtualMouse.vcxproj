@@ -36,9 +36,6 @@
     <ClInclude Include="USBCom.h" />
     <ClInclude Include="usbdevice.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Inf Include="VirtualMouse.inf" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{474444F1-1628-494C-BBDB-1BD7096B1118}</ProjectGuid>
     <Configuration>Debug</Configuration>
@@ -180,6 +177,9 @@ copy *.bat $(PackageDir)</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="VirtualMouse.inx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
