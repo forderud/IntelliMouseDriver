@@ -12,7 +12,7 @@ DriverVer=
 PnpLockdown=1
 
 [DestinationDirs]
-DefaultDestDir = 12
+DefaultDestDir = 13
 
 ; ================= Class section =====================
 
@@ -48,7 +48,7 @@ DisplayName    = "VirtualMouse Service"
 ServiceType    = %SERVICE_KERNEL_DRIVER%
 StartType      = %SERVICE_DEMAND_START%
 ErrorControl   = %SERVICE_ERROR_NORMAL%
-ServiceBinary  = %12%\VirtualMouse.sys
+ServiceBinary  = %13%\VirtualMouse.sys
 
 [VirtualMouse_Device.NT.Wdf]
 KmdfService =  VirtualMouse, VirtualMouse_wdfsect
