@@ -29,4 +29,4 @@ struct MOUSE_INPUT_REPORT {
     INT8 Wheel;
 };
 #pragma pack(pop)
-static_assert(sizeof(MOUSE_INPUT_REPORT) == 4, "MOUSE_INPUT_REPORT size mismatch");
+static_assert(sizeof(MOUSE_INPUT_REPORT) == 4, "MOUSE_INPUT_REPORT size mismatch"); // must match report size in g_HIDMouseUsbReportDescriptor
