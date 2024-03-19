@@ -9,9 +9,6 @@
 
 #pragma comment(lib, "mincore.lib") // for CM_Get_Device_Interface_List..
 
-// RAII wrapper of file HANDLE objects
-using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
-
 
 std::wstring GetDevicePath(_In_  GUID InterfaceGuid) {
     const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
@@ -91,7 +88,7 @@ int main() {
     printf("DeviceName = (%S)\n", completeDeviceName.c_str());
     fflush(stdout);
 
-    FileHandle deviceHandle(CreateFileW(completeDeviceName.c_str(),
+    Microsoft::WRL::Wrappers::FileHandle deviceHandle(CreateFileW(completeDeviceName.c_str(),
         GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ,
         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if (!deviceHandle.IsValid()) {
