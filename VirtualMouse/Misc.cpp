@@ -6,22 +6,14 @@
 #include "Misc.tmh"
 
 
-static VOID
-_WQQCancelRequest(
-    IN WDFQUEUE Queue,
-    IN WDFREQUEST  Request
-)
+static VOID _WQQCancelRequest(IN WDFQUEUE Queue, IN WDFREQUEST  Request)
 {
     UNREFERENCED_PARAMETER(Queue);
     WdfRequestComplete(Request, STATUS_CANCELLED);
 }
 
 
-static VOID
-_WQQCancelUSBRequest(
-    IN WDFQUEUE Queue,
-    IN WDFREQUEST  Request
-)
+static VOID _WQQCancelUSBRequest(IN WDFQUEUE Queue, IN WDFREQUEST  Request)
 {
     UNREFERENCED_PARAMETER(Queue);
     LogInfo(TRACE_DEVICE, "Canceling request %p", Request);
@@ -29,12 +21,7 @@ _WQQCancelUSBRequest(
 }
 
 
-NTSTATUS
-WRQueueInit(
-    _In_    WDFDEVICE parent,
-    _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
-    _In_    BOOLEAN bUSBReqQueue
-)
+NTSTATUS WRQueueInit(_In_ WDFDEVICE parent, _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ, _In_ BOOLEAN bUSBReqQueue)
 {
     memset(pQ, 0, sizeof(*pQ));
 
@@ -46,9 +33,7 @@ WRQueueInit(
     NTSTATUS status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &(pQ->qsync));
     if (!NT_SUCCESS(status) )  {
         pQ->qsync = NULL;
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_QUEUE,
-            "Unable to create spinlock, err= %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "Unable to create spinlock, err= %!STATUS!", status);
         goto Error;
     }
 
@@ -59,9 +44,7 @@ WRQueueInit(
 
     if (!NT_SUCCESS(status))  {
         pQ->ReadBufferQueue = NULL;
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_QUEUE,
-            "Unable to create rd queue, err= %!STATUS!", status );
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "Unable to create rd queue, err= %!STATUS!", status );
         goto Error;
     }
 
@@ -72,10 +55,7 @@ Error: // free anything done half-way
     return status;
 }
 
-VOID
-WRQueueDestroy(
-    _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ
-)
+VOID WRQueueDestroy(_Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ)
 {
     if (pQ->qsync == NULL)  {
         return; // init has not even started
@@ -100,13 +80,11 @@ WRQueueDestroy(
 }
 
 
-NTSTATUS
-WRQueuePushWrite(
+NTSTATUS WRQueuePushWrite(
     _In_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
     _In_ PVOID wbuffer,
     _In_ SIZE_T wlen,
-    _Out_ WDFREQUEST *rqReadToComplete
-)
+    _Out_ WDFREQUEST *rqReadToComplete)
 {
     NTSTATUS status;
     if (rqReadToComplete == NULL) {
@@ -127,9 +105,7 @@ WRQueuePushWrite(
         // allocate
         BUFFER_CONTENT* pNewEntry = (BUFFER_CONTENT*)ExAllocatePool2(POOL_FLAG_PAGED, sizeof(BUFFER_CONTENT) + wlen, POOL_TAG);
         if (pNewEntry == NULL) {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "Not enough memory to queue write, err= %!STATUS!", status);
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "Not enough memory to queue write, err= %!STATUS!", status);
             status = STATUS_INSUFFICIENT_RESOURCES;
             return status;
         }
@@ -140,9 +116,7 @@ WRQueuePushWrite(
 
         // enqueue
         WdfSpinLockAcquire(pQ->qsync);
-        InsertTailList(
-            &(pQ->WriteBufferQueue),
-            &(pNewEntry->BufferLink) );
+        InsertTailList(&(pQ->WriteBufferQueue), &(pNewEntry->BufferLink) );
         WdfSpinLockRelease(pQ->qsync);
     }
 
@@ -150,15 +124,13 @@ WRQueuePushWrite(
 }
 
 
-NTSTATUS
-WRQueuePullRead(
+NTSTATUS WRQueuePullRead(
     _In_  WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
     _In_  WDFREQUEST rqRead,
     _Out_ PVOID rbuffer,
     _In_  SIZE_T rlen,
     _Out_ PBOOLEAN pbReadyToComplete,
-    _Out_ PSIZE_T completedBytes
-)
+    _Out_ PSIZE_T completedBytes)
 {
     NTSTATUS status;
 
@@ -190,10 +162,9 @@ WRQueuePullRead(
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "Unable to foward pending read, err= %!STATUS!", status);
         }
     } else {
-        size_t minlen;
         BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(firstPendingWrite, BUFFER_CONTENT, BufferLink);
 
-        minlen = MINLEN(pWriteEntry->BufferLength, rlen);
+        size_t minlen = MINLEN(pWriteEntry->BufferLength, rlen);
         memcpy(rbuffer, &(pWriteEntry->BufferStart), minlen);
 
         (*pbReadyToComplete) = TRUE;

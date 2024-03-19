@@ -104,41 +104,31 @@ BackChannelEvtWrite(
 {
     UNREFERENCED_PARAMETER(Length);
 
-    WDFREQUEST matchingRead = 0;
-    SIZE_T completeBytes = 0;
-
-    WDFDEVICE controller = WdfIoQueueGetDevice(Queue); /// WdfIoQueueGetDevice
+    WDFDEVICE controller = WdfIoQueueGetDevice(Queue);
     UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(controller);
 
     PVOID transferBuffer = 0;
     SIZE_T transferBufferLength = 0;
     NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, 1, &transferBuffer, &transferBufferLength);
-    if (!NT_SUCCESS(status))
-    {
-        LogError(TRACE_DEVICE, "BCHAN WdfRequest write %p unable to retrieve buffer %!STATUS!",
-            Request, status);
+    if (!NT_SUCCESS(status)) {
+        LogError(TRACE_DEVICE, "BCHAN WdfRequest write %p unable to retrieve buffer %!STATUS!", Request, status);
         goto exit;
     }
 
     // try to get us information about a request that may be waiting for this info
-    status = WRQueuePushWrite(
-        &(pControllerContext->missionCompletion),
-        transferBuffer,
-        transferBufferLength,
-        &matchingRead);
+    WDFREQUEST matchingRead = 0;
+    status = WRQueuePushWrite(&(pControllerContext->missionCompletion), transferBuffer, transferBufferLength, &matchingRead);
 
     if (matchingRead != NULL)
     {
-        PUCHAR rbuffer;
-        ULONG rlen;
-
         // this is a USB read!
+        UCHAR* rbuffer = nullptr;
+        ULONG rlen = 0;
         status = UdecxUrbRetrieveBuffer(matchingRead, &rbuffer, &rlen);
 
+        SIZE_T completeBytes = 0;
         if (!NT_SUCCESS(status)) {
-
-            LogError(TRACE_DEVICE, "BCHAN WdfRequest %p cannot retrieve mission completion buffer %!STATUS!",
-                matchingRead, status);
+            LogError(TRACE_DEVICE, "BCHAN WdfRequest %p cannot retrieve mission completion buffer %!STATUS!", matchingRead, status);
         }
         else {
             completeBytes = MINLEN(rlen, transferBufferLength);
