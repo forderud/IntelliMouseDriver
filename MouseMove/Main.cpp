@@ -65,22 +65,16 @@ static bool GenerateMouseReport(HANDLE dev, USHORT code) {
         break;
     }
 
-    ULONG index = 0;
-    if (!DeviceIoControl(dev,
-        IOCTL_UDEFX2_GENERATE_INTERRUPT,
-        &event,                // Ptr to InBuffer
-        sizeof(event),         // Length of InBuffer
-        NULL,                  // Ptr to OutBuffer
-        0,                     // Length of OutBuffer
-        &index,                // BytesReturned
-        0)) {                  // Ptr to Overlapped structure
-
-        DWORD err = GetLastError();
-        printf("DeviceIoControl failed with error 0x%x\n", err);
+    ULONG bytesReturned = 0;
+    if (!DeviceIoControl(dev, IOCTL_UDEFX2_GENERATE_INTERRUPT,
+        &event, sizeof(event), // input buffer
+        NULL, 0,               // output buffer
+        &bytesReturned, nullptr)) {
+        printf("DeviceIoControl failed with error 0x%x\n", GetLastError());
         return false;
     }
 
-    printf("DeviceIoControl SUCCESS , returned bytes=%d\n", index);
+    printf("DeviceIoControl succeeded, returned bytes=%d\n", bytesReturned);
     return true;
 }
 
@@ -89,21 +83,20 @@ int main() {
 
     std::wstring completeDeviceName = GetDevicePath(GUID_DEVINTERFACE_UDE_BACKCHANNEL);
     if (completeDeviceName.empty()) {
-        printf("Unable to find virtual controller device!\n"); fflush(stdout);
+        printf("Unable to find virtual controller device!\n");
+        fflush(stdout);
         return -2;
     }
 
-    printf("DeviceName = (%S)\n", completeDeviceName.c_str()); fflush(stdout);
+    printf("DeviceName = (%S)\n", completeDeviceName.c_str());
+    fflush(stdout);
 
     FileHandle deviceHandle(CreateFileW(completeDeviceName.c_str(),
-        GENERIC_WRITE | GENERIC_READ,
-        FILE_SHARE_WRITE | FILE_SHARE_READ,
-        NULL, // default security
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        NULL));
+        GENERIC_WRITE | GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ,
+        NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if (!deviceHandle.IsValid()) {
-        printf("Failed to open the device, error - %d", GetLastError()); fflush(stdout);
+        printf("Failed to open the device, error - %d", GetLastError());
+        fflush(stdout);
         return -1;
     }
 
