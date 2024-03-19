@@ -104,6 +104,7 @@ int main() {
         BOOL ok = FALSE;
 
         // test write operation
+        // Triggers a "BCHAN Mission completion %p enqueued" event
         DWORD bytesWritten = 0;
         ok = WriteFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesWritten, nullptr);
         if (!ok) {
@@ -113,7 +114,7 @@ int main() {
 
 #if 0
         // test read operation
-        // Blocked with "BCHAN Mission request xxxxxxxx pended" event due to no dangling writes found
+        // Blocked with "BCHAN Mission request %p pended" event due to no dangling writes found
         DWORD bytesRead = 0;
         ok = ReadFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesRead, nullptr);
         if (!ok) {
