@@ -43,7 +43,7 @@ const UCHAR g_UsbConfigDescriptorSet[] = {
     // Configuration Descriptor Type
     0x9,                               // Descriptor Size
     USB_CONFIGURATION_DESCRIPTOR_TYPE, // Configuration Descriptor Type
-    34, 0,                             // Length of this descriptor and all sub descriptors (34 bytes)
+    48, 0,                             // Length of this descriptor and all sub descriptors (48 bytes)
     0x01,                              // Number of interfaces
     0x01,                              // Configuration number
     0x00,                              // Configuration string index
@@ -55,7 +55,7 @@ const UCHAR g_UsbConfigDescriptorSet[] = {
     USB_INTERFACE_DESCRIPTOR_TYPE,            // Interface Association Descriptor Type
     0,                                        // bInterfaceNumber
     0,                                        // bAlternateSetting
-    1,                                        // bNumEndpoints
+    3,                                        // bNumEndpoints
     0x03,                                     // bInterfaceClass (HID)
     0x01,                                     // bInterfaceSubClass (Boot Interface)
     0x02,                                     // bInterfaceProtocol (Mouse)
@@ -76,7 +76,23 @@ const UCHAR g_UsbConfigDescriptorSet[] = {
     g_InterruptEndpointAddress,     // Endpoint address and description
     USB_ENDPOINT_TYPE_INTERRUPT,    // bmAttributes - interrupt
     0x04, 0x00,                     // Max packet size = 4 bytes
-    0x0A                            // Servicing interval for interrupt (10 ms/1 frame)
+    0x0A,                           // Servicing interval for interrupt (10 ms/1 frame)
+
+    // Bulk IN endpoint
+    0x07,                           // Descriptor size 
+    USB_ENDPOINT_DESCRIPTOR_TYPE,   // Descriptor type
+    g_BulkInEndpointAddress,        // Endpoint address and description
+    USB_ENDPOINT_TYPE_BULK,         // Endpoint type
+    0x00, 0x04,                     // Max packet size = 1024 bytes
+    0x00,                         // Servicing interval for data transfers : NA for bulk
+
+    // Bulk OUT endpoint
+    0x07,                           // Descriptor size 
+    USB_ENDPOINT_DESCRIPTOR_TYPE,   // Descriptor type
+    g_BulkOutEndpointAddress,       // Endpoint address and description
+    USB_ENDPOINT_TYPE_BULK,         // Endpoint type
+    0x00, 0x04,                     // Max packet size = 1024 bytes
+    0x00,                           // Servicing interval for data transfers : NA for bulk
 };
 
 
