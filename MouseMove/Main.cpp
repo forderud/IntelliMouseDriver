@@ -13,11 +13,11 @@
 using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
 
 
-std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid) {
+std::wstring GetDevicePath(_In_  GUID InterfaceGuid) {
     const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
     ULONG deviceInterfaceListLength = 0;
-    CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, InterfaceGuid, NULL, searchScope);
+    CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, &InterfaceGuid, NULL, searchScope);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list size.\n", cr);
         return {};
@@ -28,7 +28,7 @@ std::wstring GetDevicePath(_In_  LPGUID InterfaceGuid) {
     }
 
     std::wstring deviceInterfaceList(deviceInterfaceListLength, L'\0');
-    cr = CM_Get_Device_Interface_ListW(InterfaceGuid, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
+    cr = CM_Get_Device_Interface_ListW(&InterfaceGuid, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
     if (cr != CR_SUCCESS) {
         printf("Error 0x%x retrieving device interface list.\n", cr);
         return {};
@@ -87,7 +87,7 @@ static bool GenerateMouseReport(HANDLE dev, USHORT code) {
 int main() {
     printf("About to open device\n"); fflush(stdout);
 
-    std::wstring completeDeviceName = GetDevicePath((LPGUID)&GUID_DEVINTERFACE_UDE_BACKCHANNEL);
+    std::wstring completeDeviceName = GetDevicePath(GUID_DEVINTERFACE_UDE_BACKCHANNEL);
     if (completeDeviceName.empty()) {
         printf("Unable to find virtual controller device!\n"); fflush(stdout);
         return -2;
