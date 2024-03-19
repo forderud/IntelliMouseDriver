@@ -43,7 +43,7 @@ const UCHAR g_UsbConfigDescriptorSet[] = {
     // Configuration Descriptor Type
     0x9,                               // Descriptor Size
     USB_CONFIGURATION_DESCRIPTOR_TYPE, // Configuration Descriptor Type
-    0x22, 0x00,                        // Length of this descriptor and all sub descriptors
+    34, 0,                             // Length of this descriptor and all sub descriptors (34 bytes)
     0x01,                              // Number of interfaces
     0x01,                              // Configuration number
     0x00,                              // Configuration string index
