@@ -163,42 +163,27 @@ exit:
 
 
 
-BOOLEAN
-BackChannelIoctl(
-    _In_ ULONG IoControlCode,
-    _In_ WDFDEVICE ctrdevice,
-    _In_ WDFREQUEST Request
-)
+BOOLEAN BackChannelIoctl(_In_ ULONG IoControlCode, _In_ WDFDEVICE ctrdevice, _In_ WDFREQUEST Request)
 {
     BOOLEAN handled = FALSE;
     UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
 
-    switch (IoControlCode)
-    {
+    switch (IoControlCode) {
     case IOCTL_UDEFX2_GENERATE_INTERRUPT:
-        MOUSE_INPUT_REPORT* pflags = 0;
-        size_t pblen = 0; // BufferLength
-        NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(MOUSE_INPUT_REPORT), (void**)&pflags, &pblen);
+        MOUSE_INPUT_REPORT* inBuf = 0;
+        size_t inBufLen = 0;
+        NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(MOUSE_INPUT_REPORT), (void**)&inBuf, &inBufLen);
 
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "%!FUNC! Unable to retrieve input buffer");
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "%!FUNC! Unable to retrieve input buffer");
         }
-        else if (pblen == sizeof(MOUSE_INPUT_REPORT) && (pflags != NULL)) {
-            MOUSE_INPUT_REPORT flags;
-            memcpy(&flags, pflags, sizeof(MOUSE_INPUT_REPORT));
-            TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_QUEUE,
-                "%!FUNC! Will generate interrupt");
+        else if (inBufLen == sizeof(MOUSE_INPUT_REPORT) && (inBuf != NULL)) {
+            MOUSE_INPUT_REPORT flags = *inBuf;
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Will generate interrupt");
             status = Io_RaiseInterrupt(pControllerContext->ChildDevice, flags);
-
         }
         else {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "%!FUNC! Invalid buffer size");
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "%!FUNC! Invalid buffer size");
             status = STATUS_INVALID_PARAMETER;
         }
         WdfRequestComplete(Request, status);
