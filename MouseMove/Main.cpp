@@ -123,7 +123,7 @@ int main() {
 
 #if 0
         // test read operation
-        // Blocked with "Mission request xxxxxxxx pended" event)
+        // Blocked with "BCHAN Mission request xxxxxxxx pended" event)
         DWORD bytesRead = 0;
         ok = ReadFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesRead, nullptr);
         if (!ok) {
