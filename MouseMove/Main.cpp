@@ -108,8 +108,32 @@ int main() {
     }
 
     printf("Device open.\n");
-    printf("Use arrow keys to generate mouse input reports for cursor movement and SPACE to click. Press ESC or Q to quit..\n"); fflush(stdout);
 
+    {
+        BYTE buffer[16] = {};
+        BOOL ok = FALSE;
+
+        // test write operation
+        DWORD bytesWritten = 0;
+        ok = WriteFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesWritten, nullptr);
+        if (!ok) {
+            printf("WriteFile failed, %d", GetLastError());
+            return -1;
+        }
+
+#if 0
+        // test read operation
+        // Blocked with "Mission request xxxxxxxx pended" event)
+        DWORD bytesRead = 0;
+        ok = ReadFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesRead, nullptr);
+        if (!ok) {
+            printf("ReadFile failed, %d", GetLastError());
+            return -1;
+        }
+#endif
+    }
+
+    printf("Use arrow keys to generate mouse input reports for cursor movement and SPACE to click. Press ESC or Q to quit..\n"); fflush(stdout);
     for (;;) {
         wint_t code = _getwch();
 
