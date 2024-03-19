@@ -75,6 +75,25 @@ static bool GenerateMouseReport(HANDLE dev, USHORT code) {
     return true;
 }
 
+
+static DWORD ReadThread(void* data) {
+    HANDLE* handle = static_cast<HANDLE*>(data);
+    DWORD bytesRead = 0;
+
+    // test read operation
+    printf("Calling ReadFile...\n");
+    fflush(stdout);
+    BYTE buffer[4] = {};
+    BOOL ok = ReadFile(*handle, &buffer, sizeof(buffer), &bytesRead, nullptr);
+    if (!ok) {
+        printf("ReadFile failed, %d", GetLastError());
+        return 1;
+    }
+
+    return 0;
+}
+
+
 int main() {
     printf("About to open device\n"); fflush(stdout);
 
@@ -100,11 +119,23 @@ int main() {
     printf("Device open.\n");
 
     {
-        BYTE buffer[16] = {};
+        HANDLE data = deviceHandle.Get();
+        HANDLE thread = CreateThread(NULL, 0, ReadThread, &data, 0, NULL);
+        if (!thread) {
+            printf("CreateThread failed, %d", GetLastError());
+            return -1;
+        }
+
+
+        Sleep(1000);
+
+        BYTE buffer[4] = {};
         BOOL ok = FALSE;
 
         // test write operation
         // Triggers a "BCHAN Mission completion %p enqueued" event
+        printf("Calling WriteFile...\n");
+        fflush(stdout);
         DWORD bytesWritten = 0;
         ok = WriteFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesWritten, nullptr);
         if (!ok) {
@@ -112,16 +143,8 @@ int main() {
             return -1;
         }
 
-#if 0
-        // test read operation
-        // Blocked with "BCHAN Mission request %p pended" event due to no dangling writes found
-        DWORD bytesRead = 0;
-        ok = ReadFile(deviceHandle.Get(), &buffer, sizeof(buffer), &bytesRead, nullptr);
-        if (!ok) {
-            printf("ReadFile failed, %d", GetLastError());
-            return -1;
-        }
-#endif
+        WaitForSingleObject(thread, INFINITE);
+        CloseHandle(thread);
     }
 
     printf("Use arrow keys to generate mouse input reports for cursor movement and SPACE to click. Press ESC or Q to quit..\n"); fflush(stdout);
