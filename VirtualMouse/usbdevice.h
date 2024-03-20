@@ -26,9 +26,9 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USB_CONTEXT, GetUsbDeviceContext);
 
 
 // ----- descriptor constants/strings/indexes
-#define g_BulkOutEndpointAddress   2
-#define g_BulkInEndpointAddress    0x84
-#define g_InterruptEndpointAddress 0x86
+#define g_BulkOutEndpointAddress   0x02  // high-order bit=0 mean OUT
+#define g_BulkInEndpointAddress    0x84  // high-order bit=1 mean IN
+#define g_InterruptEndpointAddress 0x86  // high-order bit=1 mean IN
 
 
 extern const UCHAR g_UsbDeviceDescriptor[];
