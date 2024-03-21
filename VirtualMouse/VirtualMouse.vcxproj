@@ -105,7 +105,6 @@
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
-copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -127,7 +126,6 @@ copy *.bat $(PackageDir)</Command>
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
-copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -149,7 +147,6 @@ copy *.bat $(PackageDir)</Command>
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
-copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -171,7 +168,6 @@ copy *.bat $(PackageDir)</Command>
 copy "C:\Program Files (x86)\Windows Kits\10\tools\$(WDKBuildFolder)\$(Platform)\traceview.exe" $(PackageDir)
 copy $(OutDir)\VirtualMouse.pdb $(PackageDir)
 copy $(OutDir)\VirtualMouse.cer $(PackageDir)
-copy "$(WDKBinRoot)\$(Platform)\certmgr.exe" $(PackageDir)
 copy *.bat $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

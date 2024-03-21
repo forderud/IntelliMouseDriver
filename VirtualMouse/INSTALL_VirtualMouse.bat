@@ -2,9 +2,9 @@
 :: Goto current directory
 cd /d "%~dp0"
 
-:: Install driver certificate
-certmgr.exe /add VirtualMouse.cer /s /r localMachine root
-certmgr.exe /add VirtualMouse.cer /s /r localMachine trustedpublisher
+:: Trust driver certificate
+certutil.exe -addstore root VirtualMouse.cer
+certutil.exe -addstore trustedpublisher VirtualMouse.cer
 
 :: Install driver
 PNPUTIL /add-driver VirtualMouse.inf /install /reboot
