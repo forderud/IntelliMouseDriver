@@ -3,7 +3,7 @@
 /** Driver-specific struct for storing instance-specific data. */
 struct DEVICE_CONTEXT {
     UNICODE_STRING PdoName;
-    BOOLEAN        fSetBlackSuccess;
+    ULONG          fulSetBlackSuccess;
     WDFWMIINSTANCE WmiInstance;
     PVOID          pnpDevInterfaceChangedHandle;
 };

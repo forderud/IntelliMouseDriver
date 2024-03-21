@@ -39,7 +39,7 @@ NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device,
         // It's possible to get called twice. Please refer to 
         // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-ioregisterplugplaynotification,
         // under "Remarks"
-        if ((!pDeviceContext) || pDeviceContext->fSetBlackSuccess) {
+        if ((!pDeviceContext) || pDeviceContext->fulSetBlackSuccess) {
             return STATUS_SUCCESS;
         }
 
@@ -129,7 +129,7 @@ VOID SetBlackWorkItem(
 
     if (NT_SUCCESS(status)) {
         DEVICE_CONTEXT* pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
-        InterlockedIncrement((PLONG)(&pDeviceContext->fSetBlackSuccess));
+        InterlockedExchange((PLONG)&pDeviceContext->fulSetBlackSuccess, TRUE);
     }
 
     WdfObjectDelete(workItem);
@@ -196,6 +196,9 @@ NTSTATUS SetBlackAsync(WDFDEVICE device,
             if (!RtlEqualUnicodeString(&pDeviceContext->PdoName,
                 &theirPDOName,
                 TRUE)) {
+                KdPrint(("TailLight: %s: Device %wZ not known to control the taillight so failing\n",
+                    __func__,
+                    theirPDOName));
                 return STATUS_NOT_FOUND;
             }
         }

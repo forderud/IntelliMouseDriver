@@ -133,6 +133,7 @@ copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     <ClCompile Include="device.cpp" />
     <ClCompile Include="driver.cpp" />
     <ClCompile Include="eventlog.cpp" />
+    <ClCompile Include="SetTaillightBlack.cpp" />
     <ClCompile Include="vfeature.cpp" />
     <ClCompile Include="wmi.cpp" />
     <ResourceCompile Include="module.rc" />
