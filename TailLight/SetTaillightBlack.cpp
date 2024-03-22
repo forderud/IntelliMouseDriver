@@ -97,11 +97,14 @@ void SetBlackCompletionRoutine(
 {
     UNREFERENCED_PARAMETER(Target);
     UNREFERENCED_PARAMETER(Params);
-    UNREFERENCED_PARAMETER(Context);
 
     NTSTATUS status = STATUS_UNSUCCESSFUL;
     status = WdfRequestGetStatus(Request);
-    KdPrint(("TailLight: %s WdfRequestSend status: 0x%x\n", __func__, status));
+    KdPrint(("TailLight: %s WdfRequestGetStatus: 0x%x\n", __func__, status));
+
+    if (NT_SUCCESS(status)) {
+        InterlockedExchange((PLONG)Context, (LONG)TRUE);
+    }
 
     // One-shot and top of stack, so delete.
     WdfObjectDelete(Request);
@@ -121,16 +124,10 @@ VOID SetBlackWorkItem(
         workItem - Handle to a pre-allocated WDF work item.
     --*/
 {
-    NTSTATUS status = STATUS_UNSUCCESSFUL;
     WDFDEVICE device = static_cast<WDFDEVICE>(WdfWorkItemGetParentObject(workItem));
     auto workItemContext = WdfObjectGet_SET_BLACK_WORKITEM_CONTEXT(workItem);
 
-    status = SetBlackAsync(device, workItemContext->symLink);
-
-    if (NT_SUCCESS(status)) {
-        DEVICE_CONTEXT* pDeviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
-        InterlockedExchange((PLONG)&pDeviceContext->fulSetBlackSuccess, TRUE);
-    }
+    SetBlackAsync(device, workItemContext->symLink);
 
     WdfObjectDelete(workItem);
 }
@@ -216,7 +213,7 @@ NTSTATUS SetBlackAsync(WDFDEVICE device,
         WdfRequestSetCompletionRoutine(
             request,
             SetBlackCompletionRoutine,
-            WDF_NO_CONTEXT);
+            &pDeviceContext->fulSetBlackSuccess);
 
         TailLightReport  report = {};
         report.Blue = 0x0;
