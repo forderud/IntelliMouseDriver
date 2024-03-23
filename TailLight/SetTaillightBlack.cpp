@@ -39,7 +39,7 @@ NTSTATUS CreateWorkItemForIoTargetOpenDevice(WDFDEVICE device,
         // It's possible to get called twice. Please refer to 
         // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-ioregisterplugplaynotification,
         // under "Remarks"
-        if ((!pDeviceContext) || pDeviceContext->fulSetBlackSuccess) {
+        if (pDeviceContext->fulSetBlackSuccess) {
             return STATUS_SUCCESS;
         }
 
@@ -259,6 +259,15 @@ NTSTATUS SetBlackAsync(WDFDEVICE device,
         if (!NT_SUCCESS(status)) {
             KdPrint(("TailLight: WdfIoTargetFormatRequestForIoctl failed: 0x%x\n", status));
             return status;
+        }
+
+        // Rundown any threads that may still be executing after we succeed in
+        // setting the taillight to black. This way we hit the bus one time.
+        if (pDeviceContext->fulSetBlackSuccess) {
+            KdPrint(("Taillight: Taillight already set to black. failing\n"));
+            WdfObjectDelete(request);
+            request = 0;
+            return STATUS_NOT_FOUND;
         }
 
         if (!WdfRequestSend(request, target, WDF_NO_SEND_OPTIONS)) {
