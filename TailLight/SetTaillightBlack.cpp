@@ -265,6 +265,7 @@ NTSTATUS SetBlackAsync(WDFDEVICE device,
             WdfObjectDelete(request);
             request = 0;
             status = STATUS_UNSUCCESSFUL;
+            KdPrint(("TailLight: Request not delivered to HIDUSB.\n"));
         }
     }
 
