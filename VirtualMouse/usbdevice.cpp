@@ -43,44 +43,56 @@ const USB_DEVICE_DESCRIPTOR g_UsbDeviceDescriptor = {
     0x01                             // Number of configurations
 };
 
-const UCHAR g_UsbConfigDescriptorSet[] = {
-    // Configuration Descriptor Type
-    sizeof(USB_CONFIGURATION_DESCRIPTOR),// Descriptor Size
-    USB_CONFIGURATION_DESCRIPTOR_TYPE,   // Configuration Descriptor Type
-    34, 0,                               // Length of this descriptor and all sub descriptors (34 bytes)
-    0x01,                                // Number of interfaces
-    0x01,                                // Configuration number
-    0x00,                                // Configuration string index
-    0xA0,                                // Config characteristics - Bus Powered, Remote Wakeup
-    0x32,                                // Max power consumption of device (in 2mA unit) : 100 mA
+struct UsbDevDesc {
+    USB_CONFIGURATION_DESCRIPTOR cfg;
+    USB_INTERFACE_DESCRIPTOR intf;
+    HID_DESCRIPTOR hid;
+    USB_ENDPOINT_DESCRIPTOR ep;
+};
 
-    // Interface  descriptor
-    sizeof(USB_INTERFACE_DESCRIPTOR),  // Descriptor size
-    USB_INTERFACE_DESCRIPTOR_TYPE,     // Interface Association Descriptor Type
-    0,                                 // bInterfaceNumber
-    0,                                 // bAlternateSetting
-    1,                                 // bNumEndpoints
-    0x03,                              // bInterfaceClass (HID)
-    0x01,                              // bInterfaceSubClass (Boot Interface)
-    0x02,                              // bInterfaceProtocol (Mouse)
-    0x00,                              // iInterface
-
-    // HID Descriptor
-    sizeof(HID_DESCRIPTOR), // Descriptor size
-    HID_HID_DESCRIPTOR_TYPE,// bDescriptorType (HID)
-    0x11, 0x01,             // HID Class Spec Version
-    0x00,                   // bCountryCode
-    0x01,                   // bNumDescriptors
-    0x22,                   // bDescriptorType (Report)
-    0x3E, 0x00,             // wDescriptorLength
-
-    // Interrupt IN endpoint descriptor
-    sizeof(USB_ENDPOINT_DESCRIPTOR),// Descriptor size 
-    USB_ENDPOINT_DESCRIPTOR_TYPE,   // Descriptor type
-    g_InterruptEndpointAddress,     // Endpoint address and description
-    USB_ENDPOINT_TYPE_INTERRUPT,    // bmAttributes - interrupt
-    0x04, 0x00,                     // Max packet size = 4 bytes
-    0x0A                            // Servicing interval for interrupt (10 ms/1 frame)
+const UsbDevDesc g_UsbConfigDescriptorSet = {
+    {
+        // Configuration Descriptor Type
+        sizeof(USB_CONFIGURATION_DESCRIPTOR),// Descriptor Size
+        USB_CONFIGURATION_DESCRIPTOR_TYPE,   // Configuration Descriptor Type
+        sizeof(UsbDevDesc),                  // Length of this descriptor and all sub descriptors (34 bytes)
+        0x01,                                // Number of interfaces
+        0x01,                                // Configuration number
+        0x00,                                // Configuration string index
+        0xA0,                                // Config characteristics - Bus Powered, Remote Wakeup
+        0x32,                                // Max power consumption of device (in 2mA unit) : 100 mA
+    },
+    {
+        // Interface  descriptor
+        sizeof(USB_INTERFACE_DESCRIPTOR),  // Descriptor size
+        USB_INTERFACE_DESCRIPTOR_TYPE,     // Interface Association Descriptor Type
+        0,                                 // bInterfaceNumber
+        0,                                 // bAlternateSetting
+        1,                                 // bNumEndpoints
+        0x03,                              // bInterfaceClass (HID)
+        0x01,                              // bInterfaceSubClass (Boot Interface)
+        0x02,                              // bInterfaceProtocol (Mouse)
+        0x00,                              // iInterface
+    },
+    {
+        // HID Descriptor
+        sizeof(HID_DESCRIPTOR), // Descriptor size
+        HID_HID_DESCRIPTOR_TYPE,// bDescriptorType (HID)
+        0x0111,                 // HID Class Spec Version
+        0x00,                   // bCountryCode
+        0x01,                   // bNumDescriptors
+        0x22,                   // bDescriptorType (Report)
+        0x003E,                 // wDescriptorLength
+    },
+    {
+        // Interrupt IN endpoint descriptor
+        sizeof(USB_ENDPOINT_DESCRIPTOR),// Descriptor size 
+        USB_ENDPOINT_DESCRIPTOR_TYPE,   // Descriptor type
+        g_InterruptEndpointAddress,     // Endpoint address and description
+        USB_ENDPOINT_TYPE_INTERRUPT,    // bmAttributes - interrupt
+        0x0004,                         // Max packet size = 4 bytes
+        0x0A                            // Servicing interval for interrupt (10 ms/1 frame)
+    }
 };
 
 
@@ -122,18 +134,6 @@ const UCHAR g_HIDMouseUsbReportDescriptor[] = {
 
 const USHORT g_HIDMouseUsbReportDescriptor_len = sizeof(g_HIDMouseUsbReportDescriptor);
 
-// Generic descriptor asserts
-static FORCEINLINE VOID UsbValidateConstants()
-{
-    // C_ASSERT doesn't treat these expressions as constant, so use NT_ASSERT
-    NT_ASSERT(((PUSB_CONFIGURATION_DESCRIPTOR)g_UsbConfigDescriptorSet)->wTotalLength ==
-        sizeof(g_UsbConfigDescriptorSet));
-
-    NT_ASSERT(((PUSB_CONFIGURATION_DESCRIPTOR)g_UsbConfigDescriptorSet)->bDescriptorType ==
-        USB_CONFIGURATION_DESCRIPTOR_TYPE);
-}
-
-
 // END ------------------ descriptor -------------------------------
 
 
@@ -148,8 +148,6 @@ Usb_Initialize(
     // Allocate per-controller private contexts used by other source code modules (I/O,
     // etc.)
     UDECX_USBCONTROLLER_CONTEXT* controllerContext = GetUsbControllerContext(WdfDevice);
-
-    UsbValidateConstants();
 
     controllerContext->ChildDeviceInit = UdecxUsbDeviceInitAllocate(WdfDevice);
 
@@ -227,7 +225,7 @@ Usb_ReadDescriptorsAndPlugIn(
         goto exit;
     }
 
-    RtlCopyMemory(pComputedConfigDescSet, g_UsbConfigDescriptorSet, sizeof(g_UsbConfigDescriptorSet));
+    RtlCopyMemory(pComputedConfigDescSet, &g_UsbConfigDescriptorSet, sizeof(g_UsbConfigDescriptorSet));
 
     status = UdecxUsbDeviceInitAddDescriptor(controllerContext->ChildDeviceInit, (PUCHAR)pComputedConfigDescSet, sizeof(g_UsbConfigDescriptorSet));
     if (!NT_SUCCESS(status)) {
