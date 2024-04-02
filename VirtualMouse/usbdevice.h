@@ -31,7 +31,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(USB_CONTEXT, GetUsbDeviceContext);
 #define g_InterruptEndpointAddress 0x86  // high-order bit=1 mean IN
 
 
-extern const UCHAR g_UsbDeviceDescriptor[];
 extern const UCHAR g_UsbConfigDescriptorSet[];
 extern const UCHAR g_HIDMouseUsbReportDescriptor[];
 extern const USHORT g_HIDMouseUsbReportDescriptor_len;
