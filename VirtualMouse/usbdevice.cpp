@@ -4,6 +4,7 @@
 #include "usbdevice.h"
 #include "USBCom.h"
 #include "ucx/1.4/ucxobjects.h"
+#include <Hidport.h>
 #include "usbdevice.tmh"
 
 
@@ -65,13 +66,13 @@ const UCHAR g_UsbConfigDescriptorSet[] = {
     0x00,                              // iInterface
 
     // HID Descriptor
-    0x09,       // Descriptor size
-    0x21,       // bDescriptorType (HID)
-    0x11, 0x01, // HID Class Spec Version
-    0x00,       // bCountryCode
-    0x01,       // bNumDescriptors
-    0x22,       // bDescriptorType (Report)
-    0x3E, 0x00, // wDescriptorLength
+    sizeof(HID_DESCRIPTOR), // Descriptor size
+    HID_HID_DESCRIPTOR_TYPE,// bDescriptorType (HID)
+    0x11, 0x01,             // HID Class Spec Version
+    0x00,                   // bCountryCode
+    0x01,                   // bNumDescriptors
+    0x22,                   // bDescriptorType (Report)
+    0x3E, 0x00,             // wDescriptorLength
 
     // Interrupt IN endpoint descriptor
     sizeof(USB_ENDPOINT_DESCRIPTOR),// Descriptor size 
