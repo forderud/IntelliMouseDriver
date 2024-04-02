@@ -16,9 +16,13 @@ DECLARE_CONST_UNICODE_STRING(g_ProductStringEnUs, L"UDE Client");
 #define g_ProductIndex        0
 
 
-const USHORT AMERICAN_ENGLISH = 0x409;
+const USHORT AMERICAN_ENGLISH = 0x0409;
 
-const UCHAR g_LanguageDescriptor[] = { 4,3,9,4 };
+const USB_STRING_DESCRIPTOR g_LanguageDescriptor = {
+    sizeof(g_LanguageDescriptor), // bLength
+    USB_STRING_DESCRIPTOR_TYPE,   // bDescriptorType
+    AMERICAN_ENGLISH              // bString[1]
+};
 
 
 const UCHAR g_UsbDeviceDescriptor[18] = {
@@ -122,8 +126,6 @@ const USHORT g_HIDMouseUsbReportDescriptor_len = sizeof(g_HIDMouseUsbReportDescr
 static FORCEINLINE VOID UsbValidateConstants()
 {
     // C_ASSERT doesn't treat these expressions as constant, so use NT_ASSERT
-    NT_ASSERT(((PUSB_STRING_DESCRIPTOR)g_LanguageDescriptor)->bString[0] == AMERICAN_ENGLISH);
-    //NT_ASSERT(((PUSB_STRING_DESCRIPTOR)g_LanguageDescriptor)->bString[1] == PRC_CHINESE);
     NT_ASSERT(((PUSB_DEVICE_DESCRIPTOR)g_UsbDeviceDescriptor)->iManufacturer == g_ManufacturerIndex);
     NT_ASSERT(((PUSB_DEVICE_DESCRIPTOR)g_UsbDeviceDescriptor)->iProduct == g_ProductIndex);
 
@@ -132,15 +134,11 @@ static FORCEINLINE VOID UsbValidateConstants()
     NT_ASSERT(sizeof(g_UsbDeviceDescriptor) == sizeof(USB_DEVICE_DESCRIPTOR));
     NT_ASSERT(((PUSB_CONFIGURATION_DESCRIPTOR)g_UsbConfigDescriptorSet)->wTotalLength ==
         sizeof(g_UsbConfigDescriptorSet));
-    NT_ASSERT(((PUSB_STRING_DESCRIPTOR)g_LanguageDescriptor)->bLength ==
-        sizeof(g_LanguageDescriptor));
 
     NT_ASSERT(((PUSB_DEVICE_DESCRIPTOR)g_UsbDeviceDescriptor)->bDescriptorType ==
         USB_DEVICE_DESCRIPTOR_TYPE);
     NT_ASSERT(((PUSB_CONFIGURATION_DESCRIPTOR)g_UsbConfigDescriptorSet)->bDescriptorType ==
         USB_CONFIGURATION_DESCRIPTOR_TYPE);
-    NT_ASSERT(((PUSB_STRING_DESCRIPTOR)g_LanguageDescriptor)->bDescriptorType ==
-        USB_STRING_DESCRIPTOR_TYPE);
 }
 
 
@@ -190,7 +188,7 @@ Usb_Initialize(
     }
 
     // String descriptors
-    status = UdecxUsbDeviceInitAddDescriptorWithIndex(controllerContext->ChildDeviceInit, (PUCHAR)g_LanguageDescriptor, sizeof(g_LanguageDescriptor), 0);
+    status = UdecxUsbDeviceInitAddDescriptorWithIndex(controllerContext->ChildDeviceInit, (PUCHAR)&g_LanguageDescriptor, sizeof(g_LanguageDescriptor), 0);
     if (!NT_SUCCESS(status)) {
         return status;
     }
