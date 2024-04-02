@@ -44,25 +44,25 @@ const USB_DEVICE_DESCRIPTOR g_UsbDeviceDescriptor = {
 
 const UCHAR g_UsbConfigDescriptorSet[] = {
     // Configuration Descriptor Type
-    0x9,                               // Descriptor Size
-    USB_CONFIGURATION_DESCRIPTOR_TYPE, // Configuration Descriptor Type
-    34, 0,                             // Length of this descriptor and all sub descriptors (34 bytes)
-    0x01,                              // Number of interfaces
-    0x01,                              // Configuration number
-    0x00,                              // Configuration string index
-    0xA0,                              // Config characteristics - Bus Powered, Remote Wakeup
-    0x32,                              // Max power consumption of device (in 2mA unit) : 100 mA
+    sizeof(USB_CONFIGURATION_DESCRIPTOR),// Descriptor Size
+    USB_CONFIGURATION_DESCRIPTOR_TYPE,   // Configuration Descriptor Type
+    34, 0,                               // Length of this descriptor and all sub descriptors (34 bytes)
+    0x01,                                // Number of interfaces
+    0x01,                                // Configuration number
+    0x00,                                // Configuration string index
+    0xA0,                                // Config characteristics - Bus Powered, Remote Wakeup
+    0x32,                                // Max power consumption of device (in 2mA unit) : 100 mA
 
     // Interface  descriptor
-    0x9,                                      // Descriptor size
-    USB_INTERFACE_DESCRIPTOR_TYPE,            // Interface Association Descriptor Type
-    0,                                        // bInterfaceNumber
-    0,                                        // bAlternateSetting
-    1,                                        // bNumEndpoints
-    0x03,                                     // bInterfaceClass (HID)
-    0x01,                                     // bInterfaceSubClass (Boot Interface)
-    0x02,                                     // bInterfaceProtocol (Mouse)
-    0x00,                                     // iInterface
+    sizeof(USB_INTERFACE_DESCRIPTOR),  // Descriptor size
+    USB_INTERFACE_DESCRIPTOR_TYPE,     // Interface Association Descriptor Type
+    0,                                 // bInterfaceNumber
+    0,                                 // bAlternateSetting
+    1,                                 // bNumEndpoints
+    0x03,                              // bInterfaceClass (HID)
+    0x01,                              // bInterfaceSubClass (Boot Interface)
+    0x02,                              // bInterfaceProtocol (Mouse)
+    0x00,                              // iInterface
 
     // HID Descriptor
     0x09,       // Descriptor size
@@ -74,7 +74,7 @@ const UCHAR g_UsbConfigDescriptorSet[] = {
     0x3E, 0x00, // wDescriptorLength
 
     // Interrupt IN endpoint descriptor
-    0x07,                           // Descriptor size 
+    sizeof(USB_ENDPOINT_DESCRIPTOR),// Descriptor size 
     USB_ENDPOINT_DESCRIPTOR_TYPE,   // Descriptor type
     g_InterruptEndpointAddress,     // Endpoint address and description
     USB_ENDPOINT_TYPE_INTERRUPT,    // bmAttributes - interrupt
