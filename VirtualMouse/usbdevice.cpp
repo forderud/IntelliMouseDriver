@@ -49,6 +49,7 @@ struct UsbDevDesc {
     HID_DESCRIPTOR hid;
     USB_ENDPOINT_DESCRIPTOR ep;
 };
+static_assert(sizeof(UsbDevDesc) == sizeof(USB_CONFIGURATION_DESCRIPTOR) + sizeof(USB_INTERFACE_DESCRIPTOR) + sizeof(HID_DESCRIPTOR) + sizeof(USB_ENDPOINT_DESCRIPTOR)); // verify that struct is packed
 
 const UsbDevDesc g_UsbConfigDescriptorSet = {
     {
