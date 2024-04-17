@@ -7,7 +7,7 @@ certutil.exe -addstore root VirtualMouse.cer
 certutil.exe -addstore trustedpublisher VirtualMouse.cer
 
 :: Install driver
-PNPUTIL /add-driver VirtualMouse.inf /install /reboot
+PNPUTIL /add-driver VirtualMouse.inf /install
 
 :: Create virtual mouse
 devgen /add /instanceid 1 /hardwareid "Root\VirtualMouse"
