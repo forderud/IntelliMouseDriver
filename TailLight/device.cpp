@@ -148,6 +148,32 @@ Arguments:
         return status;
     }
 
+    // Initialize WMI FakeBIST
+    WDF_TIMER_CONFIG timerCfg = {};
+    WDF_TIMER_CONFIG_INIT(&timerCfg, FakeBISTTimerProc);
+
+    WDF_OBJECT_ATTRIBUTES attribs = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
+    WDF_OBJECT_ATTRIBUTES_SET_CONTEXT_TYPE(&attribs, COLOR_CONTROL);
+
+    // The timer object needs to stick around until all of the timer callbacks
+    // have run. If we delete the timer handle in the timer callback then WDF
+    // will remind us of this being a deadlock scenario. The simplest solution
+    // is to parent it to the device and live with the "garbage".
+    attribs.ExecutionLevel = WdfExecutionLevelPassive; // required to access HID functions
+    attribs.ParentObject = device;
+
+    WDFTIMER* pTimer = &WdfObjectGet_DEVICE_CONTEXT(device)->FakeBISTTimer;
+    status = WdfTimerCreate(&timerCfg,
+                            &attribs,
+                            pTimer);
+    IF_FAILED_RETURN_STATUS(1, "WdfTimerCreate")
+
+    auto pColorController = WdfObjectGet_COLOR_CONTROL(*pTimer);
+    pColorController->Colors[0] = 0xFF00;
+    pColorController->Colors[1] = 0x0;
+    pColorController->RemainingColors = REMAINING_COLORS_COUNT;
+
     return status;
 }
 

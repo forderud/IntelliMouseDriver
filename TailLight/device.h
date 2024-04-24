@@ -3,7 +3,9 @@
 /** Driver-specific struct for storing instance-specific data. */
 struct DEVICE_CONTEXT {
     UNICODE_STRING PdoName;
-    WDFWMIINSTANCE WmiInstance;
+    WDFWMIINSTANCE WmiReportInstance;
+    WDFWMIINSTANCE WmiBISTInstance;
+    WDFTIMER       FakeBISTTimer;
 };
 WDF_DECLARE_CONTEXT_TYPE(DEVICE_CONTEXT)
 

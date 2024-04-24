@@ -1,17 +1,45 @@
 #include "HID.hpp"
 #include "TailLight.hpp"
+#include "Wbem.h"
 
+#define SWITCH_BIST "/bist"
+#define CB_SWITCH_BIST_ONLY (sizeof(SWITCH_BIST) - 1)
+
+void PrintUsage() {
+    wprintf(L"IntelliMouse tail-light shifter .\n");
+    wprintf(L"Usage:\n\"HidUtil.exe [/bist] [<red> <green> <blue>\""
+        " (example: \"HidUtil.exe 0 0 255\" or\n \"HidUtil.exe /bist\"]).\n");
+}
 
 int main(int argc, char* argv[]) {
-    if (argc < 4) {
-        wprintf(L"IntelliMouse tail-light shifter.\n");
-        wprintf(L"Usage: \"HidUtil.exe <red> <green> <blue>\" (example: \"HidUtil.exe 0 0 255\").\n");
+
+    BYTE red     = 0;
+    BYTE green   = 0;
+    BYTE blue    = 0;
+
+    if (argc == 2 && lstrlenA(argv[1]) == CB_SWITCH_BIST_ONLY) {
+        if (memcmp(argv[1], SWITCH_BIST, CB_SWITCH_BIST_ONLY) == 0) {
+            if (SUCCEEDED(ConnectToWbem())) {
+                return 0;
+            }
+            else {
+                return -4;
+            }
+        }
+        else {
+            PrintUsage();
+            return -1;
+        }
+    }
+    else if (argc == 4) {
+        red = (BYTE)atoi(argv[1]);
+        green = (BYTE)atoi(argv[2]);
+        blue = (BYTE)atoi(argv[3]);
+    }
+    else {
+        PrintUsage();
         return -1;
     }
-
-    auto red = (BYTE)atoi(argv[1]);
-    auto green = (BYTE)atoi(argv[2]);
-    auto blue = (BYTE)atoi(argv[3]);
 
     HID::Query query;
     query.VendorID = 0x045E;  // Microsoft

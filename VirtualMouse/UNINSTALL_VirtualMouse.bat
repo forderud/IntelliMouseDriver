@@ -3,7 +3,7 @@
 cd /d "%~dp0"
 
 :: Uninstall driver
-pnputil.exe /delete-driver VirtualMouse.inf /uninstall /force /reboot
+pnputil.exe /delete-driver VirtualMouse.inf /uninstall /force
 
 :: Delete virtual mouse
 devgen /remove "SWD\DEVGEN\1"
