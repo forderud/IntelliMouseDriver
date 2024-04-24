@@ -2,9 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="WbemExecute.cpp" />
+    <ClCompile Include="WbemCore.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HID.hpp" />
     <ClInclude Include="TailLight.hpp" />
+    <ClInclude Include="Wbem.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

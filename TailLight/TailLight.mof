@@ -19,3 +19,22 @@ class TailLightDeviceInformation {
     [WmiDataId(1), read, write, Description("Tail-light in RGB COLORREF format.")]
     uint32 TailLight;
 };
+
+[Dynamic, 
+ Provider("WMIProv"), 
+ WMI,
+ Locale("MS\\0x409"),
+ Description("TailLight BIST"),
+ guid("{ED9DA801-EEEA-44C7-8B1C-5E4C1039F95C}")]
+class TailLightBIST {
+    [key, read]
+    string InstanceName;
+
+    [read]
+    boolean Active;
+
+    [WmiMethodId(1), 
+    Implemented,
+    Description("BIST Command.")]
+    void BIST();
+};

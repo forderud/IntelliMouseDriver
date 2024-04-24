@@ -120,6 +120,7 @@ copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\hidparse.lib</AdditionalDependencies>
     </Link>
+
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>

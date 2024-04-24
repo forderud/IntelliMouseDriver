@@ -15,3 +15,11 @@ Write-Host("  Changing color to {0:x}" -f $mouse.TailLight) # display as hex str
 
 Write-Host("Storing changes.")
 Set-CimInstance -CimInstance $mouse
+
+$mouse = Get-CimInstance -Namespace root/WMI -Class TailLightBIST
+
+Write-Host("IntelliMouse BIST:")
+Write-Host("  InstanceName: {0}" -f $mouse.InstanceName)
+Write-Host("  Active: {0}" -f $mouse.Active)
+
+Invoke-CimMethod -InputObject $mouse -MethodName BIST
