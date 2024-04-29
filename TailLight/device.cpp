@@ -155,6 +155,7 @@ Arguments:
     WDF_OBJECT_ATTRIBUTES attribs = {};
     WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
     WDF_OBJECT_ATTRIBUTES_SET_CONTEXT_TYPE(&attribs, COLOR_CONTROL);
+    attribs.SynchronizationScope = WdfSynchronizationScopeDevice;
 
     // The timer object needs to stick around until all of the timer callbacks
     // have run. If we delete the timer handle in the timer callback then WDF

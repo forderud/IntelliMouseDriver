@@ -44,12 +44,10 @@ NTSTATUS FakeBIST(_In_ WDFDEVICE Device) {
         return STATUS_DEVICE_BUSY;
     }
 
-    InterlockedDecrement((LONG*) & pColorController->RemainingColors);
+    --pColorController->RemainingColors;
 
     // Indicate that we are "starting" the test.
     status = SetFeatureColor(Device, 0xFF);
-
-    pTimer = &WdfObjectGet_DEVICE_CONTEXT(Device)->FakeBISTTimer;
     IF_FAILED_RETURN_STATUS(2, "SetFeatureColor")
 
     #pragma warning(suppress : 6387) // *pTimer initialized in AddDevice
