@@ -206,7 +206,7 @@ Arguments:
     }
 
     // update last written color
-    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(deviceContext->WmiReportInstance);
+    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(deviceContext->WmiInstance);
     pInfo->TailLight = packet->GetColor();
 
     return status;
