@@ -15,3 +15,6 @@ Write-Host("  Changing color to {0:x}" -f $mouse.TailLight) # display as hex str
 
 Write-Host("Storing changes.")
 Set-CimInstance -CimInstance $mouse
+
+
+Invoke-CimMethod -InputObject $mouse -MethodName SelfTest
