@@ -24,35 +24,6 @@ Abstract:
 #include "BackChannel.tmh"
 
 
-
-NTSTATUS
-BackChannelInit(
-    _In_ WDFDEVICE ctrdevice
-)
-{
-    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
-
-    NTSTATUS status = WRQueueInit(ctrdevice, &(pControllerContext->missionCompletion), TRUE);
-    if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE, "Unable to initialize mission request, err= %!STATUS!", status);
-        return status;
-    }
-
-    return status;
-}
-
-
-VOID
-BackChannelDestroy(
-    _In_ WDFDEVICE ctrdevice
-)
-{
-    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
-
-    WRQueueDestroy(&(pControllerContext->missionCompletion));
-}
-
-
 BOOLEAN BackChannelIoctl(_In_ ULONG IoControlCode, _In_ WDFDEVICE ctrdevice, _In_ WDFREQUEST Request)
 {
     BOOLEAN handled = FALSE;

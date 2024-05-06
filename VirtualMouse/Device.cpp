@@ -120,12 +120,6 @@ Arguments:
     // Initialize controller data members.
     pControllerContext = GetUsbControllerContext(wdfDevice);
 
-    status = BackChannelInit(wdfDevice);
-    if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE, "Unable to initialize backchannel err=%!STATUS!", status);
-        goto exit;
-    }
-
     KeInitializeEvent(&pControllerContext->ResetCompleteEvent, NotificationEvent, FALSE /* initial state: not signaled */);
 
     // Create default queue. It only supports USB controller IOCTLs. (USB I/O will come through
@@ -319,7 +313,6 @@ ControllerWdfEvtCleanupCallback(
     FuncEntry(TRACE_DEVICE);
 
     Usb_Destroy((WDFDEVICE)WdfDevice);
-    BackChannelDestroy((WDFDEVICE)WdfDevice);
 
     FuncExit(TRACE_DEVICE, 0);
 }
