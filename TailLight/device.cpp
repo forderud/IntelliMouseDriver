@@ -147,6 +147,10 @@ Arguments:
         KdPrint(("TailLight: Error initializing WMI 0x%x\n", status));
         return status;
     }
+	
+    KeInitializeEvent(&deviceContext->SelfTestWaiter, 
+        EVENT_TYPE::SynchronizationEvent, 
+        FALSE);
 
     return status;
 }
