@@ -186,10 +186,8 @@ IoEvtBulkInUrb(
     UNREFERENCED_PARAMETER(InputBufferLength);
 
     NTSTATUS status = STATUS_SUCCESS;
-    BOOLEAN bReady = FALSE;
     PUCHAR transferBuffer;
     ULONG transferBufferLength;
-    SIZE_T completeBytes = 0;
 
     ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
     WDFDEVICE backchannel = pEpQContext->backChannelDevice;
@@ -210,21 +208,13 @@ IoEvtBulkInUrb(
     }
 
     // try to get us information about a request that may be waiting for this info
-    status = WRQueuePullRead(
-        &(pBackChannelContext->missionCompletion),
-        Request,
-        transferBuffer,
-        transferBufferLength,
-        &bReady,
-        &completeBytes);
-
-    if (bReady) {
-        UdecxUrbSetBytesCompleted(Request, (ULONG)completeBytes);
-        UdecxUrbCompleteWithNtStatus(Request, status);
-        LogInfo(TRACE_DEVICE, "Mission response %p completed with pre-existing data", Request);
-    } else {
-        LogInfo(TRACE_DEVICE, "Mission response %p pended", Request);
+    // no dangling writes found, must pend this read
+    status = WdfRequestForwardToIoQueue(Request, pBackChannelContext->missionCompletion.ReadBufferQueue);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "Unable to foward pending read, err= %!STATUS!", status);
     }
+
+    LogInfo(TRACE_DEVICE, "Mission response %p pended", Request);
 }
 
 
