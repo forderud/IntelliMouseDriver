@@ -32,13 +32,7 @@ BackChannelInit(
 {
     UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
 
-    NTSTATUS status = WRQueueInit(ctrdevice, &(pControllerContext->missionRequest), FALSE);
-    if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE, "Unable to initialize mission completion, err= %!STATUS!", status);
-        return status;
-    }
-
-    status = WRQueueInit(ctrdevice, &(pControllerContext->missionCompletion), TRUE);
+    NTSTATUS status = WRQueueInit(ctrdevice, &(pControllerContext->missionCompletion), TRUE);
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "Unable to initialize mission request, err= %!STATUS!", status);
         return status;
@@ -56,7 +50,6 @@ BackChannelDestroy(
     UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
 
     WRQueueDestroy(&(pControllerContext->missionCompletion));
-    WRQueueDestroy(&(pControllerContext->missionRequest));
 }
 
 
