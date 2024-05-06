@@ -16,8 +16,6 @@
 struct USB_CONTEXT {
     WDFDEVICE             ControllerDevice;
     UDECXUSBENDPOINT      UDEFX2ControlEndpoint;
-    UDECXUSBENDPOINT      UDEFX2BulkOutEndpoint;
-    UDECXUSBENDPOINT      UDEFX2BulkInEndpoint;
     UDECXUSBENDPOINT      UDEFX2InterruptInEndpoint;
     BOOLEAN               IsAwake;
 };
