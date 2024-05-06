@@ -421,10 +421,4 @@ Io_FreeEndpointQueues(
 
     WdfIoQueuePurgeSynchronously(pIoContext->InterruptUrbQueue);
     WdfObjectDelete(pIoContext->InterruptUrbQueue);
-
-    WdfIoQueuePurgeSynchronously(pIoContext->BulkInQueue);
-    WdfObjectDelete(pIoContext->BulkInQueue);
-
-    WdfIoQueuePurgeSynchronously(pIoContext->BulkOutQueue);
-    WdfObjectDelete(pIoContext->BulkOutQueue);
 }

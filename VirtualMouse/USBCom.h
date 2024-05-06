@@ -21,8 +21,6 @@ struct DEVICE_INTR_STATE {
 
 struct IO_CONTEXT {
     WDFQUEUE          ControlQueue;
-    WDFQUEUE          BulkOutQueue;
-    WDFQUEUE          BulkInQueue;
     WDFQUEUE          InterruptUrbQueue;
     WDFQUEUE          IntrDeferredQueue;
 
