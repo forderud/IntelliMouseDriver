@@ -337,25 +337,23 @@ ControllerEvtIoDeviceControl(
 	_In_ ULONG IoControlCode
 )
 {
-    NTSTATUS status = STATUS_SUCCESS;
-    WDFDEVICE ctrdevice = WdfIoQueueGetDevice(Queue);
-
     UNREFERENCED_PARAMETER(OutputBufferLength);
 	UNREFERENCED_PARAMETER(InputBufferLength);
 
+    WDFDEVICE ctrdevice = WdfIoQueueGetDevice(Queue);
+
 	BOOLEAN handled = UdecxWdfDeviceTryHandleUserIoctl(ctrdevice, Request);
-	if (handled) {
+	if (handled)
 		return;
-	}
 
     handled = BackChannelIoctl(IoControlCode, ctrdevice, Request);
-    if (handled) {
+    if (handled)
 		return;
-    }
 
-	status = STATUS_INVALID_DEVICE_REQUEST;
+	NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
 	LogError(TRACE_DEVICE, "Unexpected I/O control code 0x%x %!STATUS!", IoControlCode, status);
 	NT_ASSERTMSG("Unexpected I/O", FALSE);
+
 	WdfRequestComplete(Request, status);
 }
 
