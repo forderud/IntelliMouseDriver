@@ -60,16 +60,16 @@ VOID WRQueueDestroy(_Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ)
         return; // init has not even started
     }
 
-    // clean up the entire list
-    WdfSpinLockAcquire(pQ->qsync);
+    {
+        // clean up the entire list
+        SpinLock lock(pQ->qsync);
 
-    LIST_ENTRY* e = nullptr;
-    while ((e = RemoveHeadList(&(pQ->WriteBufferQueue))) != (&(pQ->WriteBufferQueue)) ) {
-        BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(e, BUFFER_CONTENT, BufferLink);
-        ExFreePool(pWriteEntry);
+        LIST_ENTRY* e = nullptr;
+        while ((e = RemoveHeadList(&(pQ->WriteBufferQueue))) != (&(pQ->WriteBufferQueue))) {
+            BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(e, BUFFER_CONTENT, BufferLink);
+            ExFreePool(pWriteEntry);
+        }
     }
-
-    WdfSpinLockRelease(pQ->qsync);
 
     WdfObjectDelete(pQ->ReadBufferQueue);
     pQ->ReadBufferQueue = NULL;
@@ -113,10 +113,11 @@ NTSTATUS WRQueuePushWrite(
         memcpy(&(pNewEntry->BufferStart), wbuffer, wlen);
         pNewEntry->BufferLength = wlen;
 
-        // enqueue
-        WdfSpinLockAcquire(pQ->qsync);
-        InsertTailList(&(pQ->WriteBufferQueue), &(pNewEntry->BufferLink) );
-        WdfSpinLockRelease(pQ->qsync);
+        {
+            // enqueue
+            SpinLock lock(pQ->qsync);
+            InsertTailList(&(pQ->WriteBufferQueue), &(pNewEntry->BufferLink));
+        }
     }
 
     return status;
@@ -150,9 +151,12 @@ NTSTATUS WRQueuePullRead(
     (*pbReadyToComplete) = FALSE;
     (*completedBytes) = 0;
 
-    WdfSpinLockAcquire(pQ->qsync);
-    PLIST_ENTRY firstPendingWrite = RemoveHeadList( &(pQ->WriteBufferQueue) );
-    WdfSpinLockRelease(pQ->qsync);
+    PLIST_ENTRY firstPendingWrite = nullptr;
+    {
+        SpinLock lock(pQ->qsync);
+        firstPendingWrite = RemoveHeadList(&(pQ->WriteBufferQueue));
+        WdfSpinLockRelease(pQ->qsync);
+    }
 
     if (firstPendingWrite == &(pQ->WriteBufferQueue) ) {
         // no dangling writes found, must pend this read

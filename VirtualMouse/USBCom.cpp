@@ -315,12 +315,13 @@ Io_RaiseInterrupt(
     if (!NT_SUCCESS(status)) {
         LogInfo(TRACE_DEVICE, "Save update and wake device as queue status was %!STATUS!", status);
 
-        WdfSpinLockAcquire(pIoContext->IntrState.sync);
-        pIoContext->IntrState.latestStatus = LatestStatus;
-        if ((pIoContext->IntrState.numUnreadUpdates) < INTR_STATE_MAX_CACHED_UPDATES) {
-            ++(pIoContext->IntrState.numUnreadUpdates);
+        {
+            SpinLock lock(pIoContext->IntrState.sync);
+            pIoContext->IntrState.latestStatus = LatestStatus;
+            if ((pIoContext->IntrState.numUnreadUpdates) < INTR_STATE_MAX_CACHED_UPDATES) {
+                ++(pIoContext->IntrState.numUnreadUpdates);
+            }
         }
-        WdfSpinLockRelease(pIoContext->IntrState.sync);
 
         UdecxUsbDeviceSignalWake(Device);
         status = STATUS_SUCCESS;
@@ -359,15 +360,16 @@ IoEvtInterruptInUrb(
         return;
     }
 
-    // gate cached data we may have and clear it
-    WdfSpinLockAcquire(pIoContext->IntrState.sync);
-    if( pIoContext->IntrState.numUnreadUpdates > 0) {
-        bHasData = TRUE;
-        LatestStatus = pIoContext->IntrState.latestStatus;
+    {
+        // gate cached data we may have and clear it
+        SpinLock lock(pIoContext->IntrState.sync);
+        if (pIoContext->IntrState.numUnreadUpdates > 0) {
+            bHasData = TRUE;
+            LatestStatus = pIoContext->IntrState.latestStatus;
+        }
+        pIoContext->IntrState.latestStatus = {};
+        pIoContext->IntrState.numUnreadUpdates = 0;
     }
-    pIoContext->IntrState.latestStatus = {};
-    pIoContext->IntrState.numUnreadUpdates = 0;
-    WdfSpinLockRelease(pIoContext->IntrState.sync);
 
     if (bHasData)  {
         IoCompletePendingRequest(Request, LatestStatus);

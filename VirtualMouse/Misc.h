@@ -18,6 +18,20 @@ struct WRITE_BUFFER_TO_READ_REQUEST_QUEUE {
     WDFSPINLOCK qsync;
 };
 
+/** C++ spin lock RAII wrapper. */
+class SpinLock {
+public:
+    SpinLock(WDFSPINLOCK lock) : m_lock(lock) {
+        WdfSpinLockAcquire(m_lock);
+    }
+    ~SpinLock() {
+        WdfSpinLockRelease(m_lock);
+    }
+
+private:
+    WDFSPINLOCK m_lock;
+};
+
 NTSTATUS
 WRQueueInit(
     _In_    WDFDEVICE parent,
