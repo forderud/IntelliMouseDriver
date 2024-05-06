@@ -535,7 +535,6 @@ Io_StopDeferredProcessing(
 {
     IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
 
-    pIoContext->bStopping = TRUE;
     // plus this queue will no longer accept incoming requests
     WdfIoQueuePurgeSynchronously( pIoContext->IntrDeferredQueue);
 

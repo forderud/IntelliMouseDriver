@@ -25,7 +25,6 @@ struct IO_CONTEXT {
     WDFQUEUE          BulkInQueue;
     WDFQUEUE          InterruptUrbQueue;
     WDFQUEUE          IntrDeferredQueue;
-    BOOLEAN           bStopping;
 
     DEVICE_INTR_STATE IntrState;
 };
