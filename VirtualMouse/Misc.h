@@ -43,13 +43,3 @@ VOID
 WRQueueDestroy(
     _Inout_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ
 );
-
-
-
-NTSTATUS
-WRQueuePushWrite(
-    _In_ WRITE_BUFFER_TO_READ_REQUEST_QUEUE* pQ,
-    _In_ PVOID wbuffer,
-    _In_ SIZE_T wlen,
-    _Out_ WDFREQUEST *rqReadToComplete
-);
