@@ -22,7 +22,6 @@
     <ClCompile Include="BackChannel.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Driver.cpp" />
-    <ClCompile Include="Misc.cpp" />
     <ClCompile Include="USBCom.cpp" />
     <ClCompile Include="usbdevice.cpp" />
   </ItemGroup>
