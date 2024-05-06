@@ -21,7 +21,6 @@
 
 // controller context 
 struct UDECX_USBCONTROLLER_CONTEXT {
-    LIST_ENTRY ControllerListEntry;
     KEVENT ResetCompleteEvent;
     BOOLEAN AllowOnlyResetInterrupts;
     WDFQUEUE DefaultQueue;
