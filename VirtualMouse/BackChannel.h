@@ -31,8 +31,3 @@ BackChannelIoctl(
     _In_ WDFDEVICE ctrdevice,
     _In_ WDFREQUEST Request
 );
-
-
-
-EVT_WDF_IO_QUEUE_IO_READ  BackChannelEvtRead;
-EVT_WDF_IO_QUEUE_IO_WRITE BackChannelEvtWrite;
