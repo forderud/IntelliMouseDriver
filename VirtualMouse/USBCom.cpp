@@ -141,12 +141,10 @@ IoEvtBulkOutUrb(
     _In_ ULONG IoControlCode
 )
 {
+    UNREFERENCED_PARAMETER(Queue);
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
-    WDFDEVICE backchannel = pEpQContext->backChannelDevice;
-    UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
     ULONG transferBufferLength = 0;
 
     NTSTATUS status = STATUS_SUCCESS;
@@ -165,35 +163,7 @@ IoEvtBulkOutUrb(
         goto exit;
     }
 
-    // try to get us information about a request that may be waiting for this info
-    WDFREQUEST matchingRead = 0;
-    status = WRQueuePushWrite(
-        &(pBackChannelContext->missionRequest),
-        transferBuffer,
-        transferBufferLength,
-        &matchingRead);
-
-    if (matchingRead != NULL) {
-        PVOID rbuffer;
-        SIZE_T rlen;
-
-        // this is a back-channel read, not a USB read!
-        status = WdfRequestRetrieveOutputBuffer(matchingRead, 1, &rbuffer, &rlen);
-
-        SIZE_T completeBytes = 0;
-        if (!NT_SUCCESS(status))  {
-            LogError(TRACE_DEVICE, "WdfRequest %p cannot retrieve mission completion buffer %!STATUS!", matchingRead, status);
-        } else  {
-            completeBytes = min(rlen, transferBufferLength);
-            memcpy(rbuffer, transferBuffer, completeBytes);
-        }
-
-        WdfRequestCompleteWithInformation(matchingRead, status, completeBytes);
-
-        LogInfo(TRACE_DEVICE, "Mission request %p completed with matching read %p", Request, matchingRead);
-    } else {
-        LogInfo(TRACE_DEVICE, "Mission request %p enqueued", Request);
-    }
+    LogInfo(TRACE_DEVICE, "Mission request %p enqueued", Request);
 
 exit:
     // writes never pended, always completed
