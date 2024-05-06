@@ -46,10 +46,8 @@ Arguments:
 	wdfPnpPowerCallbacks.EvtDeviceReleaseHardware = ControllerWdfEvtDeviceReleaseHardware;
 	wdfPnpPowerCallbacks.EvtDeviceD0Entry = ControllerWdfEvtDeviceD0Entry;
 	wdfPnpPowerCallbacks.EvtDeviceD0Exit = ControllerWdfEvtDeviceD0Exit;
-	wdfPnpPowerCallbacks.EvtDeviceD0EntryPostInterruptsEnabled =
-		ControllerWdfEvtDeviceD0EntryPostInterruptsEnabled;
-	wdfPnpPowerCallbacks.EvtDeviceD0ExitPreInterruptsDisabled =
-		ControllerWdfEvtDeviceD0ExitPreInterruptsDisabled;
+	wdfPnpPowerCallbacks.EvtDeviceD0EntryPostInterruptsEnabled = ControllerWdfEvtDeviceD0EntryPostInterruptsEnabled;
+	wdfPnpPowerCallbacks.EvtDeviceD0ExitPreInterruptsDisabled = ControllerWdfEvtDeviceD0ExitPreInterruptsDisabled;
 
 	WdfDeviceInitSetPnpPowerEventCallbacks(WdfDeviceInit, &wdfPnpPowerCallbacks);
 
@@ -91,9 +89,7 @@ Arguments:
 
 	// Call WdfDeviceCreate with a few extra compatibility steps to ensure this device looks
 	// exactly like other USB host controllers.
-	status = ControllerCreateWdfDeviceWithNameAndSymLink(&WdfDeviceInit,
-		&wdfDeviceAttributes,
-		&wdfDevice);
+	status = ControllerCreateWdfDeviceWithNameAndSymLink(&WdfDeviceInit, &wdfDeviceAttributes, &wdfDevice);
 	if (!NT_SUCCESS(status)) {
 		goto exit;
 	}
@@ -144,10 +140,7 @@ Arguments:
     defaultQueueConfig.EvtIoWrite = BackChannelEvtWrite;
     defaultQueueConfig.PowerManaged = WdfFalse;
 
-	status = WdfIoQueueCreate(wdfDevice,
-		&defaultQueueConfig,
-		WDF_NO_OBJECT_ATTRIBUTES,
-		&pControllerContext->DefaultQueue);
+	status = WdfIoQueueCreate(wdfDevice, &defaultQueueConfig, WDF_NO_OBJECT_ATTRIBUTES, &pControllerContext->DefaultQueue);
 	if (!NT_SUCCESS(status)) {
 		LogError(TRACE_DEVICE, "Default queue creation failed %!STATUS!", status);
 		goto exit;

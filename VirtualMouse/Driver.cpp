@@ -39,9 +39,7 @@ Parameters Description:
     attributes.EvtCleanupCallback = UDEFX2EvtDriverContextCleanup;
 
     WDF_DRIVER_CONFIG config = {};
-    WDF_DRIVER_CONFIG_INIT(&config,
-                           UDEFX2EvtDeviceAdd
-                           );
+    WDF_DRIVER_CONFIG_INIT(&config, UDEFX2EvtDeviceAdd);
 	config.DriverPoolTag = POOL_TAG;
 
     NTSTATUS status = WdfDriverCreate(DriverObject,

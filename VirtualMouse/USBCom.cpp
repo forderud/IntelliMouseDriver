@@ -94,8 +94,7 @@ IoEvtControlUrb(
         WDF_USB_CONTROL_SETUP_PACKET setupPacket;
         NTSTATUS status = UdecxUrbRetrieveControlSetupPacket(Request, &setupPacket);
 
-        if (!NT_SUCCESS(status))
-        {
+        if (!NT_SUCCESS(status)) {
             LogError(TRACE_DEVICE, "WdfRequest %p is not a control URB? UdecxUrbRetrieveControlSetupPacket %!STATUS!",
                 Request, status);
             UdecxUrbCompleteWithNtStatus(Request, status);
@@ -125,9 +124,6 @@ IoEvtControlUrb(
             (int)(setupPacket.Packet.wLength)
         );
 
-
-
-
         UdecxUrbCompleteWithNtStatus(Request, STATUS_SUCCESS);
     }
     else
@@ -154,8 +150,7 @@ IoEvtBulkOutUrb(
     ULONG transferBufferLength = 0;
 
     NTSTATUS status = STATUS_SUCCESS;
-    if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)
-    {
+    if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB) {
         LogError(TRACE_DEVICE, "WdfRequest BOUT %p Incorrect IOCTL %x, %!STATUS!",
             Request, IoControlCode, status);
         status = STATUS_INVALID_PARAMETER;
@@ -164,8 +159,7 @@ IoEvtBulkOutUrb(
 
     UCHAR* transferBuffer = nullptr;
     status = UdecxUrbRetrieveBuffer(Request, &transferBuffer, &transferBufferLength);
-    if (!NT_SUCCESS(status))
-    {
+    if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "WdfRequest BOUT %p unable to retrieve buffer %!STATUS!",
             Request, status);
         goto exit;
@@ -179,8 +173,7 @@ IoEvtBulkOutUrb(
         transferBufferLength,
         &matchingRead);
 
-    if (matchingRead != NULL)
-    {
+    if (matchingRead != NULL) {
         PVOID rbuffer;
         SIZE_T rlen;
 
@@ -232,8 +225,7 @@ IoEvtBulkInUrb(
     WDFDEVICE backchannel = pEpQContext->backChannelDevice;
     UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
 
-    if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB)
-    {
+    if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB) {
         LogError(TRACE_DEVICE, "WdfRequest BIN %p Incorrect IOCTL %x, %!STATUS!",
             Request, IoControlCode, status);
         status = STATUS_INVALID_PARAMETER;
@@ -241,8 +233,7 @@ IoEvtBulkInUrb(
     }
 
     status = UdecxUrbRetrieveBuffer(Request, &transferBuffer, &transferBufferLength);
-    if (!NT_SUCCESS(status))
-    {
+    if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "WdfRequest BIN %p unable to retrieve buffer %!STATUS!",
             Request, status);
         return;
@@ -257,8 +248,7 @@ IoEvtBulkInUrb(
         &bReady,
         &completeBytes);
 
-    if (bReady)
-    {
+    if (bReady) {
         UdecxUrbSetBytesCompleted(Request, (ULONG)completeBytes);
         UdecxUrbCompleteWithNtStatus(Request, status);
         LogInfo(TRACE_DEVICE, "Mission response %p completed with pre-existing data", Request);
@@ -287,14 +277,12 @@ IoCompletePendingRequest(
     PUCHAR transferBuffer;
     ULONG transferBufferLength;
     NTSTATUS status = UdecxUrbRetrieveBuffer(request, &transferBuffer, &transferBufferLength);
-    if (!NT_SUCCESS(status))
-    {
+    if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "WdfRequest  %p unable to retrieve buffer %!STATUS!", request, status);
         goto exit;
     }
 
-    if (transferBufferLength < sizeof(MOUSE_INPUT_REPORT))
-    {
+    if (transferBufferLength < sizeof(MOUSE_INPUT_REPORT)) {
         LogError(TRACE_DEVICE, "[ERROR] Can't copy response to buffer: ResponseBufferLen < sizeof(MOUSE_INPUT_REPORT)");
         status = STATUS_INVALID_BLOCK_LENGTH;
         goto exit;
@@ -324,13 +312,12 @@ Io_RaiseInterrupt(
     NTSTATUS status = WdfIoQueueRetrieveNextRequest( pIoContext->IntrDeferredQueue, &request);
 
     // no items in the queue?  it is safe to assume the device is sleeping
-    if (!NT_SUCCESS(status))    {
+    if (!NT_SUCCESS(status)) {
         LogInfo(TRACE_DEVICE, "Save update and wake device as queue status was %!STATUS!", status);
 
         WdfSpinLockAcquire(pIoContext->IntrState.sync);
         pIoContext->IntrState.latestStatus = LatestStatus;
-        if ((pIoContext->IntrState.numUnreadUpdates) < INTR_STATE_MAX_CACHED_UPDATES)
-        {
+        if ((pIoContext->IntrState.numUnreadUpdates) < INTR_STATE_MAX_CACHED_UPDATES) {
             ++(pIoContext->IntrState.numUnreadUpdates);
         }
         WdfSpinLockRelease(pIoContext->IntrState.sync);
@@ -374,8 +361,7 @@ IoEvtInterruptInUrb(
 
     // gate cached data we may have and clear it
     WdfSpinLockAcquire(pIoContext->IntrState.sync);
-    if( pIoContext->IntrState.numUnreadUpdates > 0)
-    {
+    if( pIoContext->IntrState.numUnreadUpdates > 0) {
         bHasData = TRUE;
         LatestStatus = pIoContext->IntrState.latestStatus;
     }
@@ -418,12 +404,7 @@ Io_CreateDeferredIntrQueue(
     // purge it and de-queue from it whenever we get power indications.
     queueConfig.PowerManaged = WdfFalse;
 
-    NTSTATUS status = WdfIoQueueCreate(ControllerDevice,
-        &queueConfig,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &(pIoContext->IntrDeferredQueue)
-    );
-
+    NTSTATUS status = WdfIoQueueCreate(ControllerDevice, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &(pIoContext->IntrDeferredQueue));
     if (!NT_SUCCESS(status)) {
         LogError(TRACE_DEVICE, "WdfIoQueueCreate failed 0x%x\n", status);
         return status;

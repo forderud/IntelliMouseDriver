@@ -39,8 +39,7 @@ NTSTATUS WRQueueInit(_In_ WDFDEVICE parent, _Inout_ WRITE_BUFFER_TO_READ_REQUEST
 
     InitializeListHead( &(pQ->WriteBufferQueue) );
 
-    status = WdfIoQueueCreate(parent, 
-        &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &(pQ->ReadBufferQueue) );
+    status = WdfIoQueueCreate(parent, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &(pQ->ReadBufferQueue));
 
     if (!NT_SUCCESS(status))  {
         pQ->ReadBufferQueue = NULL;

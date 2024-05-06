@@ -334,7 +334,6 @@ Usb_Destroy(
 
     // Free device init in case we didn't successfully create the device.
     if (pControllerContext != NULL && pControllerContext->ChildDeviceInit != NULL) {
-
         UdecxUsbDeviceInitFree(pControllerContext->ChildDeviceInit);
         pControllerContext->ChildDeviceInit = NULL;
     }
@@ -380,9 +379,7 @@ UsbCreateEndpointObj(
     }
 
     endpointInit = UdecxUsbSimpleEndpointInitAllocate(WdfUsbChildDevice);
-
     if (endpointInit == NULL) {
-
         status = STATUS_INSUFFICIENT_RESOURCES;
         LogError(TRACE_DEVICE, "Failed to allocate endpoint init %!STATUS!", status);
         goto exit;
