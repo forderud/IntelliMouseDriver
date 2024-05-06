@@ -164,7 +164,7 @@ NTSTATUS WRQueuePullRead(
     } else {
         BUFFER_CONTENT* pWriteEntry = CONTAINING_RECORD(firstPendingWrite, BUFFER_CONTENT, BufferLink);
 
-        size_t minlen = MINLEN(pWriteEntry->BufferLength, rlen);
+        size_t minlen = min(pWriteEntry->BufferLength, rlen);
         memcpy(rbuffer, &(pWriteEntry->BufferStart), minlen);
 
         (*pbReadyToComplete) = TRUE;

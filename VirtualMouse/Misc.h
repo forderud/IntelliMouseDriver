@@ -5,9 +5,6 @@
 #include "trace.h"
 
 
-#define MINLEN(__a, __b)  ( ((__a) < (__b)) ? (__a) : (__b) )
-
-
 struct BUFFER_CONTENT {
     LIST_ENTRY  BufferLink;
     SIZE_T      BufferLength;

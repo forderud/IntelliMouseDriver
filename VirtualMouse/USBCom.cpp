@@ -191,7 +191,7 @@ IoEvtBulkOutUrb(
         if (!NT_SUCCESS(status))  {
             LogError(TRACE_DEVICE, "WdfRequest %p cannot retrieve mission completion buffer %!STATUS!", matchingRead, status);
         } else  {
-            completeBytes = MINLEN(rlen, transferBufferLength);
+            completeBytes = min(rlen, transferBufferLength);
             memcpy(rbuffer, transferBuffer, completeBytes);
         }
 
