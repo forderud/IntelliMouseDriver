@@ -35,7 +35,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(UDECX_USBCONTROLLER_CONTEXT, GetUsbController
 
 
 struct REQUEST_CONTEXT {
-	UINT32 unused;
+    UINT32 unused;
 };
 WDF_DECLARE_CONTEXT_TYPE(REQUEST_CONTEXT);
 
@@ -58,7 +58,7 @@ EVT_UDECX_WDF_DEVICE_QUERY_USB_CAPABILITY         ControllerEvtUdecxWdfDeviceQue
 
 NTSTATUS
 ControllerCreateWdfDeviceWithNameAndSymLink(
-	_Inout_	PWDFDEVICE_INIT * WdfDeviceInit,
-	_In_	PWDF_OBJECT_ATTRIBUTES WdfDeviceAttributes,
-	_Out_	WDFDEVICE * WdfDevice
+    _Inout_	PWDFDEVICE_INIT * WdfDeviceInit,
+    _In_	PWDF_OBJECT_ATTRIBUTES WdfDeviceAttributes,
+    _Out_	WDFDEVICE * WdfDevice
 );

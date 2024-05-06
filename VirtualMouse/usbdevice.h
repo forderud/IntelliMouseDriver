@@ -16,7 +16,7 @@
 struct USB_CONTEXT {
     WDFDEVICE             ControllerDevice;
     UDECXUSBENDPOINT      UDEFX2ControlEndpoint;
-	UDECXUSBENDPOINT      UDEFX2BulkOutEndpoint;
+    UDECXUSBENDPOINT      UDEFX2BulkOutEndpoint;
     UDECXUSBENDPOINT      UDEFX2BulkInEndpoint;
     UDECXUSBENDPOINT      UDEFX2InterruptInEndpoint;
     BOOLEAN               IsAwake;
@@ -38,29 +38,29 @@ extern const USHORT g_HIDMouseUsbReportDescriptor_len;
 
 NTSTATUS
 Usb_Initialize(
-	_In_ WDFDEVICE WdfControllerDevice
+    _In_ WDFDEVICE WdfControllerDevice
 );
 
 
 NTSTATUS
 Usb_ReadDescriptorsAndPlugIn(
-	_In_ WDFDEVICE WdfControllerDevice
+    _In_ WDFDEVICE WdfControllerDevice
 );
 
 NTSTATUS
 Usb_Disconnect(
-	_In_ WDFDEVICE WdfDevice
+    _In_ WDFDEVICE WdfDevice
 );
 
 VOID
 Usb_Destroy(
-	_In_ WDFDEVICE WdfDevice
+    _In_ WDFDEVICE WdfDevice
 );
 
 // Private functions
 NTSTATUS
 UsbCreateEndpointObj(
-	_In_   UDECXUSBDEVICE    WdfUsbChildDevice,
+    _In_   UDECXUSBDEVICE    WdfUsbChildDevice,
     _In_   UCHAR             epAddr,
     _Out_  UDECXUSBENDPOINT *pNewEpObjAddr
 );
