@@ -33,13 +33,6 @@ struct UDECX_USBCONTROLLER_CONTEXT {
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(UDECX_USBCONTROLLER_CONTEXT, GetUsbControllerContext);
 
 
-struct REQUEST_CONTEXT {
-    UINT32 unused;
-};
-WDF_DECLARE_CONTEXT_TYPE(REQUEST_CONTEXT);
-
-
-
 // Function to initialize the device and its callbacks
 NTSTATUS
 UDEFX2CreateDevice(

@@ -48,7 +48,7 @@ Arguments:
     WdfDeviceInitSetPnpPowerEventCallbacks(WdfDeviceInit, &wdfPnpPowerCallbacks);
 
     WDF_OBJECT_ATTRIBUTES wdfRequestAttributes = {};
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&wdfRequestAttributes, REQUEST_CONTEXT);
+    WDF_OBJECT_ATTRIBUTES_INIT(&wdfRequestAttributes);
     WdfDeviceInitSetRequestAttributes(WdfDeviceInit, &wdfRequestAttributes);
 
     // To distinguish I/O sent to GUID_DEVINTERFACE_USB_HOST_CONTROLLER, we will enable
