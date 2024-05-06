@@ -58,7 +58,7 @@ EVT_UDECX_WDF_DEVICE_QUERY_USB_CAPABILITY         ControllerEvtUdecxWdfDeviceQue
 
 NTSTATUS
 ControllerCreateWdfDeviceWithNameAndSymLink(
-    _Inout_	PWDFDEVICE_INIT * WdfDeviceInit,
-    _In_	PWDF_OBJECT_ATTRIBUTES WdfDeviceAttributes,
-    _Out_	WDFDEVICE * WdfDevice
+    _Inout_ PWDFDEVICE_INIT * WdfDeviceInit,
+    _In_    PWDF_OBJECT_ATTRIBUTES WdfDeviceAttributes,
+    _Out_   WDFDEVICE * WdfDevice
 );
