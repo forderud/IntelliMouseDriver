@@ -295,7 +295,15 @@ Usb_Disconnect(
 
     UDECX_USBCONTROLLER_CONTEXT* controllerCtx = GetUsbControllerContext(WdfDevice);
 
-    Io_StopDeferredProcessing(controllerCtx->ChildDevice, &ioContextCopy);
+    {
+        // Stop deferred processing
+        IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(controllerCtx->ChildDevice);
+
+        // plus this queue will no longer accept incoming requests
+        WdfIoQueuePurgeSynchronously(pIoContext->IntrDeferredQueue);
+
+        ioContextCopy = *pIoContext;
+    }
 
     status = UdecxUsbDevicePlugOutAndDelete(controllerCtx->ChildDevice);
     // Not deleting the queues that belong to the controller, as this

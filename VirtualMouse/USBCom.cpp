@@ -360,19 +360,3 @@ Io_RetrieveEpQueue(
     *Queue = (*pQueueRecord);
     return status;
 }
-
-
-
-VOID
-Io_StopDeferredProcessing(
-    _In_ UDECXUSBDEVICE  Device,
-    _Out_ IO_CONTEXT* pIoContextCopy
-)
-{
-    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
-
-    // plus this queue will no longer accept incoming requests
-    WdfIoQueuePurgeSynchronously( pIoContext->IntrDeferredQueue);
-
-    (*pIoContextCopy) = (*pIoContext);
-}

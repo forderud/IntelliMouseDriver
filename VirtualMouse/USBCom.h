@@ -50,10 +50,3 @@ Io_RetrieveEpQueue(
     _In_ UCHAR           EpAddr,
     _Out_ WDFQUEUE     * Queue
 );
-
-
-VOID
-Io_StopDeferredProcessing(
-    _In_ UDECXUSBDEVICE  Device,
-    _Out_ IO_CONTEXT*   pIoContextCopy
-);
