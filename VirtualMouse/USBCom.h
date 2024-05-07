@@ -64,9 +64,3 @@ VOID
 Io_FreeEndpointQueues(
     _In_ IO_CONTEXT* pIoContext
 );
-
-
-NTSTATUS
-Io_DeviceSlept(
-    _In_ UDECXUSBDEVICE  Device
-);

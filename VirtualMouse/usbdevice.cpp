@@ -438,8 +438,11 @@ UsbDevice_EvtUsbDeviceLinkPowerExit(
 
     USB_CONTEXT* pUsbContext = GetUsbDeviceContext(UdecxUsbDevice);
     pUsbContext->IsAwake = FALSE;
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(UdecxUsbDevice);
 
-    Io_DeviceSlept(UdecxUsbDevice);
+    // thi will result in all current requests being canceled
+    LogInfo(TRACE_DEVICE, "About to purge deferred request queue");
+    WdfIoQueuePurge(pIoContext->IntrDeferredQueue, NULL, NULL);
 
     LogInfo(TRACE_DEVICE, "USB Device power EXIT [wdfDev=%p, usbDev=%p], WakeSetting=%x", UdecxWdfDevice, UdecxUsbDevice, WakeSetting);
     return STATUS_SUCCESS;

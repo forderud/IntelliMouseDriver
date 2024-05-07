@@ -297,21 +297,6 @@ Io_CreateDeferredIntrQueue(
 
 
 NTSTATUS
-Io_DeviceSlept(
-    _In_ UDECXUSBDEVICE  Device
-)
-{
-    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
-
-    // thi will result in all current requests being canceled
-    LogInfo(TRACE_DEVICE, "About to purge deferred request queue" );
-    WdfIoQueuePurge(pIoContext->IntrDeferredQueue, NULL, NULL);
-
-    return STATUS_SUCCESS;
-}
-
-
-NTSTATUS
 Io_RetrieveEpQueue(
     _In_ UDECXUSBDEVICE  Device,
     _In_ UCHAR           EpAddr,
