@@ -307,7 +307,13 @@ Usb_Disconnect(
         return status;
     }
 
-    Io_FreeEndpointQueues(&ioContextCopy);
+    WdfObjectDelete(ioContextCopy.IntrDeferredQueue);
+
+    WdfIoQueuePurgeSynchronously(ioContextCopy.ControlQueue);
+    WdfObjectDelete(ioContextCopy.ControlQueue);
+
+    WdfIoQueuePurgeSynchronously(ioContextCopy.InterruptUrbQueue);
+    WdfObjectDelete(ioContextCopy.InterruptUrbQueue);
 
     LogInfo(TRACE_DEVICE, "Usb_Disconnect ends successfully");
     return status;

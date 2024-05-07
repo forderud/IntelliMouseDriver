@@ -376,18 +376,3 @@ Io_StopDeferredProcessing(
 
     (*pIoContextCopy) = (*pIoContext);
 }
-
-
-VOID
-Io_FreeEndpointQueues(
-    _In_ IO_CONTEXT* pIoContext
-)
-{
-    WdfObjectDelete(pIoContext->IntrDeferredQueue);
-
-    WdfIoQueuePurgeSynchronously(pIoContext->ControlQueue);
-    WdfObjectDelete(pIoContext->ControlQueue);
-
-    WdfIoQueuePurgeSynchronously(pIoContext->InterruptUrbQueue);
-    WdfObjectDelete(pIoContext->InterruptUrbQueue);
-}

@@ -57,10 +57,3 @@ Io_StopDeferredProcessing(
     _In_ UDECXUSBDEVICE  Device,
     _Out_ IO_CONTEXT*   pIoContextCopy
 );
-
-
-
-VOID
-Io_FreeEndpointQueues(
-    _In_ IO_CONTEXT* pIoContext
-);
