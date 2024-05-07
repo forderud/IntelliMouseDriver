@@ -416,7 +416,12 @@ UsbDevice_EvtUsbDeviceLinkPowerEntry(
     UNREFERENCED_PARAMETER(UdecxWdfDevice);
 
     USB_CONTEXT* pUsbContext = GetUsbDeviceContext(UdecxUsbDevice);
-    Io_DeviceWokeUp(UdecxUsbDevice);
+    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(UdecxUsbDevice);
+
+    // this will result in all current requests being canceled
+    LogInfo(TRACE_DEVICE, "About to re-start paused deferred queue");
+    WdfIoQueueStart(pIoContext->IntrDeferredQueue);
+
     pUsbContext->IsAwake = TRUE;
     LogInfo(TRACE_DEVICE, "USB Device power ENTRY");
 

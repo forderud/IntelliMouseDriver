@@ -312,21 +312,6 @@ Io_DeviceSlept(
 
 
 NTSTATUS
-Io_DeviceWokeUp(
-    _In_ UDECXUSBDEVICE  Device
-)
-{
-    IO_CONTEXT* pIoContext = WdfDeviceGetIoContext(Device);
-
-    // thi will result in all current requests being canceled
-    LogInfo(TRACE_DEVICE, "About to re-start paused deferred queue");
-    WdfIoQueueStart(pIoContext->IntrDeferredQueue);
-
-    return STATUS_SUCCESS;
-}
-
-
-NTSTATUS
 Io_RetrieveEpQueue(
     _In_ UDECXUSBDEVICE  Device,
     _In_ UCHAR           EpAddr,

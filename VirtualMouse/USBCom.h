@@ -70,9 +70,3 @@ NTSTATUS
 Io_DeviceSlept(
     _In_ UDECXUSBDEVICE  Device
 );
-
-
-NTSTATUS
-Io_DeviceWokeUp(
-    _In_ UDECXUSBDEVICE  Device
-);
