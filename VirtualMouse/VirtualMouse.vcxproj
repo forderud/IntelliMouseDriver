@@ -19,14 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BackChannel.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="USBCom.cpp" />
     <ClCompile Include="usbdevice.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BackChannel.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Misc.h" />

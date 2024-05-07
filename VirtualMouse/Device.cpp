@@ -9,7 +9,6 @@ Abstract:
 #include "usbdevice.h"
 #include "Misc.h"
 #include "USBCom.h"
-#include "BackChannel.h"
 
 #include <ntstrsafe.h>
 #include "device.tmh"
@@ -318,6 +317,36 @@ ControllerWdfEvtCleanupCallback(
 }
 
 
+BOOLEAN BackChannelIoctl(_In_ ULONG IoControlCode, _In_ WDFDEVICE ctrdevice, _In_ WDFREQUEST Request)
+{
+    BOOLEAN handled = FALSE;
+    UDECX_USBCONTROLLER_CONTEXT* pControllerContext = GetUsbControllerContext(ctrdevice);
+
+    switch (IoControlCode) {
+    case IOCTL_UDEFX2_GENERATE_INTERRUPT:
+        MOUSE_INPUT_REPORT* inBuf = 0;
+        size_t inBufLen = 0;
+        NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(MOUSE_INPUT_REPORT), (void**)&inBuf, &inBufLen);
+
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "%!FUNC! Unable to retrieve input buffer");
+        }
+        else if (inBufLen == sizeof(MOUSE_INPUT_REPORT) && (inBuf != NULL)) {
+            MOUSE_INPUT_REPORT flags = *inBuf;
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Will generate interrupt");
+            status = Io_RaiseInterrupt(pControllerContext->ChildDevice, flags);
+        }
+        else {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "%!FUNC! Invalid buffer size");
+            status = STATUS_INVALID_PARAMETER;
+        }
+        WdfRequestComplete(Request, status);
+        handled = TRUE;
+        break;
+    }
+
+    return handled;
+}
 
 VOID
 ControllerEvtIoDeviceControl(

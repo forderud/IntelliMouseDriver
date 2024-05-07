@@ -3,7 +3,6 @@
 #include "Device.h"
 #include "usbdevice.h"
 #include "USBCom.h"
-#include "BackChannel.h"
 #include "ucx/1.4/ucxobjects.h"
 #include "USBCom.tmh"
 
