@@ -263,16 +263,6 @@ Usb_ReadDescriptorsAndPlugIn(
         goto exit;
     }
 
-    status = UsbCreateEndpointObj(controllerContext->ChildDevice, g_BulkOutEndpointAddress,  &(deviceContext->UDEFX2BulkOutEndpoint) );
-    if (!NT_SUCCESS(status)) {
-        goto exit;
-    }
-
-    status = UsbCreateEndpointObj(controllerContext->ChildDevice, g_BulkInEndpointAddress, &(deviceContext->UDEFX2BulkInEndpoint));
-    if (!NT_SUCCESS(status)) {
-        goto exit;
-    }
-
     status = UsbCreateEndpointObj(controllerContext->ChildDevice, g_InterruptEndpointAddress, &(deviceContext->UDEFX2InterruptInEndpoint));
     if (!NT_SUCCESS(status)) {
         goto exit;

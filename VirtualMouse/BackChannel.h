@@ -9,30 +9,9 @@ All the code in here is for testing purpose, and it is NOT related to UDE direct
 #include "Misc.h"
 
 
-// magic to re-use the controller context without creating
-// explict dependencies on the controller where we only want to use
-// the back-channel
-typedef UDECX_USBCONTROLLER_CONTEXT UDECX_BACKCHANNEL_CONTEXT;
-#define GetBackChannelContext GetUsbControllerContext
-
-NTSTATUS
-BackChannelInit(
-    _In_ WDFDEVICE ctrdevice
-);
-
-VOID
-BackChannelDestroy(
-    _In_ WDFDEVICE ctrdevice
-);
-
 BOOLEAN
 BackChannelIoctl(
     _In_ ULONG IoControlCode,
     _In_ WDFDEVICE ctrdevice,
     _In_ WDFREQUEST Request
 );
-
-
-
-EVT_WDF_IO_QUEUE_IO_READ  BackChannelEvtRead;
-EVT_WDF_IO_QUEUE_IO_WRITE BackChannelEvtWrite;

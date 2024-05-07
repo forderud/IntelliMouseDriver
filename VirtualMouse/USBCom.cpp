@@ -132,131 +132,6 @@ IoEvtControlUrb(
     }
 }
 
-static VOID
-IoEvtBulkOutUrb(
-    _In_ WDFQUEUE Queue,
-    _In_ WDFREQUEST Request,
-    _In_ size_t OutputBufferLength,
-    _In_ size_t InputBufferLength,
-    _In_ ULONG IoControlCode
-)
-{
-    UNREFERENCED_PARAMETER(OutputBufferLength);
-    UNREFERENCED_PARAMETER(InputBufferLength);
-
-    ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
-    WDFDEVICE backchannel = pEpQContext->backChannelDevice;
-    UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
-    ULONG transferBufferLength = 0;
-
-    NTSTATUS status = STATUS_SUCCESS;
-    if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB) {
-        LogError(TRACE_DEVICE, "WdfRequest BOUT %p Incorrect IOCTL %x, %!STATUS!",
-            Request, IoControlCode, status);
-        status = STATUS_INVALID_PARAMETER;
-        goto exit;
-    }
-
-    UCHAR* transferBuffer = nullptr;
-    status = UdecxUrbRetrieveBuffer(Request, &transferBuffer, &transferBufferLength);
-    if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE, "WdfRequest BOUT %p unable to retrieve buffer %!STATUS!",
-            Request, status);
-        goto exit;
-    }
-
-    // try to get us information about a request that may be waiting for this info
-    WDFREQUEST matchingRead = 0;
-    status = WRQueuePushWrite(
-        &(pBackChannelContext->missionRequest),
-        transferBuffer,
-        transferBufferLength,
-        &matchingRead);
-
-    if (matchingRead != NULL) {
-        PVOID rbuffer;
-        SIZE_T rlen;
-
-        // this is a back-channel read, not a USB read!
-        status = WdfRequestRetrieveOutputBuffer(matchingRead, 1, &rbuffer, &rlen);
-
-        SIZE_T completeBytes = 0;
-        if (!NT_SUCCESS(status))  {
-            LogError(TRACE_DEVICE, "WdfRequest %p cannot retrieve mission completion buffer %!STATUS!", matchingRead, status);
-        } else  {
-            completeBytes = min(rlen, transferBufferLength);
-            memcpy(rbuffer, transferBuffer, completeBytes);
-        }
-
-        WdfRequestCompleteWithInformation(matchingRead, status, completeBytes);
-
-        LogInfo(TRACE_DEVICE, "Mission request %p completed with matching read %p", Request, matchingRead);
-    } else {
-        LogInfo(TRACE_DEVICE, "Mission request %p enqueued", Request);
-    }
-
-exit:
-    // writes never pended, always completed
-    UdecxUrbSetBytesCompleted(Request, transferBufferLength);
-    UdecxUrbCompleteWithNtStatus(Request, status);
-    return;
-}
-
-
-static VOID
-IoEvtBulkInUrb(
-    _In_ WDFQUEUE Queue,
-    _In_ WDFREQUEST Request,
-    _In_ size_t OutputBufferLength,
-    _In_ size_t InputBufferLength,
-    _In_ ULONG IoControlCode
-)
-{
-    UNREFERENCED_PARAMETER(OutputBufferLength);
-    UNREFERENCED_PARAMETER(InputBufferLength);
-
-    NTSTATUS status = STATUS_SUCCESS;
-    BOOLEAN bReady = FALSE;
-    PUCHAR transferBuffer;
-    ULONG transferBufferLength;
-    SIZE_T completeBytes = 0;
-
-    ENDPOINTQUEUE_CONTEXT* pEpQContext = GetEndpointQueueContext(Queue);
-    WDFDEVICE backchannel = pEpQContext->backChannelDevice;
-    UDECX_BACKCHANNEL_CONTEXT* pBackChannelContext = GetBackChannelContext(backchannel);
-
-    if (IoControlCode != IOCTL_INTERNAL_USB_SUBMIT_URB) {
-        LogError(TRACE_DEVICE, "WdfRequest BIN %p Incorrect IOCTL %x, %!STATUS!",
-            Request, IoControlCode, status);
-        status = STATUS_INVALID_PARAMETER;
-        return;
-    }
-
-    status = UdecxUrbRetrieveBuffer(Request, &transferBuffer, &transferBufferLength);
-    if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE, "WdfRequest BIN %p unable to retrieve buffer %!STATUS!",
-            Request, status);
-        return;
-    }
-
-    // try to get us information about a request that may be waiting for this info
-    status = WRQueuePullRead(
-        &(pBackChannelContext->missionCompletion),
-        Request,
-        transferBuffer,
-        transferBufferLength,
-        &bReady,
-        &completeBytes);
-
-    if (bReady) {
-        UdecxUrbSetBytesCompleted(Request, (ULONG)completeBytes);
-        UdecxUrbCompleteWithNtStatus(Request, status);
-        LogInfo(TRACE_DEVICE, "Mission response %p completed with pre-existing data", Request);
-    } else {
-        LogInfo(TRACE_DEVICE, "Mission response %p pended", Request);
-    }
-}
-
 
 static VOID
 IoEvtCancelInterruptInUrb(
@@ -477,16 +352,6 @@ Io_RetrieveEpQueue(
         pIoCallback = IoEvtControlUrb;
         break;
 
-    case g_BulkOutEndpointAddress:
-        pQueueRecord = &(pIoContext->BulkOutQueue);
-        pIoCallback = IoEvtBulkOutUrb;
-        break;
-
-    case g_BulkInEndpointAddress:
-        pQueueRecord = &(pIoContext->BulkInQueue);
-        pIoCallback = IoEvtBulkInUrb;
-        break;
-
     case g_InterruptEndpointAddress:
         status = Io_CreateDeferredIntrQueue(wdfController, pIoContext);
         pQueueRecord = &(pIoContext->InterruptUrbQueue);
@@ -556,10 +421,4 @@ Io_FreeEndpointQueues(
 
     WdfIoQueuePurgeSynchronously(pIoContext->InterruptUrbQueue);
     WdfObjectDelete(pIoContext->InterruptUrbQueue);
-
-    WdfIoQueuePurgeSynchronously(pIoContext->BulkInQueue);
-    WdfObjectDelete(pIoContext->BulkInQueue);
-
-    WdfIoQueuePurgeSynchronously(pIoContext->BulkOutQueue);
-    WdfObjectDelete(pIoContext->BulkOutQueue);
 }
