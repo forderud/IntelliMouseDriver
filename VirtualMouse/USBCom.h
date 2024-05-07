@@ -31,13 +31,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(IO_CONTEXT, WdfDeviceGetIoContext);
 
 
 NTSTATUS
-Io_AllocateContext(
-    _In_ UDECXUSBDEVICE Object
-);
-
-
-
-NTSTATUS
 Io_RaiseInterrupt(
     _In_ UDECXUSBDEVICE    Device,
     _In_ MOUSE_INPUT_REPORT LatestStatus

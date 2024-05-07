@@ -15,33 +15,6 @@ struct ENDPOINTQUEUE_CONTEXT {
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(ENDPOINTQUEUE_CONTEXT, GetEndpointQueueContext);
 
 
-NTSTATUS
-Io_AllocateContext(
-    _In_ UDECXUSBDEVICE Object
-)
-/*++
-Routine Description:
-  Object context allocation helper
-
-Arguments:
-  Object - WDF object upon which to allocate the new context
-
-Return value:
-  NTSTATUS. Could fail on allocation failure or the same context type already exists on the object
---*/
-{
-    WDF_OBJECT_ATTRIBUTES attributes;
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, IO_CONTEXT);
-
-    NTSTATUS status = WdfObjectAllocateContext(Object, &attributes, NULL);
-    if (!NT_SUCCESS(status)) {
-        LogError(TRACE_DEVICE, "Unable to allocate new context for WDF object %p", Object);
-        return status;
-    }
-
-    return status;
-}
-
 
 NTSTATUS CompleteRequestWithDescriptor(
     _In_ WDFREQUEST Request,

@@ -208,7 +208,6 @@ Usb_ReadDescriptorsAndPlugIn(
 {
     NTSTATUS                          status;
     PUSB_CONFIGURATION_DESCRIPTOR     pComputedConfigDescSet;
-    WDF_OBJECT_ATTRIBUTES             attributes;
     USB_CONTEXT*                      deviceContext = NULL;
     UDECX_USB_DEVICE_PLUG_IN_OPTIONS  pluginOptions;
 
@@ -232,20 +231,27 @@ Usb_ReadDescriptorsAndPlugIn(
         goto exit;
     }
 
+    {
+        // Create emulated USB device
+        WDF_OBJECT_ATTRIBUTES attributes;
+        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, USB_CONTEXT);
 
-    // Create emulated USB device
-    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, USB_CONTEXT);
-
-    status = UdecxUsbDeviceCreate(&controllerContext->ChildDeviceInit, &attributes, &(controllerContext->ChildDevice) );
-    if (!NT_SUCCESS(status)) {
-        goto exit;
+        status = UdecxUsbDeviceCreate(&controllerContext->ChildDeviceInit, &attributes, &(controllerContext->ChildDevice));
+        if (!NT_SUCCESS(status)) {
+            goto exit;
+        }
     }
 
-    status = Io_AllocateContext(controllerContext->ChildDevice);
-    if (!NT_SUCCESS(status)) {
-        goto exit;
-    }
+    {
+        WDF_OBJECT_ATTRIBUTES attributes;
+        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, IO_CONTEXT);
 
+        status = WdfObjectAllocateContext(controllerContext->ChildDevice, &attributes, NULL);
+        if (!NT_SUCCESS(status)) {
+            LogError(TRACE_DEVICE, "Unable to allocate new context for WDF object %p", controllerContext->ChildDevice);
+            goto exit;
+        }
+    }
 
     deviceContext = GetUsbDeviceContext(controllerContext->ChildDevice);
 
