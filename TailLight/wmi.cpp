@@ -16,12 +16,14 @@ VOID SelfTestTimerProc (_In_ WDFTIMER timer) {
         rgb[2] = max(rgb[2] - 16, 0);
     }
 
+    auto stCtx = WdfObjectGet_SELF_TEST_CONTEXT(timer);
     NTSTATUS status = SetFeatureColor(device, pInfo->TailLight);
     if (!NT_SUCCESS(status)) {
         KdPrint(("TailLight: %s: failed 0x%x\n", __func__, status));
+        stCtx->TestStatus = status;
     }
 
-    if (!WdfObjectGet_SELF_TEST_CONTEXT(timer)->Advance()) {
+    if (!stCtx->Advance()) {
         KdPrint(("TailLight: Self-test completed\n"));
         LONG wasSignaled = KeSetEvent(&deviceContext->SelfTestWaiter, IO_MOUSE_INCREMENT, FALSE);
         NT_ASSERTMSG("TailLight: SelfTest method set to signaled while already signaled.\n", wasSignaled == 0);
@@ -52,10 +54,10 @@ static NTSTATUS EvtWmiInstanceExecuteMethod(
     switch (MethodId) {
     case SelfTest: {
             DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
+            WDFTIMER timer = deviceContext->SelfTestTimer;
+            SELF_TEST_CONTEXT* stCtx = WdfObjectGet_SELF_TEST_CONTEXT(timer);
 
             {
-                WDFTIMER timer = deviceContext->SelfTestTimer;
-                SELF_TEST_CONTEXT* stCtx = WdfObjectGet_SELF_TEST_CONTEXT(timer);
                 if (stCtx->IsBusy())
                     return STATUS_DEVICE_BUSY; // self-test already in progress
 
@@ -82,6 +84,7 @@ static NTSTATUS EvtWmiInstanceExecuteMethod(
                         &timeout
                     );
                 }
+
                 switch (status) {
 
                 case STATUS_ALERTED:
@@ -94,10 +97,12 @@ static NTSTATUS EvtWmiInstanceExecuteMethod(
                     status = STATUS_INTERNAL_ERROR;
                     break;
 
+                case STATUS_SUCCESS:
+                    status = stCtx->TestStatus;
+
                 default:
                     break;
                 }  
-
                 
                 *(NTSTATUS*)Buffer = status;
                 *BufferUsed = sizeof(NTSTATUS);
