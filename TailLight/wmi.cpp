@@ -23,6 +23,8 @@ VOID SelfTestTimerProc (_In_ WDFTIMER timer) {
 
     if (!WdfObjectGet_SELF_TEST_CONTEXT(timer)->Advance()) {
         KdPrint(("TailLight: Self-test completed\n"));
+        LONG wasSignaled = KeSetEvent(&deviceContext->SelfTestWaiter, IO_MOUSE_INCREMENT, FALSE);
+        NT_ASSERTMSG("TailLight: SelfTest method set to signaled while already signaled.\n", wasSignaled == 0);
         return;
     }
 
@@ -40,32 +42,71 @@ static NTSTATUS EvtWmiInstanceExecuteMethod(
     _Out_   PULONG BufferUsed
 ) {
     UNREFERENCED_PARAMETER(InBufferSize);
-    UNREFERENCED_PARAMETER(OutBufferSize);
-    UNREFERENCED_PARAMETER(Buffer);
 
-    *BufferUsed = 0;
+    if (OutBufferSize < sizeof(NTSTATUS)) {
+        return STATUS_BUFFER_TOO_SMALL;
+    }
+
     WDFDEVICE device = WdfWmiInstanceGetDevice(WmiInstance);
 
     switch (MethodId) {
-    case SelfTest:
-        {
-            WDFTIMER timer = WdfObjectGet_DEVICE_CONTEXT(device)->SelfTestTimer;
-            SELF_TEST_CONTEXT* stCtx = WdfObjectGet_SELF_TEST_CONTEXT(timer);
-            if (stCtx->IsBusy())
-                return STATUS_DEVICE_BUSY; // self-test already in progress
+    case SelfTest: {
+            DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
 
-            KdPrint(("TailLight: Starting self-test\n"));
-            TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
-            pInfo->TailLight = 0x00D0D0D0; // start color
-            stCtx->Start();
-            SelfTestTimerProc(timer);
-            return STATUS_SUCCESS;
+            {
+                WDFTIMER timer = deviceContext->SelfTestTimer;
+                SELF_TEST_CONTEXT* stCtx = WdfObjectGet_SELF_TEST_CONTEXT(timer);
+                if (stCtx->IsBusy())
+                    return STATUS_DEVICE_BUSY; // self-test already in progress
+
+                KdPrint(("TailLight: Starting self-test\n"));
+                TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
+                pInfo->TailLight = 0x00D0D0D0; // start color
+                stCtx->Start();
+                SelfTestTimerProc(timer);
+            }
+            
+            {
+                NTSTATUS status = STATUS_UNSUCCESSFUL;
+
+                {
+                    LARGE_INTEGER timeout;
+                    timeout.QuadPart = WDF_REL_TIMEOUT_IN_MS(
+                        NUM_SELF_TEST_STATES *
+                        SELF_TEST_STATE_DURATION_MS +
+                        1);
+                    status = KeWaitForSingleObject((PVOID)&deviceContext->SelfTestWaiter,
+                        KWAIT_REASON::Executive,
+                        MODE::KernelMode,
+                        FALSE,
+                        &timeout
+                    );
+                }
+                switch (status) {
+
+                case STATUS_ALERTED:
+                    NT_ASSERTMSG("TailLight: SelfTest KEVENT is TRUE for alertable.\n", FALSE);
+                    status = STATUS_INTERNAL_ERROR;
+                    break;
+
+                case STATUS_USER_APC:
+                    NT_ASSERTMSG("TailLight: SelfTest KEVENT is not set to KernelMode.\n", FALSE);
+                    status = STATUS_INTERNAL_ERROR;
+                    break;
+
+                default:
+                    break;
+                }  
+
+                
+                *(NTSTATUS*)Buffer = status;
+                *BufferUsed = sizeof(NTSTATUS);
+                return STATUS_SUCCESS;
+            }
         }
-    default:
-        break;
     }
 
-    return STATUS_NOT_IMPLEMENTED;
+    return STATUS_WMI_ITEMID_NOT_FOUND;
 }
 
 

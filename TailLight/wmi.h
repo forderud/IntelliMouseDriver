@@ -2,15 +2,19 @@
 #define MOFRESOURCENAME L"TailLightWMI"
 
 /** Self-test context that counts down until completion. */
+#define NUM_SELF_TEST_STATES    16
+#define SELF_TEST_STATE_DURATION_MS 200
+
 struct SELF_TEST_CONTEXT {
     ULONG State = 0;
+    NTSTATUS TestStatus = STATUS_UNSUCCESSFUL;
 
     bool IsBusy() const {
         return (State != 0);
     }
 
     void Start() {
-        State = 16;
+        State = NUM_SELF_TEST_STATES;
     }
 
     bool Advance() {
