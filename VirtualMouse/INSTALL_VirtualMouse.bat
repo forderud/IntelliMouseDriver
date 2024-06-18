@@ -4,7 +4,7 @@ cd /d "%~dp0"
 
 :: Trust driver certificate
 certutil.exe -addstore root VirtualMouse.cer
-certutil.exe -addstore trustedpublisher VirtualMouse.cer
+certutil.exe -f -addstore trustedpublisher VirtualMouse.cer
 
 :: Install driver
 PNPUTIL /add-driver VirtualMouse.inf /install
