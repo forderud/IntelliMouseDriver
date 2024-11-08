@@ -102,9 +102,9 @@ public:
     std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;
 
-    HIDD_ATTRIBUTES attr = {};
-    PreparsedData report;
-    HIDP_CAPS caps = {};
+    HIDD_ATTRIBUTES attr = {}; // VendorID, ProductID, VersionNumber
+    PreparsedData report; // opaque ptr
+    HIDP_CAPS caps = {}; // Usage, UsagePage, report sizes
 };
 
 /** Human Interface Devices (HID) device search class. */
