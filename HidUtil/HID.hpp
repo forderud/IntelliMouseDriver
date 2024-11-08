@@ -49,13 +49,6 @@ private:
     PHIDP_PREPARSED_DATA report = nullptr; // report descriptor for top-level collection
 };
 
-struct Criterion {
-    USHORT VendorID = 0;
-    USHORT ProductID = 0;
-    USHORT Usage = 0;
-    USHORT UsagePage = 0;
-};
-
 class Device {
 public:
     Device() = default;
@@ -112,6 +105,13 @@ public:
     HIDD_ATTRIBUTES attr = {};
     PreparsedData report;
     HIDP_CAPS caps = {};
+};
+
+struct Criterion {
+    USHORT VendorID = 0;
+    USHORT ProductID = 0;
+    USHORT Usage = 0;
+    USHORT UsagePage = 0;
 };
 
 /** Human Interface Devices (HID) device search class. */
