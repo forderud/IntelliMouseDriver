@@ -56,12 +56,48 @@ struct Criterion {
     USHORT UsagePage = 0;
 };
 
-struct Device {
-    // RAII wrapper of file HANDLE objects
-    using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
+class Device {
+public:
+    Device() = default;
 
+    Device(const wchar_t* deviceName) : name(deviceName) {
+        dev.Attach(CreateFileW(deviceName,
+            GENERIC_READ | GENERIC_WRITE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL,
+            OPEN_EXISTING,
+            0,
+            NULL));
+        if (!dev.IsValid()) {
+            DWORD err = GetLastError(); err;
+            //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
+            //assert(err != ERROR_SHARING_VIOLATION); // (32)
+            //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
+            return;
+        }
+
+        if (!HidD_GetAttributes(dev.Get(), &attr)) {
+            DWORD err = GetLastError(); err;
+            assert(err == ERROR_NOT_FOUND);
+            dev.Close();
+            return;
+        }
+
+        report.Open(dev.Get());
+
+        if (HidP_GetCaps(report, &caps) != HIDP_STATUS_SUCCESS)
+            abort();
+    }
+
+    bool IsValid() const {
+        return dev.IsValid();
+    }
+
+public:
     std::wstring name;
-    FileHandle dev;
+    Microsoft::WRL::Wrappers::FileHandle dev;
+
+    HIDD_ATTRIBUTES attr = {};
     PreparsedData report;
     HIDP_CAPS caps = {};
 };
@@ -93,57 +129,33 @@ public:
 
 private:
     static Device CheckDevice(const wchar_t* deviceName, const Criterion& crit) {
-        Device::FileHandle hid_dev(CreateFileW(deviceName,
-            GENERIC_READ | GENERIC_WRITE,
-            FILE_SHARE_READ | FILE_SHARE_WRITE,
-            NULL,
-            OPEN_EXISTING,
-            0,
-            NULL));
-        if (!hid_dev.IsValid()) {
-            DWORD err = GetLastError(); err;
-            //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
-            //assert(err != ERROR_SHARING_VIOLATION); // (32)
-            //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
+        Device dev(deviceName);
+        if (!dev.IsValid())
+            return {};
+
+        //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, dev.attr.VendorID, dev.attr.ProductID, dev.caps.Usage, dev.caps.UsagePage);
+
+        if (crit.VendorID && (crit.VendorID != dev.attr.VendorID))
             return Device();
-        }
-
-        HIDD_ATTRIBUTES attr = {};
-        if (!HidD_GetAttributes(hid_dev.Get(), &attr)) {
-            DWORD err = GetLastError(); err;
-            assert(err == ERROR_NOT_FOUND);
-            return Device();
-        }
-
-        PreparsedData reportDesc(hid_dev.Get());
-
-        HIDP_CAPS caps = {};
-        if (HidP_GetCaps(reportDesc, &caps) != HIDP_STATUS_SUCCESS)
-            abort();
-
-        //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
-
-        if (crit.VendorID && (crit.VendorID != attr.VendorID))
-            return Device();
-        if (crit.ProductID && (crit.ProductID != attr.ProductID))
+        if (crit.ProductID && (crit.ProductID != dev.attr.ProductID))
             return Device();
 
-        if (crit.Usage && (crit.Usage != caps.Usage))
+        if (crit.Usage && (crit.Usage != dev.caps.Usage))
             return Device();
-        if (crit.UsagePage && (crit.UsagePage != caps.UsagePage))
+        if (crit.UsagePage && (crit.UsagePage != dev.caps.UsagePage))
             return Device();
 
-        //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
+        //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", dev.attr.VendorID, dev.attr.ProductID);
 #if 0
         wchar_t man_buffer[128] = L"<unknown>";
-        HidD_GetManufacturerString(hid_dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
+        HidD_GetManufacturerString(dev.dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
         wprintf(L"  Manufacturer: %ws\n", man_buffer);
 
         wchar_t prod_buffer[128] = L"<unknown>";
-        HidD_GetProductString(hid_dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
+        HidD_GetProductString(dev.dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
         wprintf(L"  Product: %ws\n", prod_buffer);
 #endif
-        return {deviceName, std::move(hid_dev), std::move(reportDesc), caps};
+        return dev;
     }
 };
 
