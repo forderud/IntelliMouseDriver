@@ -9,9 +9,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    auto red = (BYTE)atoi(argv[1]);
-    auto green = (BYTE)atoi(argv[2]);
-    auto blue = (BYTE)atoi(argv[3]);
+    BYTE red = (BYTE)atoi(argv[1]);
+    BYTE green = (BYTE)atoi(argv[2]);
+    BYTE blue = (BYTE)atoi(argv[3]);
 
     HID::Query query;
     query.VendorID = 0x045E;  // Microsoft
@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
     query.UsagePage = 0xFF07; //
 
     wprintf(L"Searching for matching HID devices...\n");
-    auto matches = HID::FindDevices(query);
+    std::vector<HID::Match> matches = HID::FindDevices(query);
     if (matches.empty()) {
         wprintf(L"No matching devices found.\n");
         return -3;
