@@ -20,9 +20,17 @@ public:
     PreparsedData() = default;
 
     PreparsedData(HANDLE hid_dev) {
-        HidD_GetPreparsedData(hid_dev, &report);
+        Open(hid_dev);
     }
     ~PreparsedData() {
+        Close();
+    }
+
+    BOOLEAN Open(HANDLE hid_dev) {
+        Close();
+        return HidD_GetPreparsedData(hid_dev, &report);
+    }
+    void Close() {
         if (report) {
             HidD_FreePreparsedData(report);
             report = nullptr;
