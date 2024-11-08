@@ -132,7 +132,7 @@ public:
         std::vector<Device> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
             auto result = CheckDevice(currentInterface, crit);
-            if (!result.devName.empty())
+            if (result.IsValid())
                 results.push_back(std::move(result));
         }
 
