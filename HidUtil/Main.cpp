@@ -13,20 +13,20 @@ int main(int argc, char* argv[]) {
     BYTE green = (BYTE)atoi(argv[2]);
     BYTE blue = (BYTE)atoi(argv[3]);
 
-    HID::Criterion crit;
+    hid::Criterion crit;
     crit.VendorID = 0x045E;  // Microsoft
     crit.ProductID = 0x082A; // Pro IntelliMouse
     crit.Usage = 0x0212;     //
     crit.UsagePage = 0xFF07; //
 
     wprintf(L"Searching for matching HID devices...\n");
-    std::vector<HID::Match> matches = HID::FindDevices(crit);
+    std::vector<hid::Match> matches = hid::Query::FindDevices(crit);
     if (matches.empty()) {
         wprintf(L"No matching devices found.\n");
         return -3;
     }
 
-    for (HID::Match& match : matches) {
+    for (hid::Match& match : matches) {
 #if 0
         COLORREF cur_color = 0;
         if (GetTailLight(match.dev.Get(), cur_color)) {

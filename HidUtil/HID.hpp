@@ -12,6 +12,7 @@
 #pragma comment(lib, "hid.lib")
 #pragma comment(lib, "mincore.lib")
 
+namespace hid {
 
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */
 class PreparsedData {
@@ -40,26 +41,26 @@ private:
     PHIDP_PREPARSED_DATA report = nullptr; // report descriptor for top-level collection
 };
 
+// RAII wrapper of file HANDLE objects
+using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
+
+struct Criterion {
+    USHORT VendorID = 0;
+    USHORT ProductID = 0;
+    USHORT Usage = 0;
+    USHORT UsagePage = 0;
+};
+
+struct Match {
+    std::wstring name;
+    FileHandle dev;
+    PreparsedData report;
+    HIDP_CAPS caps = {};
+};
+
 /** Human Interface Devices (HID) device search class. */
-class HID {
+class Query {
 public:
-    // RAII wrapper of file HANDLE objects
-    using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
-
-    struct Criterion {
-        USHORT VendorID = 0;
-        USHORT ProductID = 0;
-        USHORT Usage = 0;
-        USHORT UsagePage = 0;
-    };
-
-    struct Match {
-        std::wstring name;
-        FileHandle dev;
-        PreparsedData report;
-        HIDP_CAPS caps = {};
-    };
-
     static std::vector<Match> FindDevices (const Criterion& crit) {
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
@@ -137,3 +138,5 @@ private:
         return {deviceName, std::move(hid_dev), std::move(reportDesc), caps};
     }
 };
+
+} // namespace hid
