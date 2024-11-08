@@ -41,9 +41,6 @@ private:
     PHIDP_PREPARSED_DATA report = nullptr; // report descriptor for top-level collection
 };
 
-// RAII wrapper of file HANDLE objects
-using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
-
 struct Criterion {
     USHORT VendorID = 0;
     USHORT ProductID = 0;
@@ -52,6 +49,9 @@ struct Criterion {
 };
 
 struct Device {
+    // RAII wrapper of file HANDLE objects
+    using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
+
     std::wstring name;
     FileHandle dev;
     PreparsedData report;
@@ -85,7 +85,7 @@ public:
 
 private:
     static Device CheckDevice(const wchar_t* deviceName, const Criterion& crit) {
-        FileHandle hid_dev(CreateFileW(deviceName,
+        Device::FileHandle hid_dev(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             NULL,
