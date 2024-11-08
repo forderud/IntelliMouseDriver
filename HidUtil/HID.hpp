@@ -46,7 +46,7 @@ public:
     // RAII wrapper of file HANDLE objects
     using FileHandle = Microsoft::WRL::Wrappers::FileHandle;
 
-    struct Query {
+    struct Criterion {
         USHORT VendorID = 0;
         USHORT ProductID = 0;
         USHORT Usage = 0;
@@ -60,7 +60,7 @@ public:
         HIDP_CAPS caps = {};
     };
 
-    static std::vector<Match> FindDevices (const Query& query) {
+    static std::vector<Match> FindDevices (const Criterion& crit) {
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
         ULONG deviceInterfaceListLength = 0;
@@ -74,7 +74,7 @@ public:
 
         std::vector<Match> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
-            auto result = CheckDevice(currentInterface, query);
+            auto result = CheckDevice(currentInterface, crit);
             if (!result.name.empty())
                 results.push_back(std::move(result));
         }
@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    static Match CheckDevice(const wchar_t* deviceName, const Query& query) {
+    static Match CheckDevice(const wchar_t* deviceName, const Criterion& crit) {
         FileHandle hid_dev(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -114,14 +114,14 @@ private:
 
         //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
 
-        if (query.VendorID && (query.VendorID != attr.VendorID))
+        if (crit.VendorID && (crit.VendorID != attr.VendorID))
             return Match();
-        if (query.ProductID && (query.ProductID != attr.ProductID))
+        if (crit.ProductID && (crit.ProductID != attr.ProductID))
             return Match();
 
-        if (query.Usage && (query.Usage != caps.Usage))
+        if (crit.Usage && (crit.Usage != caps.Usage))
             return Match();
-        if (query.UsagePage && (query.UsagePage != caps.UsagePage))
+        if (crit.UsagePage && (crit.UsagePage != caps.UsagePage))
             return Match();
 
         //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
