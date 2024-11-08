@@ -107,16 +107,16 @@ public:
     HIDP_CAPS caps = {};
 };
 
-struct Criterion {
-    USHORT VendorID = 0;
-    USHORT ProductID = 0;
-    USHORT Usage = 0;
-    USHORT UsagePage = 0;
-};
-
 /** Human Interface Devices (HID) device search class. */
 class Query {
 public:
+    struct Criterion {
+        USHORT VendorID = 0;
+        USHORT ProductID = 0;
+        USHORT Usage = 0;
+        USHORT UsagePage = 0;
+    };
+
     static std::vector<Device> FindDevices (const Criterion& crit) {
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
