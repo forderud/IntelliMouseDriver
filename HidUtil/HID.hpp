@@ -53,7 +53,7 @@ class Device {
 public:
     Device() = default;
 
-    Device(const wchar_t* deviceName) : name(deviceName) {
+    Device(const wchar_t* deviceName) : devName(deviceName) {
         dev.Attach(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -99,7 +99,7 @@ public:
     }
 
 public:
-    std::wstring name;
+    std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;
 
     HIDD_ATTRIBUTES attr = {};
@@ -132,7 +132,7 @@ public:
         std::vector<Device> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
             auto result = CheckDevice(currentInterface, crit);
-            if (!result.name.empty())
+            if (!result.devName.empty())
                 results.push_back(std::move(result));
         }
 

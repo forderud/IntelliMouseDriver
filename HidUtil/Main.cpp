@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         }
 #endif
 
-        wprintf(L"Updating %s\n", match.name.c_str());
+        wprintf(L"Updating %s\n", match.devName.c_str());
         bool ok = UpdateTailLight(match.dev.Get(), match.report, match.caps, RGB(red, green, blue));
         if (!ok)
             return -2;
