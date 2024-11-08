@@ -20,13 +20,13 @@ int main(int argc, char* argv[]) {
     crit.UsagePage = 0xFF07; //
 
     wprintf(L"Searching for matching HID devices...\n");
-    std::vector<hid::Match> matches = hid::Query::FindDevices(crit);
+    std::vector<hid::Device> matches = hid::Query::FindDevices(crit);
     if (matches.empty()) {
         wprintf(L"No matching devices found.\n");
         return -3;
     }
 
-    for (hid::Match& match : matches) {
+    for (hid::Device& match : matches) {
 #if 0
         COLORREF cur_color = 0;
         if (GetTailLight(match.dev.Get(), cur_color)) {

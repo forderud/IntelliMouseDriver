@@ -51,7 +51,7 @@ struct Criterion {
     USHORT UsagePage = 0;
 };
 
-struct Match {
+struct Device {
     std::wstring name;
     FileHandle dev;
     PreparsedData report;
@@ -61,7 +61,7 @@ struct Match {
 /** Human Interface Devices (HID) device search class. */
 class Query {
 public:
-    static std::vector<Match> FindDevices (const Criterion& crit) {
+    static std::vector<Device> FindDevices (const Criterion& crit) {
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
         ULONG deviceInterfaceListLength = 0;
@@ -73,7 +73,7 @@ public:
         cr = CM_Get_Device_Interface_ListW((GUID*)&GUID_DEVINTERFACE_HID, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
         assert(cr == CR_SUCCESS);
 
-        std::vector<Match> results;
+        std::vector<Device> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
             auto result = CheckDevice(currentInterface, crit);
             if (!result.name.empty())
@@ -84,7 +84,7 @@ public:
     }
 
 private:
-    static Match CheckDevice(const wchar_t* deviceName, const Criterion& crit) {
+    static Device CheckDevice(const wchar_t* deviceName, const Criterion& crit) {
         FileHandle hid_dev(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -97,14 +97,14 @@ private:
             //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
             //assert(err != ERROR_SHARING_VIOLATION); // (32)
             //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
-            return Match();
+            return Device();
         }
 
         HIDD_ATTRIBUTES attr = {};
         if (!HidD_GetAttributes(hid_dev.Get(), &attr)) {
             DWORD err = GetLastError(); err;
             assert(err == ERROR_NOT_FOUND);
-            return Match();
+            return Device();
         }
 
         PreparsedData reportDesc(hid_dev.Get());
@@ -116,14 +116,14 @@ private:
         //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
 
         if (crit.VendorID && (crit.VendorID != attr.VendorID))
-            return Match();
+            return Device();
         if (crit.ProductID && (crit.ProductID != attr.ProductID))
-            return Match();
+            return Device();
 
         if (crit.Usage && (crit.Usage != caps.Usage))
-            return Match();
+            return Device();
         if (crit.UsagePage && (crit.UsagePage != caps.UsagePage))
-            return Match();
+            return Device();
 
         //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", attr.VendorID, attr.ProductID);
 #if 0
