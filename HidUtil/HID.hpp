@@ -93,6 +93,18 @@ public:
         return dev.IsValid();
     }
 
+    std::wstring GetManufacturerString() const {
+        wchar_t man_buffer[128] = L"<unknown>";
+        HidD_GetManufacturerString(dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
+        return man_buffer;
+    }
+
+    std::wstring GetProductString() const {
+        wchar_t prod_buffer[128] = L"<unknown>";
+        HidD_GetProductString(dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
+        return prod_buffer;
+    }
+
 public:
     std::wstring name;
     Microsoft::WRL::Wrappers::FileHandle dev;
@@ -147,13 +159,8 @@ private:
 
         //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", dev.attr.VendorID, dev.attr.ProductID);
 #if 0
-        wchar_t man_buffer[128] = L"<unknown>";
-        HidD_GetManufacturerString(dev.dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
-        wprintf(L"  Manufacturer: %ws\n", man_buffer);
-
-        wchar_t prod_buffer[128] = L"<unknown>";
-        HidD_GetProductString(dev.dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
-        wprintf(L"  Product: %ws\n", prod_buffer);
+        wprintf(L"  Manufacturer: %ws\n", dev.GetManufacturerString().c_str());
+        wprintf(L"  Product: %ws\n", dev.GetProductString().c_str());
 #endif
         return dev;
     }
