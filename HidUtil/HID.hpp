@@ -100,8 +100,11 @@ private:
         }
 
         HIDD_ATTRIBUTES attr = {};
-        if (!HidD_GetAttributes(hid_dev.Get(), &attr))
-            abort();
+        if (!HidD_GetAttributes(hid_dev.Get(), &attr)) {
+            DWORD err = GetLastError(); err;
+            assert(err == ERROR_NOT_FOUND);
+            return Match();
+        }
 
         PreparsedData reportDesc(hid_dev.Get());
 
