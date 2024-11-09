@@ -98,6 +98,25 @@ public:
         return prod_buffer;
     }
 
+    /** Get FEATURE report. */
+    std::vector<BYTE> GetFeature(BYTE reportId) {
+        std::vector<BYTE> result(caps.FeatureReportByteLength+1, (BYTE)0);
+        result[0] = reportId; // report ID prefix
+
+        BOOLEAN ok = HidD_GetFeature(dev.Get(), result.data(), (ULONG)result.size());
+        if (!ok) {
+            DWORD err = GetLastError();
+            printf("ERROR: HidD_GetFeature failure (err %d).\n", err);
+            assert(ok);
+            return {};
+        }
+
+        // remove report ID prefix
+        result.erase(result.begin());
+
+        return result;
+    }
+
 public:
     std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;
