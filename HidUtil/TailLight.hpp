@@ -24,11 +24,8 @@ bool MiscTestTailLight(hid::Device& dev) {
 
     {
         // TEST: Read input report
-        std::vector<BYTE> inputBuf(dev.caps.InputReportByteLength, (BYTE)0);
-        inputBuf[0] = 0x27; // ReportID 39
-        BOOLEAN ok = HidD_GetInputReport(dev.dev.Get(), inputBuf.data(), (ULONG)inputBuf.size());
-        assert(ok);
-        assert(inputBuf[1] == 0xB2);
+        std::vector<BYTE> report = dev.GetInput(0x27); // ReportID 39
+        assert(report[0] == 0xB2);
         // the rest of inputBuf is still empty
     }
 

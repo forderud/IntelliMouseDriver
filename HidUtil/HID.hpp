@@ -130,6 +130,25 @@ public:
         return ok;
     }
 
+    /** Get INPUT report. */
+    std::vector<BYTE> GetInput(BYTE reportId) const {
+        std::vector<BYTE> report(caps.FeatureReportByteLength + 1, (BYTE)0);
+        report[0] = reportId; // report ID prefix
+
+        BOOLEAN ok = HidD_GetInputReport(dev.Get(), report.data(), (ULONG)report.size());
+        if (!ok) {
+            DWORD err = GetLastError();
+            printf("ERROR: HidD_GetInputReport failure (err %d).\n", err);
+            assert(ok);
+            return {};
+        }
+
+        // remove report ID prefix
+        report.erase(report.begin());
+
+        return report;
+    }
+
 public:
     std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;
