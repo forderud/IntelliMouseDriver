@@ -14,8 +14,8 @@ int main(int argc, char* argv[]) {
     BYTE blue = (BYTE)atoi(argv[3]);
 
     hid::Query::Criterion crit;
-    crit.VendorID = 0x045E;  // Microsoft
-    crit.ProductID = 0x082A; // Pro IntelliMouse
+    //crit.VendorID = 0x045E;  // Microsoft
+    //crit.ProductID = 0x082A; // Pro IntelliMouse
     crit.Usage = 0x0212;     //
     crit.UsagePage = 0xFF07; //
 
