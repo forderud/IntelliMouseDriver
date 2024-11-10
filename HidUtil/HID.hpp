@@ -118,7 +118,7 @@ public:
     /** Set FEATURE report. */
     template <class T>
     bool SetFeature(const T& report) {
-        assert(sizeof(report) == caps.FeatureReportByteLength + 1u);
+        assert(sizeof(report) == caps.FeatureReportByteLength + 1);
         BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
