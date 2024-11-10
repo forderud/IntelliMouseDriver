@@ -17,9 +17,6 @@ bool MiscTestTailLight(hid::Device& dev) {
     }
 #endif
 
-    if (dev.caps.FeatureReportByteLength != 73)
-        return false; // length mismatch
-
     HIDP_VALUE_CAPS     valueCaps = {};
     USHORT              ValueCapsLength = dev.caps.NumberFeatureValueCaps;
     NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, dev.preparsed);
