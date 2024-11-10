@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
         {
             // query current color (doesn't work)
-            TailLightReport report = dev.GetFeature<TailLightReport>();
+            auto report = dev.GetFeature<TailLightReport>();
             wprintf(L"Current color: %u\n", report.GetColor());
         }
 
