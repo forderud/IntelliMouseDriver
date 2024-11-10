@@ -26,16 +26,16 @@ int main(int argc, char* argv[]) {
         return -3;
     }
 
-    for (hid::Device& match : matches) {
+    for (hid::Device& dev : matches) {
 #if 0
         COLORREF cur_color = 0;
-        if (GetTailLight(match.dev.Get(), cur_color)) {
+        if (GetTailLight(dev.dev.Get(), cur_color)) {
             wprintf(L"Current color: %u\n", cur_color);
         }
 #endif
 
-        wprintf(L"Updating %s\n", match.devName.c_str());
-        bool ok = UpdateTailLight(match.dev.Get(), match.report, match.caps, RGB(red, green, blue));
+        wprintf(L"Updating %s\n", dev.devName.c_str());
+        bool ok = UpdateTailLight(dev.dev.Get(), dev.report, dev.caps, RGB(red, green, blue));
         if (!ok)
             return -2;
 
