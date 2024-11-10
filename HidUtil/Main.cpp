@@ -30,16 +30,26 @@ int main(int argc, char* argv[]) {
         wprintf(L"Accessing %s\n", dev.devName.c_str());
 
         {
+            // query current color (doesn't work)
             std::vector<BYTE> data = dev.GetFeature(TailLightReport().ReportId);
             const TailLightReport* report = reinterpret_cast<TailLightReport*>(data.data());
             wprintf(L"Current color: %u\n", report->GetColor());
         }
 
-        bool ok = UpdateTailLight(dev, RGB(red, green, blue));
-        if (!ok)
-            return -2;
+        {
+            // update color
+            TailLightReport report;
+            report.SetColor(RGB(red, green, blue));
+            bool ok = dev.SetFeature(report);
+            if (!ok) {
+                printf("ERROR: Set TailLightReport failure.\n");
+                assert(ok);
+                return false;
+            }
+            wprintf(L"SUCCESS: Tail-light color updated.\n");
+        }
 
-        wprintf(L"SUCCESS: Tail-light color updated.\n");
+        MiscTestTailLight(dev);
     }
 
     return 0;

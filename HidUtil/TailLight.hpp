@@ -26,7 +26,7 @@ bool GetTailLight(HANDLE hid_dev, COLORREF & color) {
 }
 
 
-bool UpdateTailLight(hid::Device& dev, COLORREF color) {
+bool MiscTestTailLight(hid::Device& dev) {
 #if 0
     {
         auto& caps = dev.caps;
@@ -47,21 +47,11 @@ bool UpdateTailLight(hid::Device& dev, COLORREF color) {
     NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, dev.preparsed);
     assert(status == HIDP_STATUS_SUCCESS);
 
-    TailLightReport featureReport;
-    featureReport.SetColor(color);
-
-    bool ok = dev.SetFeature(featureReport);
-    if (!ok) {
-        printf("ERROR: Set TailLightReport failure.\n");
-        assert(ok);
-        return false;
-    }
-
     {
         // TEST: Read input report
         std::vector<BYTE> inputBuf(dev.caps.InputReportByteLength, (BYTE)0);
         inputBuf[0] = 0x27; // ReportID 39
-        ok = HidD_GetInputReport(dev.dev.Get(), inputBuf.data(), (ULONG)inputBuf.size());
+        BOOLEAN ok = HidD_GetInputReport(dev.dev.Get(), inputBuf.data(), (ULONG)inputBuf.size());
         assert(ok);
         assert(inputBuf[1] == 0xB2);
         // the rest of inputBuf is still empty
