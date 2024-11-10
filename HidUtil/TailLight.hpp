@@ -18,11 +18,11 @@ bool MiscTestTailLight(hid::Device& dev) {
 #endif
 
     {
-        HIDP_VALUE_CAPS valueCaps = {};
-        USHORT          ValueCapsLength = dev.caps.NumberFeatureValueCaps;
-        NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, dev.preparsed);
+        USHORT valueCapsLen = dev.caps.NumberFeatureValueCaps;
+        std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, {});
+        NTSTATUS status = HidP_GetValueCaps(HidP_Feature, valueCaps.data(), &valueCapsLen, dev.preparsed);
         assert(status == HIDP_STATUS_SUCCESS);
-        assert(valueCaps.ReportID == TailLightReport().ReportId);
+        assert(valueCaps[0].ReportID == TailLightReport().ReportId);
     }
 
     {
