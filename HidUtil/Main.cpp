@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     //crit.VendorID = 0x045E;  // Microsoft
     //crit.ProductID = 0x082A; // Pro IntelliMouse
     crit.Usage = 0x0212;     //
-    crit.UsagePage = 0xFF07; //
+    crit.UsagePage = 0xFF07; // Vendor-defined range (FF00-FFFF)
 
     wprintf(L"Searching for matching HID devices...\n");
     std::vector<hid::Device> matches = hid::Query::FindDevices(crit);
