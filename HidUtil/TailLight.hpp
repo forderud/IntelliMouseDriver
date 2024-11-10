@@ -17,10 +17,13 @@ bool MiscTestTailLight(hid::Device& dev) {
     }
 #endif
 
-    HIDP_VALUE_CAPS valueCaps = {};
-    USHORT          ValueCapsLength = dev.caps.NumberFeatureValueCaps;
-    NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, dev.preparsed);
-    assert(status == HIDP_STATUS_SUCCESS);
+    {
+        HIDP_VALUE_CAPS valueCaps = {};
+        USHORT          ValueCapsLength = dev.caps.NumberFeatureValueCaps;
+        NTSTATUS status = HidP_GetValueCaps(HidP_Feature, &valueCaps, &ValueCapsLength, dev.preparsed);
+        assert(status == HIDP_STATUS_SUCCESS);
+        assert(valueCaps.ReportID == TailLightReport().ReportId);
+    }
 
     {
         // TEST: Read input report
