@@ -117,6 +117,20 @@ public:
         return report;
     }
 
+    /** Set FEATURE report. */
+    bool SetFeature(const std::vector<BYTE>& report) {
+        assert(report.size() == caps.FeatureReportByteLength + 1);
+        BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<BYTE*>(report.data()), (ULONG)report.size());
+        if (!ok) {
+            DWORD err = GetLastError();
+            printf("ERROR: HidD_SetFeature failure (err %d).\n", err);
+            assert(ok);
+            return {};
+        }
+
+        return ok;
+    }
+
 public:
     std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;
