@@ -101,7 +101,7 @@ public:
     /** Get FEATURE report. */
     template <class T>
     T GetFeature() const {
-        T report; // assume report ID prefix on first byte
+        T report{}; // assume report ID prefix on first byte
         assert(sizeof(report) == caps.FeatureReportByteLength+1);
 
         BOOLEAN ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
