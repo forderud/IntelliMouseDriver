@@ -76,9 +76,9 @@ public:
             return;
         }
 
-        report.Open(dev.Get());
+        preparsed.Open(dev.Get());
 
-        if (HidP_GetCaps(report, &caps) != HIDP_STATUS_SUCCESS)
+        if (HidP_GetCaps(preparsed, &caps) != HIDP_STATUS_SUCCESS)
             abort();
     }
 
@@ -122,7 +122,7 @@ public:
     Microsoft::WRL::Wrappers::FileHandle dev;
 
     HIDD_ATTRIBUTES attr = {}; // VendorID, ProductID, VersionNumber
-    PreparsedData report; // opaque ptr
+    PreparsedData preparsed; // opaque ptr
     HIDP_CAPS caps = {}; // Usage, UsagePage, report sizes
 };
 
