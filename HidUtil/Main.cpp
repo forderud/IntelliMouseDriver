@@ -1,5 +1,6 @@
 #include "HID.hpp"
 #include "../TailLight/TailLight.h"
+#include "TailLight.hpp"
 
 
 int main(int argc, char* argv[]) {
@@ -35,35 +36,18 @@ int main(int argc, char* argv[]) {
             for (auto& elm : valueCaps)
                 printf("  ReportID: 0x%X\n", elm.ReportID);
 
-            //dev.PrintCaps();
-        }
+#if 0
+            dev.PrintCaps();
 
-        {
-            // query current color (doesn't work)
-            auto report = dev.GetFeature<TailLightReport>();
-            wprintf(L"Current color: %u\n", report.GetColor());
-        }
-
-        {
-            // update color
-            TailLightReport report;
-            report.SetColor(RGB(red, green, blue));
-            bool ok = dev.SetFeature(report);
-            if (!ok) {
-                printf("ERROR: Set TailLightReport failure.\n");
-                assert(ok);
-                return false;
+            for (auto& elm : valueCaps) {
+                // TEST: Input report
+                std::vector<BYTE> input = dev.GetInput(elm.ReportID);
+                input;
             }
-            wprintf(L"SUCCESS: Tail-light color updated.\n");
+#endif
         }
 
-        {
-            // TEST: Read input report
-            std::vector<BYTE> report = dev.GetInput(0x27); // ReportID 39
-            assert(report[0] == 0xB2);
-            // the rest of inputBuf is still empty
-        }
-
+        TestTailLight(dev, RGB(red, green, blue));
     }
 
     return 0;
