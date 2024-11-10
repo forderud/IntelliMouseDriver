@@ -4,28 +4,6 @@
 #include "../TailLight/TailLight.h"
 
 
-bool GetTailLight(HANDLE hid_dev, COLORREF & color) {
-    std::vector<BYTE> featureReport(41, 0); // 41 observed in WireShark
-    featureReport[0] = 0x27; // 39 observed in WireShark (with type 1=Input report)
-    featureReport[1] = 1; // observed in WireShark
-    featureReport[2] = 1; // observed in WireShark
-    featureReport[3] = 0; // observed in WireShark
-    featureReport[4] = 0x29; // observed in WireShark
-    featureReport[5] = 0; // observed in WireShark
-    BOOLEAN ok = HidD_GetFeature(hid_dev, featureReport.data(), (ULONG)featureReport.size());
-    if (!ok) {
-        DWORD err = GetLastError();
-        printf("ERROR: HidD_GetFeature failure (err %d).\n", err);
-        assert(ok);
-        return false;
-    }
-
-    color = 0;
-    return true;
-
-}
-
-
 bool MiscTestTailLight(hid::Device& dev) {
 #if 0
     {
