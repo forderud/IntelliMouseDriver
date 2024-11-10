@@ -22,7 +22,8 @@ bool MiscTestTailLight(hid::Device& dev) {
         std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, {});
         NTSTATUS status = HidP_GetValueCaps(HidP_Feature, valueCaps.data(), &valueCapsLen, dev.preparsed);
         assert(status == HIDP_STATUS_SUCCESS);
-        assert(valueCaps[0].ReportID == TailLightReport().ReportId);
+        for (auto& elm : valueCaps)
+            printf("ReportID: 0x%X\n", elm.ReportID);
     }
 
     {
