@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) {
             std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps();
             for (auto& elm : valueCaps)
                 printf("  ReportID: 0x%X\n", elm.ReportID);
+
+            //dev.PrintCaps();
         }
 
         {
