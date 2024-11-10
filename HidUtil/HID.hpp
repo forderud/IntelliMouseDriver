@@ -118,9 +118,9 @@ public:
     }
 
     /** Set FEATURE report. */
-    bool SetFeature(const std::vector<BYTE>& report) {
-        assert(report.size() == caps.FeatureReportByteLength + 1);
-        BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<BYTE*>(report.data()), (ULONG)report.size());
+    bool SetFeature(const void* report, ULONG size) {
+        assert(size == caps.FeatureReportByteLength + 1u);
+        BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<void*>(report), size);
         if (!ok) {
             DWORD err = GetLastError();
             printf("ERROR: HidD_SetFeature failure (err %d).\n", err);
