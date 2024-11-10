@@ -27,12 +27,11 @@ int main(int argc, char* argv[]) {
     }
 
     for (hid::Device& dev : matches) {
-#if 0
-        COLORREF cur_color = 0;
-        if (GetTailLight(dev.dev.Get(), cur_color)) {
-            wprintf(L"Current color: %u\n", cur_color);
+        {
+            std::vector<BYTE> data = dev.GetFeature(TailLightReport().ReportId);
+            const TailLightReport* report = reinterpret_cast<TailLightReport*>(data.data());
+            wprintf(L"Current color: %u\n", report->GetColor());
         }
-#endif
 
         wprintf(L"Updating %s\n", dev.devName.c_str());
         bool ok = UpdateTailLight(dev, RGB(red, green, blue));
