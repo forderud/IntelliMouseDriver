@@ -149,6 +149,14 @@ public:
         return report;
     }
 
+    std::vector<HIDP_VALUE_CAPS> GetValueCaps() const {
+        USHORT valueCapsLen = caps.NumberFeatureValueCaps;
+        std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, {});
+        NTSTATUS status = HidP_GetValueCaps(HidP_Feature, valueCaps.data(), &valueCapsLen, preparsed);
+        assert(status == HIDP_STATUS_SUCCESS);
+        return valueCaps;
+    }
+
 public:
     std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;

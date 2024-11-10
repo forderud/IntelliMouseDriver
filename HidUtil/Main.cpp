@@ -30,6 +30,13 @@ int main(int argc, char* argv[]) {
         wprintf(L"Accessing %s\n", dev.devName.c_str());
 
         {
+            printf("Available reports:\n");
+            std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps();
+            for (auto& elm : valueCaps)
+                printf("  ReportID: 0x%X\n", elm.ReportID);
+        }
+
+        {
             // query current color (doesn't work)
             auto report = dev.GetFeature<TailLightReport>();
             wprintf(L"Current color: %u\n", report.GetColor());
