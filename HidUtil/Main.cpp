@@ -31,9 +31,8 @@ int main(int argc, char* argv[]) {
 
         {
             // query current color (doesn't work)
-            std::vector<BYTE> data = dev.GetFeature(TailLightReport().ReportId);
-            const TailLightReport* report = reinterpret_cast<TailLightReport*>(data.data());
-            wprintf(L"Current color: %u\n", report->GetColor());
+            TailLightReport report = dev.GetFeature<TailLightReport>();
+            wprintf(L"Current color: %u\n", report.GetColor());
         }
 
         {

@@ -99,20 +99,18 @@ public:
     }
 
     /** Get FEATURE report. */
-    std::vector<BYTE> GetFeature(BYTE reportId) const {
-        std::vector<BYTE> report(caps.FeatureReportByteLength+1, (BYTE)0);
-        report[0] = reportId; // report ID prefix
+    template <class T>
+    T GetFeature() const {
+        T report; // assume report ID prefix on first byte
+        assert(sizeof(report) == caps.FeatureReportByteLength+1);
 
-        BOOLEAN ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
+        BOOLEAN ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
             printf("ERROR: HidD_GetFeature failure (err %d).\n", err);
             assert(ok);
             return {};
         }
-
-        // remove report ID prefix
-        report.erase(report.begin());
 
         return report;
     }
