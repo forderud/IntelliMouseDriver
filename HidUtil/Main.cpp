@@ -1,5 +1,5 @@
 #include "HID.hpp"
-#include "TailLight.hpp"
+#include "../TailLight/TailLight.h"
 
 
 int main(int argc, char* argv[]) {
@@ -57,7 +57,13 @@ int main(int argc, char* argv[]) {
             wprintf(L"SUCCESS: Tail-light color updated.\n");
         }
 
-        MiscTestTailLight(dev);
+        {
+            // TEST: Read input report
+            std::vector<BYTE> report = dev.GetInput(0x27); // ReportID 39
+            assert(report[0] == 0xB2);
+            // the rest of inputBuf is still empty
+        }
+
     }
 
     return 0;

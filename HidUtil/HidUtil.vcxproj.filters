@@ -5,6 +5,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HID.hpp" />
-    <ClInclude Include="TailLight.hpp" />
   </ItemGroup>
 </Project>
