@@ -118,9 +118,10 @@ public:
     }
 
     /** Set FEATURE report. */
-    bool SetFeature(const void* report, ULONG size) {
-        assert(size == caps.FeatureReportByteLength + 1u);
-        BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<void*>(report), size);
+    template <class T>
+    bool SetFeature(const T& report) {
+        assert(sizeof(report) == caps.FeatureReportByteLength + 1u);
+        BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
             printf("ERROR: HidD_SetFeature failure (err %d).\n", err);
