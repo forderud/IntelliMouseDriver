@@ -36,12 +36,17 @@ int main(int argc, char* argv[]) {
             for (auto& elm : valueCaps)
                 printf("  ReportID: 0x%X\n", elm.ReportID);
 
+            printf("Available feature reports:\n");
+            valueCaps = dev.GetValueCaps(HidP_Feature);
+            for (auto& elm : valueCaps)
+                printf("  ReportID: 0x%X\n", elm.ReportID);
+
 #if 0
             dev.PrintCaps();
 
             for (auto& elm : valueCaps) {
                 // TEST: Input report
-                std::vector<BYTE> input = dev.GetReport(HidP_Input, elm.ReportID);
+                std::vector<BYTE> input = dev.GetReport(HidP_Feature, elm.ReportID);
                 input;
             }
 #endif
