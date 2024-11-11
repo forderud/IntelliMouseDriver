@@ -103,7 +103,7 @@ public:
         return prod_buffer;
     }
 
-    /** Get FEATURE or INPUT report. */
+    /** Get typed FEATURE or INPUT report. */
     template <class T>
     T GetReport(ReportType type) const {
         T report{}; // assume report ID prefix on first byte
@@ -124,6 +124,29 @@ public:
         return report;
     }
 
+    /** Get FEATURE or INPUT report as byte array. */
+    std::vector<BYTE> GetReport(ReportType type, BYTE reportId) const {
+        std::vector<BYTE> report(caps.FeatureReportByteLength + 1, (BYTE)0);
+        report[0] = reportId; // report ID prefix
+
+        BOOLEAN ok = false;
+        if (type == ReportType::Feature)
+            ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
+        else if (type == ReportType::Input)
+            ok = HidD_GetInputReport(dev.Get(), report.data(), (ULONG)report.size());
+        if (!ok) {
+            DWORD err = GetLastError();
+            printf("ERROR: HidD_GetInputReport failure (err %d).\n", err);
+            assert(ok);
+            return {};
+        }
+
+        // remove report ID prefix
+        report.erase(report.begin());
+
+        return report;
+    }
+
     /** Set FEATURE report. */
     template <class T>
     bool SetFeature(const T& report) {
@@ -137,25 +160,6 @@ public:
         }
 
         return ok;
-    }
-
-    /** Get INPUT report. */
-    std::vector<BYTE> GetInput(BYTE reportId) const {
-        std::vector<BYTE> report(caps.FeatureReportByteLength + 1, (BYTE)0);
-        report[0] = reportId; // report ID prefix
-
-        BOOLEAN ok = HidD_GetInputReport(dev.Get(), report.data(), (ULONG)report.size());
-        if (!ok) {
-            DWORD err = GetLastError();
-            printf("ERROR: HidD_GetInputReport failure (err %d).\n", err);
-            assert(ok);
-            return {};
-        }
-
-        // remove report ID prefix
-        report.erase(report.begin());
-
-        return report;
     }
 
     std::vector<HIDP_VALUE_CAPS> GetValueCaps() const {
