@@ -30,22 +30,21 @@ int main(int argc, char* argv[]) {
     for (hid::Device& dev : matches) {
         wprintf(L"Accessing %s\n", dev.devName.c_str());
         // dev.PrintCaps();
+        wprintf(L"\n");
 
         wprintf(L"Available input reports:\n");
         std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
         for (auto& elm : valueCaps)
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-
         wprintf(L"Available output reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Output);
         for (auto& elm : valueCaps)
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-
         wprintf(L"Available feature reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Feature);
         for (auto& elm : valueCaps)
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-
+        wprintf(L"\n");
 #if 0
         for (auto& elm : valueCaps) {
             // TEST: Input report
@@ -54,7 +53,10 @@ int main(int argc, char* argv[]) {
         }
 #endif
 
-        TestTailLight(dev, RGB(red, green, blue));
+        if ((dev.caps.Usage == 0x0212) && (dev.caps.UsagePage == 0xFF07)) {
+            // Pro IntelliMouse detected
+            TestTailLight(dev, RGB(red, green, blue));
+        }
     }
 
     return 0;
