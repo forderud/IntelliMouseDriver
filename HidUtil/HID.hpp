@@ -107,7 +107,7 @@ public:
     template <class T>
     T GetReport(HIDP_REPORT_TYPE type) const {
         T report{}; // assume report ID prefix on first byte
-        assert(sizeof(report) == caps.FeatureReportByteLength+1);
+        assert(sizeof(report) == caps.FeatureReportByteLength);
 
         BOOLEAN ok = false;
         if (type == HidP_Input)
@@ -126,7 +126,7 @@ public:
 
     /** Get FEATURE or INPUT report as byte array. */
     std::vector<BYTE> GetReport(HIDP_REPORT_TYPE type, BYTE reportId) const {
-        std::vector<BYTE> report(caps.FeatureReportByteLength + 1, (BYTE)0);
+        std::vector<BYTE> report(caps.FeatureReportByteLength, (BYTE)0);
         report[0] = reportId; // report ID prefix
 
         BOOLEAN ok = false;
@@ -150,7 +150,7 @@ public:
     /** Set FEATURE or OUTPUT report. */
     template <class T>
     bool SetReport(HIDP_REPORT_TYPE type, const T& report) {
-        assert(sizeof(report) == caps.FeatureReportByteLength + 1);
+        assert(sizeof(report) == caps.FeatureReportByteLength);
 
         BOOLEAN ok = false;
         if (type == HidP_Output)
