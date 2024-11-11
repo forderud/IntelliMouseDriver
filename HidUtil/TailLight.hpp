@@ -4,7 +4,7 @@
 bool TestTailLight(hid::Device& dev, COLORREF color) {
     {
         // query current color (doesn't work)
-        auto report = dev.GetFeature<TailLightReport>();
+        auto report = dev.GetReport<TailLightReport>(hid::ReportType::Feature);
         wprintf(L"Current color: %u\n", report.GetColor());
     }
 

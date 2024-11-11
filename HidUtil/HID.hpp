@@ -14,6 +14,11 @@
 
 namespace hid {
 
+enum class ReportType {
+    Feature,
+    Input,
+};
+
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */
 class PreparsedData {
 public:
@@ -98,16 +103,20 @@ public:
         return prod_buffer;
     }
 
-    /** Get FEATURE report. */
+    /** Get FEATURE or INPUT report. */
     template <class T>
-    T GetFeature() const {
+    T GetReport(ReportType type) const {
         T report{}; // assume report ID prefix on first byte
         assert(sizeof(report) == caps.FeatureReportByteLength+1);
 
-        BOOLEAN ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
+        BOOLEAN ok = false;
+        if (type == ReportType::Feature)
+            ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
+        else if (type == ReportType::Input)
+            ok = HidD_GetInputReport(dev.Get(), &report, sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
-            printf("ERROR: HidD_GetFeature failure (err %d).\n", err);
+            printf("ERROR: HidD_GetFeature or HidD_GetInputReport failure (err %d).\n", err);
             assert(ok);
             return {};
         }
