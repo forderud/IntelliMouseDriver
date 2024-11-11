@@ -177,6 +177,9 @@ public:
             valueCapsLen = caps.NumberFeatureValueCaps;
 
         std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, HIDP_VALUE_CAPS{});
+        if (valueCapsLen == 0)
+            return valueCaps;
+
         NTSTATUS status = HidP_GetValueCaps(type, valueCaps.data(), &valueCapsLen, preparsed);
         assert(status == HIDP_STATUS_SUCCESS); status;
         return valueCaps;
