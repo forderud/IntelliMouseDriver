@@ -80,6 +80,11 @@ public:
 
         if (HidP_GetCaps(preparsed, &caps) != HIDP_STATUS_SUCCESS)
             abort();
+
+#ifndef NDEBUG
+        ManufacturerString = GetManufacturerString();
+        ProductString = GetProductString();
+#endif
     }
 
     bool IsValid() const {
@@ -173,7 +178,7 @@ public:
 
         std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, HIDP_VALUE_CAPS{});
         NTSTATUS status = HidP_GetValueCaps(type, valueCaps.data(), &valueCapsLen, preparsed);
-        assert(status == HIDP_STATUS_SUCCESS);
+        assert(status == HIDP_STATUS_SUCCESS); status;
         return valueCaps;
     }
 
@@ -193,6 +198,12 @@ public:
     HIDD_ATTRIBUTES attr = {}; // VendorID, ProductID, VersionNumber
     PreparsedData preparsed; // opaque ptr
     HIDP_CAPS caps = {}; // Usage, UsagePage, report sizes
+
+#ifndef NDEBUG
+    // fields to aid debugging
+    std::wstring ManufacturerString;
+    std::wstring ProductString;
+#endif
 };
 
 /** Human Interface Devices (HID) device search class. */
@@ -246,10 +257,6 @@ private:
             return Device();
 
         //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", dev.attr.VendorID, dev.attr.ProductID);
-#if 0
-        wprintf(L"  Manufacturer: %ws\n", dev.GetManufacturerString().c_str());
-        wprintf(L"  Product: %ws\n", dev.GetProductString().c_str());
-#endif
         return dev;
     }
 };
