@@ -107,13 +107,15 @@ public:
     template <class T>
     T GetReport(HIDP_REPORT_TYPE type) const {
         T report{}; // assume report ID prefix on first byte
-        assert(sizeof(report) == caps.FeatureReportByteLength);
 
         BOOLEAN ok = false;
-        if (type == HidP_Input)
+        if (type == HidP_Input) {
+            assert(sizeof(report) == caps.InputReportByteLength);
             ok = HidD_GetInputReport(dev.Get(), &report, sizeof(report));
-        else if (type == HidP_Feature)
+        }  else if (type == HidP_Feature) {
+            assert(sizeof(report) == caps.FeatureReportByteLength);
             ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
+        }
         if (!ok) {
             DWORD err = GetLastError();
             wprintf(L"ERROR: HidD_GetFeature or HidD_GetInputReport failure (err %d).\n", err);
@@ -126,14 +128,17 @@ public:
 
     /** Get FEATURE or INPUT report as byte array. */
     std::vector<BYTE> GetReport(HIDP_REPORT_TYPE type, BYTE reportId) const {
-        std::vector<BYTE> report(caps.FeatureReportByteLength, (BYTE)0);
+        std::vector<BYTE> report(1, (BYTE)0);
         report[0] = reportId; // report ID prefix
 
         BOOLEAN ok = false;
-        if (type == HidP_Input)
+        if (type == HidP_Input) {
+            report.resize(caps.InputReportByteLength, (BYTE)0);
             ok = HidD_GetInputReport(dev.Get(), report.data(), (ULONG)report.size());
-        else if (type == HidP_Feature)
+        } else if (type == HidP_Feature) {
+            report.resize(caps.FeatureReportByteLength, (BYTE)0);
             ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
+        }
         if (!ok) {
             DWORD err = GetLastError();
             wprintf(L"ERROR: HidD_GetInputReport failure (err %d).\n", err);
@@ -150,13 +155,14 @@ public:
     /** Set FEATURE or OUTPUT report. */
     template <class T>
     bool SetReport(HIDP_REPORT_TYPE type, const T& report) {
-        assert(sizeof(report) == caps.FeatureReportByteLength);
-
         BOOLEAN ok = false;
-        if (type == HidP_Output)
+        if (type == HidP_Output) {
+            assert(sizeof(report) == caps.OutputReportByteLength);
             ok = HidD_SetOutputReport(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
-        else if (type == HidP_Feature)
+        } else if (type == HidP_Feature) {
+            assert(sizeof(report) == caps.FeatureReportByteLength);
             ok = HidD_SetFeature(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
+        }
         if (!ok) {
             DWORD err = GetLastError();
             wprintf(L"ERROR: HidD_SetFeature failure (err %d).\n", err);
