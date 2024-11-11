@@ -29,33 +29,30 @@ int main(int argc, char* argv[]) {
 
     for (hid::Device& dev : matches) {
         wprintf(L"Accessing %s\n", dev.devName.c_str());
+        // dev.PrintCaps();
 
-        {
-            printf("Available input reports:\n");
-            std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
-            for (auto& elm : valueCaps)
-                printf("  ReportID: %#04x\n", elm.ReportID);
+        wprintf(L"Available input reports:\n");
+        std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
+        for (auto& elm : valueCaps)
+            wprintf(L"  ReportID: %#04x\n", elm.ReportID);
 
-            printf("Available output reports:\n");
-            valueCaps = dev.GetValueCaps(HidP_Output);
-            for (auto& elm : valueCaps)
-                printf("  ReportID: %#04x\n", elm.ReportID);
+        wprintf(L"Available output reports:\n");
+        valueCaps = dev.GetValueCaps(HidP_Output);
+        for (auto& elm : valueCaps)
+            wprintf(L"  ReportID: %#04x\n", elm.ReportID);
 
-            printf("Available feature reports:\n");
-            valueCaps = dev.GetValueCaps(HidP_Feature);
-            for (auto& elm : valueCaps)
-                printf("  ReportID: %#04x\n", elm.ReportID);
+        wprintf(L"Available feature reports:\n");
+        valueCaps = dev.GetValueCaps(HidP_Feature);
+        for (auto& elm : valueCaps)
+            wprintf(L"  ReportID: %#04x\n", elm.ReportID);
 
 #if 0
-            dev.PrintCaps();
-
-            for (auto& elm : valueCaps) {
-                // TEST: Input report
-                std::vector<BYTE> input = dev.GetReport(HidP_Feature, elm.ReportID);
-                input;
-            }
-#endif
+        for (auto& elm : valueCaps) {
+            // TEST: Input report
+            std::vector<BYTE> input = dev.GetReport(HidP_Feature, elm.ReportID);
+            input;
         }
+#endif
 
         TestTailLight(dev, RGB(red, green, blue));
     }
