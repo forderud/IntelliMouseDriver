@@ -14,11 +14,6 @@
 
 namespace hid {
 
-enum class ReportType {
-    Feature,
-    Input,
-};
-
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */
 class PreparsedData {
 public:
@@ -105,14 +100,14 @@ public:
 
     /** Get typed FEATURE or INPUT report. */
     template <class T>
-    T GetReport(ReportType type) const {
+    T GetReport(HIDP_REPORT_TYPE type) const {
         T report{}; // assume report ID prefix on first byte
         assert(sizeof(report) == caps.FeatureReportByteLength+1);
 
         BOOLEAN ok = false;
-        if (type == ReportType::Feature)
+        if (type == HidP_Feature)
             ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
-        else if (type == ReportType::Input)
+        else if (type == HidP_Input)
             ok = HidD_GetInputReport(dev.Get(), &report, sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
@@ -125,14 +120,14 @@ public:
     }
 
     /** Get FEATURE or INPUT report as byte array. */
-    std::vector<BYTE> GetReport(ReportType type, BYTE reportId) const {
+    std::vector<BYTE> GetReport(HIDP_REPORT_TYPE type, BYTE reportId) const {
         std::vector<BYTE> report(caps.FeatureReportByteLength + 1, (BYTE)0);
         report[0] = reportId; // report ID prefix
 
         BOOLEAN ok = false;
-        if (type == ReportType::Feature)
+        if (type == HidP_Feature)
             ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
-        else if (type == ReportType::Input)
+        else if (type == HidP_Input)
             ok = HidD_GetInputReport(dev.Get(), report.data(), (ULONG)report.size());
         if (!ok) {
             DWORD err = GetLastError();

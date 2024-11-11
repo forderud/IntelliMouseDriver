@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 
             for (auto& elm : valueCaps) {
                 // TEST: Input report
-                std::vector<BYTE> input = dev.GetReport(hid::ReportType::Input, elm.ReportID);
+                std::vector<BYTE> input = dev.GetReport(HidP_Input, elm.ReportID);
                 input;
             }
 #endif
