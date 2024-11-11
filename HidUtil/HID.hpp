@@ -142,11 +142,16 @@ public:
         return report;
     }
 
-    /** Set FEATURE report. */
+    /** Set FEATURE or OUTPUT report. */
     template <class T>
-    bool SetFeature(const T& report) {
+    bool SetReport(HIDP_REPORT_TYPE type, const T& report) {
         assert(sizeof(report) == caps.FeatureReportByteLength + 1);
-        BOOLEAN ok = HidD_SetFeature(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
+
+        BOOLEAN ok = false;
+        if (type == HidP_Output)
+            ok = HidD_SetOutputReport(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
+        else if (type == HidP_Feature)
+            ok = HidD_SetFeature(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
             printf("ERROR: HidD_SetFeature failure (err %d).\n", err);

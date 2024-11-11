@@ -12,7 +12,7 @@ bool TestTailLight(hid::Device& dev, COLORREF color) {
         // update color
         TailLightReport report;
         report.SetColor(color);
-        bool ok = dev.SetFeature(report);
+        bool ok = dev.SetReport(HidP_Feature, report);
         if (!ok) {
             printf("ERROR: Set TailLightReport failure.\n");
             assert(ok);
