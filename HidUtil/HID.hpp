@@ -166,6 +166,8 @@ public:
         USHORT valueCapsLen = 0;
         if (type == HidP_Input)
             valueCapsLen = caps.NumberInputValueCaps;
+        else if (type == HidP_Output)
+            valueCapsLen = caps.NumberOutputValueCaps;
         else if (type == HidP_Feature)
             valueCapsLen = caps.NumberFeatureValueCaps;
 
