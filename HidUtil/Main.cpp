@@ -34,12 +34,12 @@ int main(int argc, char* argv[]) {
             printf("Available input reports:\n");
             std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
             for (auto& elm : valueCaps)
-                printf("  ReportID: 0x%X\n", elm.ReportID);
+                printf("  ReportID: %#04x\n", elm.ReportID);
 
             printf("Available feature reports:\n");
             valueCaps = dev.GetValueCaps(HidP_Feature);
             for (auto& elm : valueCaps)
-                printf("  ReportID: 0x%X\n", elm.ReportID);
+                printf("  ReportID: %#04x\n", elm.ReportID);
 
 #if 0
             dev.PrintCaps();
