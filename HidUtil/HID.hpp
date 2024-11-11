@@ -151,7 +151,7 @@ public:
 
     std::vector<HIDP_VALUE_CAPS> GetValueCaps() const {
         USHORT valueCapsLen = caps.NumberFeatureValueCaps;
-        std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, {});
+        std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, HIDP_VALUE_CAPS{});
         NTSTATUS status = HidP_GetValueCaps(HidP_Feature, valueCaps.data(), &valueCapsLen, preparsed);
         assert(status == HIDP_STATUS_SUCCESS);
         return valueCaps;
