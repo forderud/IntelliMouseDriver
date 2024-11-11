@@ -105,10 +105,10 @@ public:
         assert(sizeof(report) == caps.FeatureReportByteLength+1);
 
         BOOLEAN ok = false;
-        if (type == HidP_Feature)
-            ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
-        else if (type == HidP_Input)
+        if (type == HidP_Input)
             ok = HidD_GetInputReport(dev.Get(), &report, sizeof(report));
+        else if (type == HidP_Feature)
+            ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
             printf("ERROR: HidD_GetFeature or HidD_GetInputReport failure (err %d).\n", err);
@@ -125,10 +125,10 @@ public:
         report[0] = reportId; // report ID prefix
 
         BOOLEAN ok = false;
-        if (type == HidP_Feature)
-            ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
-        else if (type == HidP_Input)
+        if (type == HidP_Input)
             ok = HidD_GetInputReport(dev.Get(), report.data(), (ULONG)report.size());
+        else if (type == HidP_Feature)
+            ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
         if (!ok) {
             DWORD err = GetLastError();
             printf("ERROR: HidD_GetInputReport failure (err %d).\n", err);
