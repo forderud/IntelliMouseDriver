@@ -47,9 +47,12 @@ int main(int argc, char* argv[]) {
         wprintf(L"\n");
 #if 0
         for (auto& elm : valueCaps) {
-            // TEST: Input report
-            std::vector<BYTE> input = dev.GetReport(HidP_Feature, elm.ReportID);
-            input;
+            // Print report
+            std::vector<BYTE> report = dev.GetReport(HidP_Feature, elm.ReportID);
+            wprintf(L"  Report: {");
+            for (BYTE elm : report)
+                wprintf(L" %#04x, ", elm);
+            wprintf(L"}\n");
         }
 #endif
 
