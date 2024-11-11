@@ -157,10 +157,15 @@ public:
         return ok;
     }
 
-    std::vector<HIDP_VALUE_CAPS> GetValueCaps() const {
-        USHORT valueCapsLen = caps.NumberFeatureValueCaps;
+    std::vector<HIDP_VALUE_CAPS> GetValueCaps(HIDP_REPORT_TYPE type) const {
+        USHORT valueCapsLen = 0;
+        if (type == HidP_Input)
+            valueCapsLen = caps.NumberInputValueCaps;
+        else if (type == HidP_Feature)
+            valueCapsLen = caps.NumberFeatureValueCaps;
+
         std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, HIDP_VALUE_CAPS{});
-        NTSTATUS status = HidP_GetValueCaps(HidP_Feature, valueCaps.data(), &valueCapsLen, preparsed);
+        NTSTATUS status = HidP_GetValueCaps(type, valueCaps.data(), &valueCapsLen, preparsed);
         assert(status == HIDP_STATUS_SUCCESS);
         return valueCaps;
     }

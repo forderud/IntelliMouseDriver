@@ -31,8 +31,8 @@ int main(int argc, char* argv[]) {
         wprintf(L"Accessing %s\n", dev.devName.c_str());
 
         {
-            printf("Available reports:\n");
-            std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps();
+            printf("Available input reports:\n");
+            std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
             for (auto& elm : valueCaps)
                 printf("  ReportID: 0x%X\n", elm.ReportID);
 
