@@ -116,7 +116,7 @@ public:
             ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
-            printf("ERROR: HidD_GetFeature or HidD_GetInputReport failure (err %d).\n", err);
+            wprintf(L"ERROR: HidD_GetFeature or HidD_GetInputReport failure (err %d).\n", err);
             assert(ok);
             return {};
         }
@@ -136,7 +136,7 @@ public:
             ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
         if (!ok) {
             DWORD err = GetLastError();
-            printf("ERROR: HidD_GetInputReport failure (err %d).\n", err);
+            wprintf(L"ERROR: HidD_GetInputReport failure (err %d).\n", err);
             assert(ok);
             return {};
         }
@@ -159,7 +159,7 @@ public:
             ok = HidD_SetFeature(dev.Get(), const_cast<void*>(static_cast<const void*>(&report)), sizeof(report));
         if (!ok) {
             DWORD err = GetLastError();
-            printf("ERROR: HidD_SetFeature failure (err %d).\n", err);
+            wprintf(L"ERROR: HidD_SetFeature failure (err %d).\n", err);
             assert(ok);
             return {};
         }
@@ -186,12 +186,12 @@ public:
     }
 
     void PrintCaps() const {
-        printf("Device capabilities:\n");
-        printf("  Usage=0x%04X, UsagePage=0x%04X\n", caps.Usage, caps.UsagePage);
-        printf("  InputReportByteLength=%u, OutputReportByteLength=%u, FeatureReportByteLength=%u, NumberLinkCollectionNodes=%u\n", caps.InputReportByteLength, caps.OutputReportByteLength, caps.FeatureReportByteLength, caps.NumberLinkCollectionNodes);
-        printf("  NumberInputButtonCaps=%u, NumberInputValueCaps=%u, NumberInputDataIndices=%u\n", caps.NumberInputButtonCaps, caps.NumberInputValueCaps, caps.NumberInputDataIndices);
-        printf("  NumberOutputButtonCaps=%u, NumberOutputValueCaps=%u, NumberOutputDataIndices=%u\n", caps.NumberOutputButtonCaps, caps.NumberOutputValueCaps, caps.NumberOutputDataIndices);
-        printf("  NumberFeatureButtonCaps=%u, NumberFeatureValueCaps=%u, NumberFeatureDataIndices=%u\n", caps.NumberFeatureButtonCaps, caps.NumberFeatureValueCaps, caps.NumberFeatureDataIndices);
+        wprintf(L"Device capabilities:\n");
+        wprintf(L"  Usage=0x%04X, UsagePage=0x%04X\n", caps.Usage, caps.UsagePage);
+        wprintf(L"  InputReportByteLength=%u, OutputReportByteLength=%u, FeatureReportByteLength=%u, NumberLinkCollectionNodes=%u\n", caps.InputReportByteLength, caps.OutputReportByteLength, caps.FeatureReportByteLength, caps.NumberLinkCollectionNodes);
+        wprintf(L"  NumberInputButtonCaps=%u, NumberInputValueCaps=%u, NumberInputDataIndices=%u\n", caps.NumberInputButtonCaps, caps.NumberInputValueCaps, caps.NumberInputDataIndices);
+        wprintf(L"  NumberOutputButtonCaps=%u, NumberOutputValueCaps=%u, NumberOutputDataIndices=%u\n", caps.NumberOutputButtonCaps, caps.NumberOutputValueCaps, caps.NumberOutputDataIndices);
+        wprintf(L"  NumberFeatureButtonCaps=%u, NumberFeatureValueCaps=%u, NumberFeatureDataIndices=%u\n", caps.NumberFeatureButtonCaps, caps.NumberFeatureValueCaps, caps.NumberFeatureDataIndices);
     }
 
 public:
