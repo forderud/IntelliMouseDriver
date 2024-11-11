@@ -50,8 +50,8 @@ int main(int argc, char* argv[]) {
             // Print report
             std::vector<BYTE> report = dev.GetReport(HidP_Feature, elm.ReportID);
             wprintf(L"  Report: {");
-            for (BYTE elm : report)
-                wprintf(L" %#04x, ", elm);
+            for (BYTE byte : report)
+                wprintf(L" %#04x, ", byte);
             wprintf(L"}\n");
         }
 #endif
