@@ -36,25 +36,24 @@ int main(int argc, char* argv[]) {
         std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
         for (auto& elm : valueCaps)
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
+
         wprintf(L"Available output reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Output);
         for (auto& elm : valueCaps)
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
+
         wprintf(L"Available feature reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Feature);
-        for (auto& elm : valueCaps)
-            wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-        wprintf(L"\n");
-#if 0
         for (auto& elm : valueCaps) {
+            wprintf(L"  ReportID: %#04x\n", elm.ReportID);
             // Print report
             std::vector<BYTE> report = dev.GetReport(HidP_Feature, elm.ReportID);
-            wprintf(L"  Report: {");
+            wprintf(L"  Data: {");
             for (BYTE byte : report)
                 wprintf(L" %02x,", byte);
             wprintf(L"}\n");
         }
-#endif
+        wprintf(L"\n");
 
         if ((dev.caps.Usage == 0x0212) && (dev.caps.UsagePage == 0xFF07)) {
             // Pro IntelliMouse detected
