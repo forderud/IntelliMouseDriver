@@ -27,7 +27,7 @@ public:
     }
 
     BOOLEAN Open(HANDLE hid_dev) {
-        Close();
+        assert(!report);
         return HidD_GetPreparsedData(hid_dev, &report);
     }
     void Close() {
