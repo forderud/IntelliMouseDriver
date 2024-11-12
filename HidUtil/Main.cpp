@@ -3,6 +3,13 @@
 #include "TailLight.hpp"
 
 
+void PrintReport(const std::vector<BYTE>& report) {
+    wprintf(L"  Data: {");
+    for (BYTE elm : report)
+        wprintf(L" %02x,", elm);
+    wprintf(L"}\n");
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 4) {
         wprintf(L"IntelliMouse tail-light shifter.\n");
@@ -46,12 +53,7 @@ int main(int argc, char* argv[]) {
         valueCaps = dev.GetValueCaps(HidP_Feature);
         for (auto& elm : valueCaps) {
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-            // Print report
-            std::vector<BYTE> report = dev.GetReport(HidP_Feature, elm.ReportID);
-            wprintf(L"  Data: {");
-            for (BYTE byte : report)
-                wprintf(L" %02x,", byte);
-            wprintf(L"}\n");
+            PrintReport(dev.GetReport(HidP_Feature, elm.ReportID));
         }
         wprintf(L"\n");
 
