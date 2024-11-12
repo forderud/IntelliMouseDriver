@@ -215,7 +215,9 @@ public:
         return valueCaps;
     }
 
-    void PrintCaps() const {
+    void PrintInfo() const {
+        wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", devName.c_str(), attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
+
         wprintf(L"Device capabilities:\n");
         wprintf(L"  Usage=0x%04X, UsagePage=0x%04X\n", caps.Usage, caps.UsagePage);
         wprintf(L"  InputReportByteLength=%u, OutputReportByteLength=%u, FeatureReportByteLength=%u, NumberLinkCollectionNodes=%u\n", caps.InputReportByteLength, caps.OutputReportByteLength, caps.FeatureReportByteLength, caps.NumberLinkCollectionNodes);
@@ -278,7 +280,6 @@ public:
 
 private:
     static bool CheckDevice(Device & dev, const Criterion& crit) {
-        //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, dev.attr.VendorID, dev.attr.ProductID, dev.caps.Usage, dev.caps.UsagePage);
         if (!dev.IsValid())
             return false;
 
@@ -292,7 +293,7 @@ private:
         if (crit.UsagePage && (crit.UsagePage != dev.caps.UsagePage))
             return false;
 
-        //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", dev.attr.VendorID, dev.attr.ProductID);
+        // found matching device
         return true;
     }
 };

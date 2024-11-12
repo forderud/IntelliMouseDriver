@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
     for (hid::Device& dev : matches) {
         wprintf(L"Accessing %s\n", dev.devName.c_str());
-        // dev.PrintCaps();
+        //dev.PrintInfo();
         wprintf(L"\n");
 
         wprintf(L"Available input reports:\n");
