@@ -267,34 +267,33 @@ public:
 
         std::vector<Device> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
-            auto result = CheckDevice(currentInterface, crit);
-            if (result.IsValid())
-                results.push_back(std::move(result));
+            Device dev(currentInterface);
+
+            if (CheckDevice(dev, crit))
+                results.push_back(std::move(dev));
         }
 
         return results;
     }
 
 private:
-    static Device CheckDevice(const wchar_t* deviceName, const Criterion& crit) {
-        Device dev(deviceName);
-        if (!dev.IsValid())
-            return {};
-
+    static bool CheckDevice(Device & dev, const Criterion& crit) {
         //wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", deviceName, dev.attr.VendorID, dev.attr.ProductID, dev.caps.Usage, dev.caps.UsagePage);
+        if (!dev.IsValid())
+            return false;
 
         if (crit.VendorID && (crit.VendorID != dev.attr.VendorID))
-            return Device();
+            return false;
         if (crit.ProductID && (crit.ProductID != dev.attr.ProductID))
-            return Device();
+            return false;
 
         if (crit.Usage && (crit.Usage != dev.caps.Usage))
-            return Device();
+            return false;
         if (crit.UsagePage && (crit.UsagePage != dev.caps.UsagePage))
-            return Device();
+            return false;
 
         //wprintf(L"  Found matching device with VendorID=%x, ProductID=%x\n", dev.attr.VendorID, dev.attr.ProductID);
-        return dev;
+        return true;
     }
 };
 
