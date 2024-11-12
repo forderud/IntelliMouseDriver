@@ -1,9 +1,9 @@
 #pragma once
 #include <windows.h>
 #include <cfgmgr32.h> // for CM_Get_Device_Interface_List
-#include <Hidclass.h> // combine with INITGUID define
+#include <Hidclass.h> // for GUID_DEVINTERFACE_HID
 #include <hidsdi.h>
-#include <wrl/wrappers/corewrappers.h>
+#include <wrl/wrappers/corewrappers.h> // for FileHandle RAII wrapper
 
 #include <cassert>
 #include <string>
