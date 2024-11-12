@@ -41,14 +41,15 @@ int main(int argc, char* argv[]) {
 
         wprintf(L"Available input reports:\n");
         std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
-        for (auto& elm : valueCaps)
+        for (auto& elm : valueCaps) {
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-
+            PrintReport(dev.GetReport(HidP_Input, elm.ReportID));
+        }
         wprintf(L"Available output reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Output);
-        for (auto& elm : valueCaps)
+        for (auto& elm : valueCaps) {
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
-
+        }
         wprintf(L"Available feature reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Feature);
         for (auto& elm : valueCaps) {
