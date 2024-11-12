@@ -67,15 +67,21 @@ public:
         if (!HidD_GetAttributes(dev.Get(), &attr)) {
             DWORD err = GetLastError(); err;
             assert(err == ERROR_NOT_FOUND);
-            dev.Close();
+            dev.Close(); // invalidate object
             return;
         }
 
-        if (!preparsed.Open(dev.Get()))
-            abort();
+        if (!preparsed.Open(dev.Get())) {
+            // Have never encountered this problem
+            dev.Close(); // invalidate object
+            return;
+        }
 
-        if (HidP_GetCaps(preparsed, &caps) != HIDP_STATUS_SUCCESS)
-            abort();
+        if (HidP_GetCaps(preparsed, &caps) != HIDP_STATUS_SUCCESS) {
+            // Have never encountered this problem
+            dev.Close(); // invalidate object
+            return;
+        }
 
 #ifndef NDEBUG
         Manufacturer = GetManufacturer();
