@@ -112,7 +112,8 @@ public:
 
     std::wstring GetString(ULONG idx) const {
         wchar_t buffer[128] = L""; // max USB length is 126 wchar's
-        HidD_GetIndexedString(dev.Get(), idx, buffer, (ULONG)std::size(buffer)); // ignore erorrs
+        BOOLEAN ok = HidD_GetIndexedString(dev.Get(), idx, buffer, (ULONG)std::size(buffer));
+        assert(ok); ok;
         return buffer;
     }
 
