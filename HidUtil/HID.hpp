@@ -197,12 +197,16 @@ public:
             valueCapsLen = caps.NumberOutputValueCaps;
         else if (type == HidP_Feature)
             valueCapsLen = caps.NumberFeatureValueCaps;
+        if (valueCapsLen == 0)
+            return {};
 
         std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, HIDP_VALUE_CAPS{});
-        if (valueCapsLen == 0)
-            return valueCaps;
-
         NTSTATUS status = HidP_GetValueCaps(type, valueCaps.data(), &valueCapsLen, preparsed);
+        if (status == HIDP_STATUS_INVALID_PREPARSED_DATA) {
+            wprintf(L"WARNING: Invalid preparsed data.\n");
+            return {};
+        }
+
         assert(status == HIDP_STATUS_SUCCESS); status;
         return valueCaps;
     }
