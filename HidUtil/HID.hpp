@@ -35,7 +35,7 @@ public:
     }
 
     PreparsedData(PreparsedData&& obj) noexcept {
-        std::swap(report, obj.report);
+        std::swap(report, obj.report); // avoid double delete
     }
 
     operator PHIDP_PREPARSED_DATA() const {
