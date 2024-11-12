@@ -34,6 +34,10 @@ public:
         }
     }
 
+    PreparsedData(PreparsedData&& obj) noexcept {
+        std::swap(report, obj.report);
+    }
+
     operator PHIDP_PREPARSED_DATA() const {
         return report;
     }
