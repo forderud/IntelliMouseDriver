@@ -19,9 +19,6 @@ class PreparsedData {
 public:
     PreparsedData() = default;
 
-    PreparsedData(HANDLE hid_dev) {
-        Open(hid_dev);
-    }
     ~PreparsedData() {
         Close();
     }
@@ -35,10 +32,6 @@ public:
             HidD_FreePreparsedData(report);
             report = nullptr;
         }
-    }
-
-    PreparsedData(PreparsedData&& obj) noexcept {
-        std::swap(report, obj.report);
     }
 
     operator PHIDP_PREPARSED_DATA() const {
