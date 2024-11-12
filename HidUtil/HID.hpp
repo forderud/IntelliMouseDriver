@@ -202,10 +202,13 @@ public:
 
 public:
     std::wstring devName;
+private:
     Microsoft::WRL::Wrappers::FileHandle dev;
-
+public:
     HIDD_ATTRIBUTES attr = {}; // VendorID, ProductID, VersionNumber
+private:
     PreparsedData preparsed; // opaque ptr
+public:
     HIDP_CAPS caps = {}; // Usage, UsagePage, report sizes
 
 #ifndef NDEBUG
