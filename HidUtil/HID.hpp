@@ -93,21 +93,27 @@ public:
     }
 
     std::wstring GetManufacturer() const {
-        wchar_t man_buffer[128] = L"<unknown>";
+        wchar_t man_buffer[128] = L""; // max USB length is 126 wchar's
         HidD_GetManufacturerString(dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
         return man_buffer;
     }
 
     std::wstring GetProduct() const {
-        wchar_t prod_buffer[128] = L"<unknown>";
+        wchar_t prod_buffer[128] = L""; // max USB length is 126 wchar's
         HidD_GetProductString(dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
         return prod_buffer;
     }
 
     std::wstring GetSerialNumber() const {
-        wchar_t sn_buffer[128] = L"<unknown>";
+        wchar_t sn_buffer[128] = L""; // max USB length is 126 wchar's
         HidD_GetSerialNumberString(dev.Get(), sn_buffer, (ULONG)std::size(sn_buffer)); // ignore erorrs
         return sn_buffer;
+    }
+
+    std::wstring GetString(ULONG idx) const {
+        wchar_t buffer[128] = L""; // max USB length is 126 wchar's
+        HidD_GetIndexedString(dev.Get(), idx, buffer, (ULONG)std::size(buffer)); // ignore erorrs
+        return buffer;
     }
 
     /** Get typed FEATURE or INPUT report. */
