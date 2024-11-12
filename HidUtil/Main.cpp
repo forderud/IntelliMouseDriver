@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
         valueCaps = dev.GetValueCaps(HidP_Output);
         for (auto& elm : valueCaps) {
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
+            // cannot print output reports, since they're sent to the device
         }
         wprintf(L"Available feature reports:\n");
         valueCaps = dev.GetValueCaps(HidP_Feature);
