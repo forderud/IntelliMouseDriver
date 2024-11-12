@@ -49,6 +49,8 @@ private:
     PHIDP_PREPARSED_DATA report = nullptr; // report descriptor for top-level collection
 };
 
+/** Win32 HID device wrapper class.
+    Simplifies accss to INPUT, OUTPUT and FEATURE reports, as well as device strings. */
 class Device {
 public:
     Device() = default;
@@ -76,7 +78,8 @@ public:
             return;
         }
 
-        preparsed.Open(dev.Get());
+        if (!preparsed.Open(dev.Get()))
+            abort();
 
         if (HidP_GetCaps(preparsed, &caps) != HIDP_STATUS_SUCCESS)
             abort();
