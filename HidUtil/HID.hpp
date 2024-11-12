@@ -19,6 +19,10 @@ class PreparsedData {
 public:
     PreparsedData() = default;
 
+    PreparsedData(PreparsedData&& obj) noexcept {
+        std::swap(report, obj.report); // avoid double delete
+    }
+
     ~PreparsedData() {
         Close();
     }
@@ -32,10 +36,6 @@ public:
             HidD_FreePreparsedData(report);
             report = nullptr;
         }
-    }
-
-    PreparsedData(PreparsedData&& obj) noexcept {
-        std::swap(report, obj.report); // avoid double delete
     }
 
     operator PHIDP_PREPARSED_DATA() const {
