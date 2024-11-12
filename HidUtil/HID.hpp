@@ -283,15 +283,23 @@ private:
         if (!dev.IsValid())
             return false;
 
-        if (crit.VendorID && (crit.VendorID != dev.attr.VendorID))
-            return false;
-        if (crit.ProductID && (crit.ProductID != dev.attr.ProductID))
-            return false;
+        if (crit.VendorID) {
+            if (crit.VendorID != dev.attr.VendorID)
+                return false;
+        }
+        if (crit.ProductID) {
+            if (crit.ProductID != dev.attr.ProductID)
+                return false;
+        }
 
-        if (crit.Usage && (crit.Usage != dev.caps.Usage))
-            return false;
-        if (crit.UsagePage && (crit.UsagePage != dev.caps.UsagePage))
-            return false;
+        if (crit.Usage) {
+            if (crit.Usage != dev.caps.Usage)
+                return false;
+        }
+        if (crit.UsagePage) {
+            if (crit.UsagePage != dev.caps.UsagePage)
+                return false;
+        }
 
         // found matching device
         return true;
