@@ -82,8 +82,9 @@ public:
             abort();
 
 #ifndef NDEBUG
-        ManufacturerString = GetManufacturerString();
-        ProductString = GetProductString();
+        Manufacturer = GetManufacturer();
+        Product = GetProduct();
+        SerialNumber = GetSerialNumber();
 #endif
     }
 
@@ -91,16 +92,22 @@ public:
         return dev.IsValid();
     }
 
-    std::wstring GetManufacturerString() const {
+    std::wstring GetManufacturer() const {
         wchar_t man_buffer[128] = L"<unknown>";
         HidD_GetManufacturerString(dev.Get(), man_buffer, (ULONG)std::size(man_buffer)); // ignore errors
         return man_buffer;
     }
 
-    std::wstring GetProductString() const {
+    std::wstring GetProduct() const {
         wchar_t prod_buffer[128] = L"<unknown>";
         HidD_GetProductString(dev.Get(), prod_buffer, (ULONG)std::size(prod_buffer)); // ignore erorrs
         return prod_buffer;
+    }
+
+    std::wstring GetSerialNumber() const {
+        wchar_t sn_buffer[128] = L"<unknown>";
+        HidD_GetSerialNumberString(dev.Get(), sn_buffer, (ULONG)std::size(sn_buffer)); // ignore erorrs
+        return sn_buffer;
     }
 
     /** Get typed FEATURE or INPUT report. */
@@ -213,8 +220,9 @@ public:
 
 #ifndef NDEBUG
     // fields to aid debugging
-    std::wstring ManufacturerString;
-    std::wstring ProductString;
+    std::wstring Manufacturer;
+    std::wstring Product;
+    std::wstring SerialNumber;
 #endif
 };
 
