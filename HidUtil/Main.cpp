@@ -21,14 +21,14 @@ int main(int argc, char* argv[]) {
     BYTE green = (BYTE)atoi(argv[2]);
     BYTE blue = (BYTE)atoi(argv[3]);
 
-    hid::Query::Criterion crit;
+    hid::Scan::Criterion crit;
     //crit.VendorID = 0x045E;  // Microsoft
     //crit.ProductID = 0x082A; // Pro IntelliMouse
     crit.Usage = 0x0212;     //
     crit.UsagePage = 0xFF07; // Vendor-defined range (FF00-FFFF)
 
     wprintf(L"Searching for matching HID devices...\n");
-    std::vector<hid::Device> matches = hid::Query::FindDevices(crit);
+    std::vector<hid::Device> matches = hid::Scan::FindDevices(crit);
     if (matches.empty()) {
         wprintf(L"No matching devices found.\n");
         return -3;

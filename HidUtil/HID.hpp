@@ -234,7 +234,7 @@ public:
 };
 
 /** Human Interface Devices (HID) device search class. */
-class Query {
+class Scan {
 public:
     struct Criterion {
         USHORT VendorID = 0;
