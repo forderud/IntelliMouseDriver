@@ -123,7 +123,7 @@ public:
         return buffer;
     }
 
-    /** Get typed FEATURE or INPUT report. */
+    /** Get typed FEATURE or INPUT report with ReportID prefix. */
     template <class T>
     T GetReport(HIDP_REPORT_TYPE type) const {
         T report{}; // assume report ID prefix on first byte
@@ -146,7 +146,7 @@ public:
         return report;
     }
 
-    /** Get FEATURE or INPUT report as byte array. */
+    /** Get FEATURE or INPUT report as byte array without ReportID prefix. */
     std::vector<BYTE> GetReport(HIDP_REPORT_TYPE type, BYTE reportId) const {
         std::vector<BYTE> report(1, (BYTE)0);
         report[0] = reportId; // report ID prefix
@@ -172,7 +172,7 @@ public:
         return report;
     }
 
-    /** Set FEATURE or OUTPUT report. */
+    /** Set FEATURE or OUTPUT report with ReportID prefix. */
     template <class T>
     bool SetReport(HIDP_REPORT_TYPE type, const T& report) {
         BOOLEAN ok = false;
