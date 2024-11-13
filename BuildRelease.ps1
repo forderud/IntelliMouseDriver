@@ -28,14 +28,14 @@ Compress-Archive -Path x64\Release\VirtualMouse   -DestinationPath dist\VirtualM
 Compress-Archive -Path ARM64\Release\VirtualMouse -DestinationPath dist\VirtualMouse_arm64.zip
 
 # Copy flicker utility
-Copy-Item -Path x64\Release\flicker.exe   -Destination dist\flicker_x64.zip
-Copy-Item -Path arm64\Release\flicker.exe -Destination dist\flicker_arm64.zip
+Copy-Item -Path x64\Release\flicker.exe   -Destination dist\flicker_x64.exe
+Copy-Item -Path arm64\Release\flicker.exe -Destination dist\flicker_arm64.exe
 # Copy HidUtil utility
-Copy-Item -Path x64\Release\HidUtil.exe   -Destination dist\HidUtil_x64.zip
-Copy-Item -Path arm64\Release\HidUtil.exe -Destination dist\HidUtil_arm64.zip
+Copy-Item -Path x64\Release\HidUtil.exe   -Destination dist\HidUtil_x64.exe
+Copy-Item -Path arm64\Release\HidUtil.exe -Destination dist\HidUtil_arm64.exe
 # Copy MouseMove utility
-Copy-Item -Path x64\Release\MouseMove.exe   -Destination dist\MouseMove_x64.zip
-Copy-Item -Path arm64\Release\MouseMove.exe -Destination dist\MouseMove_arm64.zip
+Copy-Item -Path x64\Release\MouseMove.exe   -Destination dist\MouseMove_x64.exe
+Copy-Item -Path arm64\Release\MouseMove.exe -Destination dist\MouseMove_arm64.exe
 
 # Copy test scripts
 Copy-Item -Path x64\Release\*.ps1 -Destination dist
