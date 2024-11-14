@@ -215,6 +215,26 @@ public:
         return valueCaps;
     }
 
+    std::wstring Name() const {
+        std::wstring prod = GetProduct();
+        if (prod.empty())
+            prod = L"<unknown>";
+        std::wstring manuf = GetManufacturer();
+        if (manuf.empty())
+            manuf = L"<unknown>";
+
+        wchar_t vid_pid[] = L"VID_0000&PID_0000";
+        swprintf_s(vid_pid, L"VID_%04X&PID_%04X", attr.VendorID, attr.ProductID);
+
+        std::wstring result = prod;
+        result += L" by ";
+        result += manuf;
+        result += L" (";
+        result += vid_pid;
+        result += L")";
+        return result;
+    }
+
     void PrintInfo() const {
         wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", devName.c_str(), attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
 
@@ -226,9 +246,8 @@ public:
         wprintf(L"  NumberFeatureButtonCaps=%u, NumberFeatureValueCaps=%u, NumberFeatureDataIndices=%u\n", caps.NumberFeatureButtonCaps, caps.NumberFeatureValueCaps, caps.NumberFeatureDataIndices);
     }
 
-public:
-    std::wstring devName;
 private:
+    std::wstring devName;
     Microsoft::WRL::Wrappers::FileHandle dev;
 public:
     HIDD_ATTRIBUTES attr = {}; // VendorID, ProductID, VersionNumber

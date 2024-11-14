@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     }
 
     for (hid::Device& dev : matches) {
-        wprintf(L"Accessing %s\n", dev.devName.c_str());
+        wprintf(L"Accessing %s\n", dev.Name().c_str());
         //dev.PrintInfo();
         wprintf(L"\n");
 
