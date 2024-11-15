@@ -24,6 +24,7 @@ int main(int argc, char* argv[]) {
     hid::Scan::Criterion crit;
     //crit.VendorID = 0x045E;  // Microsoft
     //crit.ProductID = 0x082A; // Pro IntelliMouse
+    //crit.ProductID = 0x0047; // IntelliMouse Explorer 3.0
     crit.Usage = 0x0212;     //
     crit.UsagePage = 0xFF07; // Vendor-defined range (FF00-FFFF)
 
