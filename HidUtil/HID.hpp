@@ -1,16 +1,18 @@
 #pragma once
 #include <windows.h>
-#include <cfgmgr32.h> // for CM_Get_Device_Interface_List
 #include <Hidclass.h> // for GUID_DEVINTERFACE_HID
 #include <hidsdi.h>
+#include <setupapi.h>
+#include <Devpkey.h>
 #include <wrl/wrappers/corewrappers.h> // for FileHandle RAII wrapper
 
 #include <cassert>
+#include <memory>
 #include <string>
 #include <vector>
 
 #pragma comment(lib, "hid.lib")
-#pragma comment(lib, "mincore.lib")
+#pragma comment (lib, "SetupAPI.lib")
 
 namespace hid {
 
@@ -275,25 +277,41 @@ public:
     };
 
     static std::vector<Device> FindDevices (const Criterion& crit) {
-        const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
+        HDEVINFO devInfo = SetupDiGetClassDevsW(&GUID_DEVINTERFACE_HID, 0, 0, DIGCF_DEVICEINTERFACE | DIGCF_PRESENT);
+        assert(devInfo != INVALID_HANDLE_VALUE);
 
-        ULONG deviceInterfaceListLength = 0;
-        CONFIGRET cr = CM_Get_Device_Interface_List_SizeW(&deviceInterfaceListLength, (GUID*)&GUID_DEVINTERFACE_HID, NULL, searchScope);
-        assert(cr == CR_SUCCESS);
-
-        // symbolic link name of interface instances
-        std::wstring deviceInterfaceList(deviceInterfaceListLength, L'\0');
-        cr = CM_Get_Device_Interface_ListW((GUID*)&GUID_DEVINTERFACE_HID, NULL, deviceInterfaceList.data(), deviceInterfaceListLength, searchScope);
-        assert(cr == CR_SUCCESS);
-
+        // iterate over all interfaces
         std::vector<Device> results;
-        for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
-            Device dev(currentInterface);
+        for (int idx = 0; ; idx++) {
+            SP_DEVICE_INTERFACE_DATA interfaceData{};
+            interfaceData.cbSize = sizeof(interfaceData);
+            BOOL ok = SetupDiEnumDeviceInterfaces(devInfo, nullptr, &GUID_DEVINTERFACE_HID, idx, &interfaceData);
+            if (!ok) {
+                DWORD err = GetLastError();
+                if (err == ERROR_NO_MORE_ITEMS)
+                    break;
+                abort();
+            }
+
+            SP_DEVINFO_DATA devInfoData = {};
+            devInfoData.cbSize = sizeof(devInfoData);
+            ok = SetupDiGetDeviceInterfaceDetailW(devInfo, &interfaceData, nullptr, 0, nullptr, &devInfoData);
+            if (!ok) {
+                DWORD err = GetLastError();
+                assert(err == ERROR_INSUFFICIENT_BUFFER); err;
+            }
+
+            std::wstring pdoName =  GetDevPropStr(devInfo, devInfoData, &DEVPKEY_Device_PDOName); // Physical Device Object
+            std::wstring devicePath = GetDevicePath(devInfo, interfaceData);
+            
+            //Device dev((L"\\\\?\\GLOBALROOT" + pdoName).c_str());
+            Device dev(devicePath.c_str());
 
             if (CheckDevice(dev, crit))
                 results.push_back(std::move(dev));
         }
 
+        SetupDiDestroyDeviceInfoList(devInfo);
         return results;
     }
 
@@ -322,6 +340,46 @@ private:
 
         // found matching device
         return true;
+    }
+
+    static std::wstring GetDevicePath(HDEVINFO devInfo, SP_DEVICE_INTERFACE_DATA& interfaceData) {
+        DWORD detailDataSize = 0;
+        BOOL ok = SetupDiGetDeviceInterfaceDetailW(devInfo, &interfaceData, nullptr, 0, &detailDataSize, nullptr);
+        if (!ok) {
+            DWORD err = GetLastError();
+            assert(err == ERROR_INSUFFICIENT_BUFFER); err;
+        }
+
+        std::unique_ptr<SP_DEVICE_INTERFACE_DETAIL_DATA_W, decltype(&free)> detailData{ static_cast<SP_DEVICE_INTERFACE_DETAIL_DATA_W*>(malloc(detailDataSize)), &free };
+        detailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_W);
+
+        ok = SetupDiGetDeviceInterfaceDetailW(devInfo, &interfaceData, detailData.get(), detailDataSize, &detailDataSize, nullptr);
+        assert(ok);
+
+        return detailData->DevicePath; // can be passsed to CreateFile
+    }
+
+    static std::wstring GetDevPropStr(HDEVINFO hDevInfo, SP_DEVINFO_DATA& devInfo, const DEVPROPKEY* property) {
+        DWORD requiredSize = 0;
+        DEVPROPTYPE propertyType = 0;
+        BOOL ok = SetupDiGetDevicePropertyW(hDevInfo, &devInfo, property, &propertyType, nullptr, 0, &requiredSize, 0);
+        if (!ok) {
+            DWORD err = GetLastError();
+            if (err != ERROR_INSUFFICIENT_BUFFER)
+                return {};
+        }
+
+        std::wstring result(requiredSize / sizeof(wchar_t), L'\0');
+        ok = SetupDiGetDevicePropertyW(hDevInfo, &devInfo, property, &propertyType, (BYTE*)result.data(), (DWORD)result.size() * sizeof(wchar_t), &requiredSize, 0);
+        if (!ok) {
+            DWORD err = GetLastError(); err;
+            return {};
+        }
+        assert(propertyType == DEVPROP_TYPE_STRING);
+
+        // single string
+        result.resize(result.size() - 1); // exclude null-termination
+        return result;
     }
 };
 
