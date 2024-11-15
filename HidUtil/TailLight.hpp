@@ -1,7 +1,7 @@
 #pragma once
 
 
-bool TestTailLight(hid::Device& dev, COLORREF color) {
+bool SetTailLightRGB(hid::Device& dev, COLORREF color) {
     {
         // query current color (doesn't work)
         auto report = dev.GetReport<TailLightReport>(HidP_Feature);

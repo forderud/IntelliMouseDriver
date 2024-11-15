@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 
         if ((dev.caps.Usage == 0x0212) && (dev.caps.UsagePage == 0xFF07)) {
             // Pro IntelliMouse detected
-            TestTailLight(dev, RGB(red, green, blue));
+            SetTailLightRGB(dev, RGB(red, green, blue));
         }
     }
 
