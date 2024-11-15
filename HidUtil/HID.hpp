@@ -251,7 +251,7 @@ private:
     Microsoft::WRL::Wrappers::FileHandle dev;
 public:
     HIDD_ATTRIBUTES attr = {}; // VendorID, ProductID, VersionNumber
-private:
+//private:
     PreparsedData preparsed; // opaque ptr
 public:
     HIDP_CAPS caps = {}; // Usage, UsagePage, report sizes
