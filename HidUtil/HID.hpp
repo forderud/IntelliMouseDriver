@@ -62,7 +62,7 @@ public:
             NULL));
         if (!dev.IsValid()) {
             DWORD err = GetLastError(); err;
-            //assert(err != ERROR_ACCESS_DENIED); // (5) observed for already used devices
+            //assert(err != ERROR_ACCESS_DENIED); // (5) Windows opens keyboard and mouse for exclusive use (https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers#important-notes)
             //assert(err != ERROR_SHARING_VIOLATION); // (32)
             //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
             return;
