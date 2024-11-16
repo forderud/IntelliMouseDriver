@@ -52,7 +52,7 @@ class Device {
 public:
     Device() = default;
 
-    Device(const wchar_t* deviceName) : devName(deviceName) {
+    Device(const wchar_t* deviceName, bool verbose) : devName(deviceName) {
         dev.Attach(CreateFileW(deviceName,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -62,7 +62,8 @@ public:
             NULL));
         if (!dev.IsValid()) {
             DWORD err = GetLastError(); err;
-            //assert(err != ERROR_ACCESS_DENIED); // (5) Windows opens keyboard and mouse for exclusive use (https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers#important-notes)
+            if (verbose && (err == ERROR_ACCESS_DENIED)) // (5) Windows opens keyboard and mouse for exclusive use (https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers#important-notes)
+                wprintf(L"WARNING: Access denied (5) when attempting to open %s\n", deviceName);
             //assert(err != ERROR_SHARING_VIOLATION); // (32)
             //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
             return;
@@ -274,7 +275,7 @@ public:
         USHORT UsagePage = 0;
     };
 
-    static std::vector<Device> FindDevices (const Criterion& crit) {
+    static std::vector<Device> FindDevices (const Criterion& crit, bool verbose) {
         const ULONG searchScope = CM_GET_DEVICE_INTERFACE_LIST_PRESENT; // only currently 'live' device interfaces
 
         ULONG deviceInterfaceListLength = 0;
@@ -288,7 +289,7 @@ public:
 
         std::vector<Device> results;
         for (const wchar_t * currentInterface = deviceInterfaceList.c_str(); *currentInterface; currentInterface += wcslen(currentInterface) + 1) {
-            Device dev(currentInterface);
+            Device dev(currentInterface, verbose);
 
             if (CheckDevice(dev, crit))
                 results.push_back(std::move(dev));

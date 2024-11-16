@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     crit.UsagePage = 0xFF07; // Vendor-defined range (FF00-FFFF)
 
     wprintf(L"Searching for matching HID devices...\n");
-    std::vector<hid::Device> matches = hid::Scan::FindDevices(crit);
+    std::vector<hid::Device> matches = hid::Scan::FindDevices(crit, false);
     if (matches.empty()) {
         wprintf(L"No matching devices found.\n");
         return -3;
