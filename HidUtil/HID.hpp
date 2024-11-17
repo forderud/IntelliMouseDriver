@@ -3,6 +3,7 @@
 #include <cfgmgr32.h> // for CM_Get_Device_Interface_List
 #include <Hidclass.h> // for GUID_DEVINTERFACE_HID
 #include <hidsdi.h>
+#include <comdef.h>
 #include <wrl/wrappers/corewrappers.h> // for FileHandle RAII wrapper
 
 #include <cassert>
@@ -61,11 +62,12 @@ public:
             0,
             NULL));
         if (!dev.IsValid()) {
-            DWORD err = GetLastError(); err;
-            if (verbose && (err == ERROR_ACCESS_DENIED)) // (5) Windows opens keyboard and mouse for exclusive use (https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers#important-notes)
-                wprintf(L"WARNING: Access denied (5) when attempting to open %s\n", deviceName);
-            //assert(err != ERROR_SHARING_VIOLATION); // (32)
-            //wprintf(L"WARNING: CreateFile failed: (err %d) for %ls\n", err, deviceName);
+            DWORD err = GetLastError();
+            if (verbose) {
+                // ERROR_ACCESS_DENIED (5) expected for keyboard and mouse since Windows opens them for exclusive use (https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/keyboard-and-mouse-hid-client-drivers#important-notes)
+                wprintf(L"WARNING: %s (%u) when attempting to open %s\n", _com_error(HRESULT_FROM_WIN32(err)).ErrorMessage(), err, deviceName);
+            }
+
             return;
         }
 
