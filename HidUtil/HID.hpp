@@ -239,7 +239,7 @@ public:
     }
 
     void PrintInfo() const {
-        wprintf(L"Device %ls (VendorID=%x, ProductID=%x, Usage=%x, UsagePage=%x)\n", devName.c_str(), attr.VendorID, attr.ProductID, caps.Usage, caps.UsagePage);
+        wprintf(L"Device %ls (VendorID=%x, ProductID=%x)\n", devName.c_str(), attr.VendorID, attr.ProductID);
 
         wprintf(L"Device capabilities:\n");
         wprintf(L"  Usage=0x%04X, UsagePage=0x%04X\n", caps.Usage, caps.UsagePage);
