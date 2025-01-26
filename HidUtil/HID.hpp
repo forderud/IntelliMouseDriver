@@ -208,7 +208,7 @@ public:
         if (valueCapsLen == 0)
             return {};
 
-        std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, {});
+        std::vector<HIDP_VALUE_CAPS> valueCaps(valueCapsLen, HIDP_VALUE_CAPS{});
         NTSTATUS status = HidP_GetValueCaps(type, valueCaps.data(), &valueCapsLen, preparsed);
         if (status == HIDP_STATUS_INVALID_PREPARSED_DATA) {
             wprintf(L"WARNING: Invalid preparsed data.\n");
@@ -230,7 +230,7 @@ public:
         if (buttonCapsLen == 0)
             return {};
 
-        std::vector<HIDP_BUTTON_CAPS> buttonCaps(buttonCapsLen, {});
+        std::vector<HIDP_BUTTON_CAPS> buttonCaps(buttonCapsLen, HIDP_BUTTON_CAPS{});
         NTSTATUS status = HidP_GetButtonCaps(type, buttonCaps.data(), &buttonCapsLen, preparsed);
         if (status == HIDP_STATUS_INVALID_PREPARSED_DATA) {
             wprintf(L"WARNING: Invalid preparsed data.\n");
@@ -266,9 +266,9 @@ public:
         wchar_t vid_pid[] = L"VID_0000&PID_0000";
         swprintf_s(vid_pid, L"VID_%04X&PID_%04X", attr.VendorID, attr.ProductID);
 
-        std::wstring result = prod;
+        std::wstring result = L"\"" + prod + L"\"";
         result += L" by ";
-        result += manuf;
+        result += L"\"" + manuf + L"\"";
         result += L" (";
         result += vid_pid;
         result += L")";
@@ -276,8 +276,6 @@ public:
     }
 
     void PrintInfo() const {
-        wprintf(L"Device %ls (VendorID=%x, ProductID=%x)\n", devName.c_str(), attr.VendorID, attr.ProductID);
-
         wprintf(L"Device capabilities:\n");
         wprintf(L"  Usage=0x%04X, UsagePage=0x%04X\n", caps.Usage, caps.UsagePage);
         wprintf(L"  InputReportByteLength=%u, OutputReportByteLength=%u, FeatureReportByteLength=%u, NumberLinkCollectionNodes=%u\n", caps.InputReportByteLength, caps.OutputReportByteLength, caps.FeatureReportByteLength, caps.NumberLinkCollectionNodes);
