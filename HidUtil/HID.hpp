@@ -128,9 +128,9 @@ public:
     }
 
     /** Get typed FEATURE or INPUT report with ReportID prefix. */
-    template <class T>
-    T GetReport(HIDP_REPORT_TYPE type) const {
-        T report{}; // assume report ID prefix on first byte
+    template <class REPORT>
+    REPORT GetReport(HIDP_REPORT_TYPE type) const {
+        REPORT report{}; // assume report ID prefix on first byte
 
         BOOLEAN ok = false;
         if (type == HidP_Input) {
@@ -139,6 +139,9 @@ public:
         }  else if (type == HidP_Feature) {
             assert(sizeof(report) == caps.FeatureReportByteLength);
             ok = HidD_GetFeature(dev.Get(), &report, sizeof(report));
+        } else {
+            // there's no HidD_GetOutputReport function
+            abort();
         }
         if (!ok) {
             DWORD err = GetLastError();
@@ -162,10 +165,13 @@ public:
         } else if (type == HidP_Feature) {
             report.resize(caps.FeatureReportByteLength, (BYTE)0);
             ok = HidD_GetFeature(dev.Get(), report.data(), (ULONG)report.size());
+        } else {
+            // there's no HidD_GetOutputReport function
+            abort();
         }
         if (!ok) {
             DWORD err = GetLastError();
-            wprintf(L"ERROR: HidD_GetInputReport failure (err %d).\n", err);
+            wprintf(L"ERROR: HidD_GetFeature or HidD_GetInputReport failure (err %d).\n", err);
             assert(ok);
             return {};
         }
@@ -174,8 +180,8 @@ public:
     }
 
     /** Set FEATURE or OUTPUT report with ReportID prefix. */
-    template <class T>
-    bool SetReport(HIDP_REPORT_TYPE type, const T& report) {
+    template <class REPORT>
+    bool SetReport(HIDP_REPORT_TYPE type, const REPORT& report) {
         BOOLEAN ok = false;
         if (type == HidP_Output) {
             assert(sizeof(report) == caps.OutputReportByteLength);
@@ -239,9 +245,9 @@ public:
     }
 
     /** Return a list of unique ReportID values found in the input. */
-    template <class T> // T might be HIDP_VALUE_CAPS or HIDP_BUTTON_CAPS
-    static std::vector<UCHAR> GetReportIDs(const std::vector<HIDP_BUTTON_CAPS> input) {
-        std::vector<UCHAR> result;
+    template <class CAPS> // CAPS might be HIDP_VALUE_CAPS or HIDP_BUTTON_CAPS
+    static std::vector<BYTE> GetReportIDs(const std::vector<CAPS> input) {
+        std::vector<BYTE> result;
         for (auto& elm : input)
             result.push_back(elm.ReportID);
 
@@ -250,6 +256,15 @@ public:
         result.erase(std::unique(result.begin(), result.end()), result.end());
 
         return result;
+    }
+
+    /** Get the current value for a given Usage. */
+    template <class CAPS> // CAPS might be HIDP_VALUE_CAPS or HIDP_BUTTON_CAPS
+    ULONG GetUsageValue(HIDP_REPORT_TYPE type, CAPS val_caps, const std::vector<BYTE>& report) {
+        ULONG value = 0;
+        NTSTATUS status = HidP_GetUsageValue(type, val_caps.UsagePage, val_caps.LinkCollection, val_caps.NotRange.Usage, &value, preparsed, (CHAR*)report.data(), (ULONG)report.size());
+        assert(status == HIDP_STATUS_SUCCESS); status;
+        return value;
     }
 
     std::wstring Name() const {
