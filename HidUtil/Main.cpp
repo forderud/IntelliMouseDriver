@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
         //dev.PrintInfo();
         wprintf(L"\n");
 
+#if 0
         wprintf(L"Available INPUT reports:\n");
         std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Input);
         for (auto& elm : valueCaps) {
@@ -52,8 +53,9 @@ int main(int argc, char* argv[]) {
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
             // cannot print output reports, since they're sent to the device
         }
+#endif
         wprintf(L"Available FEATURE reports:\n");
-        valueCaps = dev.GetValueCaps(HidP_Feature);
+        std::vector<HIDP_VALUE_CAPS> valueCaps = dev.GetValueCaps(HidP_Feature);
         for (auto& elm : valueCaps) {
             wprintf(L"  ReportID: %#04x\n", elm.ReportID);
             PrintReport(dev.GetReport(HidP_Feature, elm.ReportID));
