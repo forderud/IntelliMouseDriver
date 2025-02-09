@@ -11,7 +11,7 @@ VOID SelfTestTimerProc (_In_ WDFTIMER timer) {
     auto* stCtx = WdfObjectGet_SELF_TEST_CONTEXT(timer);
     NTSTATUS status = SetFeatureColor(device, pInfo->TailLight);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: %s: failed 0x%x\n", __func__, status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: %s: failed 0x%x\n", __func__, status);
         stCtx->Result = status;
         LONG wasSignaled = KeSetEvent(&deviceContext->SelfTestCompleted, IO_MOUSE_INCREMENT, FALSE);
         NT_ASSERTMSG("TailLight: SelfTest method set to signaled while already signaled.\n", wasSignaled == 0);
@@ -20,7 +20,7 @@ VOID SelfTestTimerProc (_In_ WDFTIMER timer) {
     }
 
     if (!stCtx->Advance(pInfo->TailLight)) {
-        KdPrint(("TailLight: Self-test completed\n"));
+        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: Self-test completed\n");
         stCtx->Result = STATUS_SUCCESS;
         LONG wasSignaled = KeSetEvent(&deviceContext->SelfTestCompleted, IO_MOUSE_INCREMENT, FALSE);
         NT_ASSERTMSG("TailLight: SelfTest method set to signaled while already signaled.\n", wasSignaled == 0);
@@ -57,7 +57,7 @@ static NTSTATUS EvtWmiInstanceExecuteMethod(
             if (stCtx->IsBusy())
                 return STATUS_DEVICE_BUSY; // self-test already in progress
 
-            KdPrint(("TailLight: Starting self-test\n"));
+            DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: Starting self-test\n");
             {
                 TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
                 stCtx->Start(pInfo->TailLight);
@@ -99,7 +99,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
 
     NTSTATUS status = WdfDeviceAssignMofResourceName(Device, &mofRsrcName);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: Error in WdfDeviceAssignMofResourceName %x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: Error in WdfDeviceAssignMofResourceName %x\n", status);
         return status;
     }
 
@@ -121,7 +121,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
     WDFWMIINSTANCE WmiInstance = 0;
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &WmiInstance);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("TailLight: WdfWmiInstanceCreate error %x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: WdfWmiInstanceCreate error %x\n", status);
         return status;
     }
 
@@ -141,7 +141,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
 
         status = WdfTimerCreate(&timerCfg, &attribs, &deviceContext->SelfTestTimer);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("TailLight: %s: WdfTimerCreate failed 0x%x\n", __func__, status));
+            DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: %s: WdfTimerCreate failed 0x%x\n", __func__, status);
             return status;
         }
     }
@@ -158,13 +158,13 @@ NTSTATUS EvtWmiInstanceQueryInstance(
 {
     UNREFERENCED_PARAMETER(OutBufferSize); // mininum buffer size already checked by WDF
 
-    KdPrint(("TailLight: WMI QueryInstance\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: WMI QueryInstance\n");
 
     TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/OutBuffer, /*src*/pInfo, sizeof(*pInfo));
     *BufferUsed = sizeof(*pInfo);
 
-    KdPrint(("TailLight: WMI QueryInstance completed\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: WMI QueryInstance completed\n");
     return STATUS_SUCCESS;
 }
 
@@ -176,7 +176,7 @@ NTSTATUS EvtWmiInstanceSetInstance(
 {
     UNREFERENCED_PARAMETER(InBufferSize); // mininum buffer size already checked by WDF
 
-    KdPrint(("TailLight: WMI SetInstance\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: WMI SetInstance\n");
 
     TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/pInfo, /*src*/InBuffer, sizeof(*pInfo));
@@ -184,7 +184,7 @@ NTSTATUS EvtWmiInstanceSetInstance(
     // call SetFeatureColor to trigger tail-light update
     NTSTATUS status = SetFeatureColor(WdfWmiInstanceGetDevice(WmiInstance), pInfo->TailLight);
 
-    KdPrint(("TailLight: WMI SetInstance completed\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: WMI SetInstance completed\n");
     return status;
 }
 
@@ -195,7 +195,7 @@ NTSTATUS EvtWmiInstanceSetItem(
     _In_reads_bytes_(InBufferSize)  PVOID InBuffer
     )
 {
-    KdPrint(("TailLight: WMI SetItem\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: WMI SetItem\n");
 
     TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(WmiInstance);
     NTSTATUS status = STATUS_SUCCESS;
@@ -212,6 +212,6 @@ NTSTATUS EvtWmiInstanceSetItem(
         return STATUS_INVALID_DEVICE_REQUEST;
     }
 
-    KdPrint(("TailLight: WMI SetItem completed\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: WMI SetItem completed\n");
     return status;
 }
