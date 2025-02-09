@@ -8,7 +8,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
 
     NTSTATUS status = WdfDeviceAssignMofResourceName(Device, &mofRsrcName);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("MouseMirror: Error in WdfDeviceAssignMofResourceName %x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: Error in WdfDeviceAssignMofResourceName %x\n", status);
         return status;
     }
 
@@ -29,7 +29,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
     WDFWMIINSTANCE WmiInstance = 0;
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &WmiInstance);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("MouseMirror: WdfWmiInstanceCreate error %x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfWmiInstanceCreate error %x\n", status);
         return status;
     }
 
@@ -48,13 +48,13 @@ NTSTATUS EvtWmiInstanceQueryInstance(
 {
     UNREFERENCED_PARAMETER(OutBufferSize); // mininum buffer size already checked by WDF
 
-    KdPrint(("MouseMirror: WMI QueryInstance\n"));
+    DebugEnter();
 
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/OutBuffer, /*src*/pInfo, sizeof(*pInfo));
     *BufferUsed = sizeof(*pInfo);
 
-    KdPrint(("MouseMirror: WMI QueryInstance completed\n"));
+    DebugExit();
     return STATUS_SUCCESS;
 }
 
@@ -66,12 +66,12 @@ NTSTATUS EvtWmiInstanceSetInstance(
 {
     UNREFERENCED_PARAMETER(InBufferSize); // mininum buffer size already checked by WDF
 
-    KdPrint(("MouseMirror: WMI SetInstance\n"));
+    DebugEnter();
 
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/pInfo, /*src*/InBuffer, sizeof(*pInfo));
 
-    KdPrint(("MouseMirror: WMI SetInstance completed\n"));
+    DebugExit();
     return STATUS_SUCCESS;
 }
 
@@ -82,7 +82,7 @@ NTSTATUS EvtWmiInstanceSetItem(
     _In_reads_bytes_(InBufferSize)  PVOID InBuffer
     )
 {
-    KdPrint(("MouseMirror: WMI SetItem\n"));
+    DebugEnter();
 
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     NTSTATUS status = STATUS_SUCCESS;
@@ -101,6 +101,6 @@ NTSTATUS EvtWmiInstanceSetItem(
         return STATUS_INVALID_DEVICE_REQUEST;
     }
 
-    KdPrint(("MouseMirror: WMI SetItem completed\n"));
+    DebugExitStatus(status);
     return status;
 }
