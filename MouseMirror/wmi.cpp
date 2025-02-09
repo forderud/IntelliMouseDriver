@@ -48,13 +48,13 @@ NTSTATUS EvtWmiInstanceQueryInstance(
 {
     UNREFERENCED_PARAMETER(OutBufferSize); // mininum buffer size already checked by WDF
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: WMI QueryInstance\n");
+    DebugEnter();
 
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/OutBuffer, /*src*/pInfo, sizeof(*pInfo));
     *BufferUsed = sizeof(*pInfo);
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: WMI QueryInstance completed\n");
+    DebugExit();
     return STATUS_SUCCESS;
 }
 
@@ -66,12 +66,12 @@ NTSTATUS EvtWmiInstanceSetInstance(
 {
     UNREFERENCED_PARAMETER(InBufferSize); // mininum buffer size already checked by WDF
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: WMI SetInstance\n");
+    DebugEnter();
 
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     RtlCopyMemory(/*dst*/pInfo, /*src*/InBuffer, sizeof(*pInfo));
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: WMI SetInstance completed\n");
+    DebugExit();
     return STATUS_SUCCESS;
 }
 
@@ -82,7 +82,7 @@ NTSTATUS EvtWmiInstanceSetItem(
     _In_reads_bytes_(InBufferSize)  PVOID InBuffer
     )
 {
-    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: WMI SetItem\n");
+    DebugEnter();
 
     MouseMirrorDeviceInformation* pInfo = WdfObjectGet_MouseMirrorDeviceInformation(WmiInstance);
     NTSTATUS status = STATUS_SUCCESS;
@@ -101,6 +101,6 @@ NTSTATUS EvtWmiInstanceSetItem(
         return STATUS_INVALID_DEVICE_REQUEST;
     }
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: WMI SetItem completed\n");
+    DebugExitStatus(status);
     return status;
 }
