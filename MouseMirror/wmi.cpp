@@ -8,7 +8,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
 
     NTSTATUS status = WdfDeviceAssignMofResourceName(Device, &mofRsrcName);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("MouseMirror: Error in WdfDeviceAssignMofResourceName %x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: Error in WdfDeviceAssignMofResourceName %x\n", status);
         return status;
     }
 
@@ -29,7 +29,7 @@ NTSTATUS WmiInitialize(_In_ WDFDEVICE Device)
     WDFWMIINSTANCE WmiInstance = 0;
     status = WdfWmiInstanceCreate(Device, &instanceConfig, &woa, &WmiInstance);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("MouseMirror: WdfWmiInstanceCreate error %x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfWmiInstanceCreate error %x\n", status);
         return status;
     }
 

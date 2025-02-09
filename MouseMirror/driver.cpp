@@ -22,7 +22,7 @@ NTSTATUS DriverEntry(
                              WDF_NO_HANDLE); // [out]
     if (!NT_SUCCESS(status)) {
         // Framework will automatically cleanup on error Status return
-        KdPrint(("MouseMirror: Error Creating WDFDRIVER 0x%x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: Error Creating WDFDRIVER 0x%x\n", status);
     }
 
     return status;

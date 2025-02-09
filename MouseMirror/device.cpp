@@ -30,7 +30,7 @@ Arguments:
 
         NTSTATUS status = WdfDeviceCreate(&DeviceInit, &attributes, &device);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("MouseMirror: WdfDeviceCreate, Error %x\n", status));
+            DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfDeviceCreate, Error %x\n", status);
             return status;
         }
     }
@@ -57,7 +57,7 @@ Arguments:
             &memory);
 
         if (!NT_SUCCESS(status)) {
-            KdPrint(("MouseMirror: WdfDeviceAllocAndQueryProperty failed 0x%x\n", status));
+            DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfDeviceAllocAndQueryProperty failed 0x%x\n", status);
             return STATUS_UNSUCCESSFUL;
         }
 
@@ -86,7 +86,7 @@ Arguments:
         NTSTATUS status = WdfIoQueueCreate(device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
 
         if (!NT_SUCCESS(status)) {
-            KdPrint(("MouseMirror: WdfIoQueueCreate failed 0x%x\n", status));
+            DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfIoQueueCreate failed 0x%x\n", status);
             return status;
         }
     }
@@ -94,7 +94,7 @@ Arguments:
     // Initialize WMI provider
     NTSTATUS status = WmiInitialize(device);
     if (!NT_SUCCESS(status)) {
-        KdPrint(("MouseMirror: Error initializing WMI 0x%x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: Error initializing WMI 0x%x\n", status);
         return status;
     }
 
@@ -164,7 +164,7 @@ VOID EvtIoDeviceControlInternalFilter(
         size_t        length = 0;
         status = WdfRequestRetrieveInputBuffer(Request, sizeof(CONNECT_DATA), (void**)&connectData, &length);
         if (!NT_SUCCESS(status)) {
-            KdPrint(("MouseMirror: WdfRequestRetrieveInputBuffer failed %x\n", status));
+            DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfRequestRetrieveInputBuffer failed %x\n", status);
             break;
         }
 
@@ -190,7 +190,7 @@ VOID EvtIoDeviceControlInternalFilter(
     BOOLEAN ret = WdfRequestSend(Request, WdfDeviceGetIoTarget(device), &options);
     if (ret == FALSE) {
         status = WdfRequestGetStatus(Request);
-        KdPrint(("MouseMirror: WdfRequestSend failed with status: 0x%x\n", status));
+        DebugPrint(DPFLTR_ERROR_LEVEL, "MouseMirror: WdfRequestSend failed with status: 0x%x\n", status);
         WdfRequestComplete(Request, status);
     }
 }
