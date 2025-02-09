@@ -70,7 +70,7 @@ Arguments:
         deviceContext->PdoName.MaximumLength = (USHORT)bufferLength;
         deviceContext->PdoName.Length = (USHORT)bufferLength - sizeof(UNICODE_NULL);
 
-        KdPrint(("MouseMirror: PdoName: %wZ\n", deviceContext->PdoName)); // outputs "\Device\00000083
+        DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: PdoName: %wZ\n", deviceContext->PdoName); // outputs "\Device\00000083
     }
 
     {
@@ -107,7 +107,7 @@ VOID MouFilter_ServiceCallback(
     _In_ MOUSE_INPUT_DATA* InputDataEnd,
     _Inout_ ULONG* InputDataConsumed
 ) {
-    //KdPrint(("MouseMirror: MouFilter_ServiceCallback (packages=%u\n", InputDataEnd - InputDataStart));
+    //DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: MouFilter_ServiceCallback (packages=%u\n", InputDataEnd - InputDataStart);
 
     WDFDEVICE device = WdfWdmDeviceGetWdfDeviceHandle(DeviceObject);
     DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
@@ -143,7 +143,7 @@ VOID EvtIoDeviceControlInternalFilter(
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    //KdPrint(("MouseMirror: EvtIoDeviceControlInternal (IoControlCode=0x%x, InputBufferLength=%Iu)\n", IoControlCode, InputBufferLength));
+    //DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: EvtIoDeviceControlInternal (IoControlCode=0x%x, InputBufferLength=%Iu)\n", IoControlCode, InputBufferLength);
 
     WDFDEVICE device = WdfIoQueueGetDevice(Queue);
     DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(device);
@@ -152,7 +152,7 @@ VOID EvtIoDeviceControlInternalFilter(
     switch (IoControlCode) {
     case IOCTL_INTERNAL_MOUSE_CONNECT:
     {
-        KdPrint(("MouseMirror: IOCTL_INTERNAL_MOUSE_CONNECT\n"));
+        DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: IOCTL_INTERNAL_MOUSE_CONNECT\n");
 
         // Only allow one connection
         if (deviceContext->UpperConnectData.ClassService != NULL) {

@@ -7,7 +7,7 @@ NTSTATUS DriverEntry(
     _In_ PUNICODE_STRING RegistryPath
     )
 {
-    KdPrint(("MouseMirror: DriverEntry - WDF version built on %s %s\n", __DATE__, __TIME__));
+    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: DriverEntry - WDF version built on %s %s\n", __DATE__, __TIME__);
 
     WDF_DRIVER_CONFIG params = {};
     WDF_DRIVER_CONFIG_INIT(/*out*/&params, EvtDriverDeviceAdd);
@@ -36,5 +36,5 @@ VOID EvtDriverUnload(
     )
 {
     UNREFERENCED_PARAMETER(Driver);
-    KdPrint(("MouseMirror: DriverUnload.\n"));
+    DebugPrint(DPFLTR_INFO_LEVEL, "MouseMirror: DriverUnload.\n");
 }
