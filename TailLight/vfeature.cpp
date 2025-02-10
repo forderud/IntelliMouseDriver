@@ -38,6 +38,7 @@ NTSTATUS SetFeatureColor (
 --*/
 {
     DebugEnter();
+    UNREFERENCED_PARAMETER(Color);
 
     WDFIOTARGET_Wrap hidTarget;
     {
@@ -120,11 +121,9 @@ NTSTATUS SetFeatureColor (
     }
 
     {
-#if 0
         // Get TailLightReport from device.
-        TailLightReport report;
+        TailLightReport report(TailLightReport::Temperature);
 
-        // WARNING: Call succeeds but doesn't update the report due to a IntelliMouse HW issue
         WDF_MEMORY_DESCRIPTOR outputDesc = {};
         WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDesc, &report, sizeof(report));
 
@@ -138,30 +137,26 @@ NTSTATUS SetFeatureColor (
             return status;
         }
 
-        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: Previous color: Red=%u, Green=%u, Blue=%u\n", report.Red, report.Green, report.Blue); // always zero
-#endif
+        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: Temperature: %u\n", report.Value);
     }
-
     {
-        // Create a report to send to the device.
-        TailLightReport report;
-        report.SetColor(Color);
+        // Get TailLightReport from device.
+        TailLightReport report(TailLightReport::CycleCount);
 
-        // send TailLightReport to device
-        WDF_MEMORY_DESCRIPTOR inputDesc = {};
-        WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDesc, &report, sizeof(report));
+        WDF_MEMORY_DESCRIPTOR outputDesc = {};
+        WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDesc, &report, sizeof(report));
 
         NTSTATUS status = WdfIoTargetSendIoctlSynchronously(hidTarget, NULL,
-            IOCTL_HID_SET_FEATURE,
-            &inputDesc, // input
-            NULL, // output
+            IOCTL_HID_GET_FEATURE,
+            NULL, // input
+            &outputDesc, // output
             NULL, NULL);
         if (!NT_SUCCESS(status)) {
-            DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: IOCTL_HID_SET_FEATURE failed 0x%x\n", status);
+            DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: IOCTL_HID_GET_FEATURE failed 0x%x\n", status);
             return status;
         }
 
-        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: New color: Red=%u, Green=%u, Blue=%u\n", report.Red, report.Green, report.Blue);
+        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: CycleCount: %u\n", report.Value);
     }
 
     DebugExit();
@@ -187,7 +182,7 @@ Arguments:
 --*/
 {
     DebugEnter();
-    DEVICE_CONTEXT* deviceContext = WdfObjectGet_DEVICE_CONTEXT(Device);
+    UNREFERENCED_PARAMETER(Device);
 
     if (InputBufferLength != sizeof(TailLightReport)) {
         DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: SetFeatureFilter: Incorrect InputBufferLength\n");
@@ -208,26 +203,7 @@ Arguments:
     }
 
     // capture color before safety adjustments
-    UCHAR r = packet->Red;
-    UCHAR g = packet->Green;
-    UCHAR b = packet->Blue;
-    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: Red=%u, Green=%u, Blue=%u\n", r, g, b);
-
-    // Enforce safety limits (sets color to RED on failure)
-    if (!packet->SafetyCheck()) {
-        // log safety violation to Windows Event Viewer "System" log
-        WCHAR color_requested[16] = {};
-        swprintf_s(color_requested, L"%u,%u,%u", r, g, b);
-        WCHAR color_adjusted[16] = {};
-        swprintf_s(color_adjusted, L"%u,%u,%u", packet->Red, packet->Green, packet->Blue);
-
-        WriteToSystemLog(Device, TailLight_SAFETY, color_requested, color_adjusted);
-        status =  STATUS_CONTENT_BLOCKED;
-    }
-
-    // update last written color
-    TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(deviceContext->WmiInstance);
-    pInfo->TailLight = packet->GetColor();
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: ReportId=%u, Value=%u\n", packet->ReportId, packet->Value);
 
     DebugExitStatus(status);
     return status;
