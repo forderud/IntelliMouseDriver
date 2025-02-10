@@ -1,29 +1,27 @@
 #pragma once
 
 /** Tail-light feature report as observed in USBPcap/Wireshark. */
+#pragma pack(push, 1) // no padding
 struct TailLightReport {
-    TailLightReport() {
-    }
+    /** ReportID values taken from https://github.com/forderud/HidBattery/blob/master/src/HIDPowerDevice.h */
+    enum ReportType : UCHAR {
+        ManufactureDate = 0x09,
+        Temperature = 0x0A,
+        Voltage = 0x0B,
+        RemainingCapacity = 0x0c,
+        CycleCount = 0x14,
+    };
 
-    void SetColor(ULONG Color) {
-        Red = (Color) & 0xFF; // red;
-        Green = (Color >> 8) & 0xFF; // green
-        Blue = (Color >> 16) & 0xFF; // blue
-    }
+    TailLightReport() = default;
 
-    ULONG GetColor() const {
-        return (Blue << 16) | (Green << 8) | Red;
+    TailLightReport(ReportType type) {
+        ReportId = type;
     }
 
 #ifdef _KERNEL_MODE
     bool IsValid() const {
-        if (ReportId != 36) {// 0x24
+        if (ReportId != 0x0A) {
             DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: TailLightReport: Unsupported report id %d\n", ReportId);
-            return false;
-        }
-
-        if ((Unknown1 != 0xB2) || (Unknown2 != 0x03)) {
-            //DebugPrint(DPFLTR_ERROR_LEVEL, "TailLight: TailLightReport: Unknown control Code 0x%x 0x%x\n", Unknown1, Unknown2);
             return false;
         }
 
@@ -33,31 +31,13 @@ struct TailLightReport {
 
 #ifdef _KERNEL_MODE
     bool SafetyCheck() {
-        // RGB check
-        unsigned int color_sum = Red + Green + Blue;
-        if (color_sum > 640) {
-            DebugPrint(DPFLTR_WARNING_LEVEL, "TailLight: Color saturation %u exceeded 640 threshold. Reseting color to RED to signal error\n", color_sum);
-            Red = 255;
-            Green = 0;
-            Blue = 0;
-            return false;
-        }
-
         return true;
     }
 #endif
 
     //report ID of the collection to which the control request is sent
-    UCHAR   ReportId = 36; // (0x24)
-
-    // control codes (user-defined)
-    UCHAR   Unknown1 = 0xB2; // magic value
-    UCHAR   Unknown2 = 0x03; // magic value
-
-    UCHAR   Red = 0;
-    UCHAR   Green = 0;
-    UCHAR   Blue = 0;
-
-    UCHAR  padding[67] = {};
+    UCHAR  ReportId = 0;
+    USHORT Value = 0;
 };
-static_assert(sizeof(TailLightReport) == 73);
+#pragma pack(pop) // restore default settings
+static_assert(sizeof(TailLightReport) == 3);
