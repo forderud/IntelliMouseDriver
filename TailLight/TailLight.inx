@@ -41,7 +41,7 @@ CopyFiles = @TailLight.sys
 AddFilter = TailLight, , Filter_Inst
 
 [Filter_Inst]
-FilterPosition = Upper
+FilterPosition = Lower
 
 [TailLight_Inst.NT.Services]
 Include = HidBatt.inf
