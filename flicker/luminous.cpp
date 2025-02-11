@@ -16,8 +16,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     HRESULT hr = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&wbemLocator);
 
     if (hr != S_OK) {
-        _tprintf(TEXT("Error %lX: Could not create instance of IWbemLocator interface.\n"),
-            hr);
+        wprintf(L"Error %lX: Could not create instance of IWbemLocator interface.\n", hr);
         return nullptr;
     }
 
@@ -34,7 +33,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         &wbemServices); // Returned IWbemServices.
 
     if (hr != WBEM_S_NO_ERROR) {
-        _tprintf(TEXT("Error %lX: Failed to connect to namespace %s.\n"), hr, chNamespace);
+        wprintf(L"Error %lX: Failed to connect to namespace %s.\n", hr, chNamespace);
 
         return nullptr;
     }
@@ -52,7 +51,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         EOAC_NONE);               // capability flags
 
     if (hr != S_OK) {
-        _tprintf(TEXT("Error %lX: Failed to impersonate.\n"), hr);
+        wprintf(L"Error %lX: Failed to impersonate.\n", hr);
         return nullptr;
     }
 
@@ -71,7 +70,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _I
         &enumInst);          // pointer to class enumerator
 
     if (hr != WBEM_S_NO_ERROR || enumInst == NULL) {
-        _tprintf(TEXT("Error %lX: Failed to get a reference to instance enumerator.\n"), hr);
+        wprintf(L"Error %lX: Failed to get a reference to instance enumerator.\n", hr);
         return nullptr;
     }
 
@@ -99,20 +98,20 @@ Luminous::Luminous() {
     HRESULT hr = CoInitialize(NULL);
 
     if ( FAILED (hr)) {
-        _tprintf( TEXT("Error %lx: Failed to initialize COM library\n"), hr);
+        wprintf(L"Error %lx: Failed to initialize COM library\n", hr);
         throw std::runtime_error("CoInitialize failure");
 
     }
 
     m_wbemServices = ConnectToNamespace(NAMESPACE);
     if (!m_wbemServices) {
-        _tprintf( TEXT("Could not connect name.\n") );
+        wprintf(L"Could not connect name.\n");
         throw std::runtime_error("ConnectToNamespace failure");
     }
 
     m_wbemClassObject = GetInstanceReference(*m_wbemServices, CLASS_NAME);
      if ( !m_wbemClassObject) {
-        _tprintf( TEXT("Could not find the instance.\n") );
+        wprintf(L"Could not find the instance.\n");
         throw std::runtime_error("GetInstanceReference failure");
     }
 }
@@ -135,7 +134,7 @@ bool Luminous::Get(COLORREF* Color) {
     HRESULT hr = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
 
     if (hr != WBEM_S_NO_ERROR) {
-        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hr, PROPERTY_NAME);
+        wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     } 
     
@@ -159,7 +158,7 @@ bool Luminous::Set(COLORREF Color) {
                              NULL );
 
     if (hr != WBEM_S_NO_ERROR ) {
-        _tprintf( TEXT("Error %lX: Failed to read property value of %s.\n"), hr, PROPERTY_NAME);
+        wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     }
 
@@ -173,14 +172,14 @@ bool Luminous::Set(COLORREF Color) {
     hr = m_wbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
 
     if (hr != WBEM_S_NO_ERROR) {
-        _tprintf(TEXT("Error %lX: Failed to set property value of %s.\n"), hr, PROPERTY_NAME);
+        wprintf(L"Error %lX: Failed to set property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     }
 
     hr = m_wbemServices->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
 
     if (hr != WBEM_S_NO_ERROR) {
-        _tprintf( TEXT("Failed to save the instance, %s will not be updated.\n"), PROPERTY_NAME);
+        wprintf(L"Failed to save the instance, %s will not be updated.\n", PROPERTY_NAME);
         return false;
     }
     
