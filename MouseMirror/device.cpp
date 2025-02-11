@@ -1,5 +1,4 @@
 #include "driver.h"
-#include <Hidport.h>
 
 EVT_WDF_IO_QUEUE_IO_INTERNAL_DEVICE_CONTROL EvtIoDeviceControlInternalFilter;
 
