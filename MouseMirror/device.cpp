@@ -90,8 +90,8 @@ VOID MouFilter_ServiceCallback(
     }
 
     // UpperConnectData must be called at DISPATCH
-    (*(PSERVICE_CALLBACK_ROUTINE)deviceContext->UpperConnectData.ClassService)
-        (deviceContext->UpperConnectData.ClassDeviceObject, InputDataStart, InputDataEnd, InputDataConsumed);
+    auto serviceCb = (PSERVICE_CALLBACK_ROUTINE)deviceContext->UpperConnectData.ClassService;
+    serviceCb(deviceContext->UpperConnectData.ClassDeviceObject, InputDataStart, InputDataEnd, InputDataConsumed);
 }
 
 VOID EvtIoDeviceControlInternalFilter(
