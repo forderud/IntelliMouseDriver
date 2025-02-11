@@ -45,7 +45,6 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         RPC_C_IMP_LEVEL_IMPERSONATE,// impersonation level
         NULL,                     // identity of the client
         EOAC_NONE);               // capability flags
-
     if (hr != S_OK) {
         wprintf(L"Error %lX: Failed to impersonate.\n", hr);
         return nullptr;
