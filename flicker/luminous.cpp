@@ -14,7 +14,6 @@ const wchar_t PROPERTY_NAME[] = L"TailLight";
 CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
     CComPtr<IWbemLocator> wbemLocator;
     HRESULT hr = CoCreateInstance(CLSID_WbemLocator, NULL, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&wbemLocator);
-
     if (hr != S_OK) {
         wprintf(L"Error %lX: Could not create instance of IWbemLocator interface.\n", hr);
         return nullptr;
@@ -31,10 +30,8 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         NULL,   // authority (domain for NTLM)
         NULL,   // context
         &wbemServices); // Returned IWbemServices.
-
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to connect to namespace %s.\n", hr, chNamespace);
-
         return nullptr;
     }
 
@@ -60,7 +57,6 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
 
 // The function returns an interface pointer to the instance given its list-index.
 CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _In_ const wchar_t* lpClassName) {
-    // Get Instance Enumerator Interface.
     CComPtr<IEnumWbemClassObject> enumInst;
     HRESULT hr = pIWbemServices.CreateInstanceEnum(
         CComBSTR(lpClassName),  // Name of the root class.
@@ -68,7 +64,6 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _I
         WBEM_FLAG_FORWARD_ONLY, // Forward-only enumeration.
         NULL,                   // Context.
         &enumInst);          // pointer to class enumerator
-
     if (hr != WBEM_S_NO_ERROR || enumInst == NULL) {
         wprintf(L"Error %lX: Failed to get a reference to instance enumerator.\n", hr);
         return nullptr;
@@ -96,8 +91,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _I
 Luminous::Luminous() {
     // Initialize COM library. Must be done before invoking any other COM function.
     HRESULT hr = CoInitialize(NULL);
-
-    if ( FAILED (hr)) {
+    if (FAILED (hr)) {
         wprintf(L"Error %lx: Failed to initialize COM library\n", hr);
         throw std::runtime_error("CoInitialize failure");
 
@@ -132,7 +126,6 @@ bool Luminous::Get(COLORREF* Color) {
     CComVariant varPropVal;
     CIMTYPE  cimType = 0;
     HRESULT hr = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
-
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
@@ -150,13 +143,7 @@ bool Luminous::Set(COLORREF Color) {
     // Get the property value.
     CComVariant  varPropVal;
     CIMTYPE     cimType = 0;
-    HRESULT hr = m_wbemClassObject->Get(
-                             CComBSTR(PROPERTY_NAME),
-                             0,
-                             &varPropVal,
-                             &cimType,
-                             NULL );
-
+    HRESULT hr = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
     if (hr != WBEM_S_NO_ERROR ) {
         wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
@@ -170,14 +157,12 @@ bool Luminous::Set(COLORREF Color) {
 
     // Set the property value
     hr = m_wbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
-
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to set property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     }
 
     hr = m_wbemServices->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
-
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Failed to save the instance, %s will not be updated.\n", PROPERTY_NAME);
         return false;
