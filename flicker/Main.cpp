@@ -35,7 +35,7 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
     auto luminous = std::make_unique<Luminous>();
 
     if (luminous == NULL) {
-        _tprintf(_T("Problem creating Luminous\n"));
+        wprintf(L"Problem creating Luminous\n");
         return 0;
     }
 
@@ -43,9 +43,9 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
         if (lightSetting < 2) {
             bool ok = luminous->Set(ToColor(lightSetting));
             if (ok)
-                _tprintf(_T("Adjusted light to %x\n"), lightSetting);
+                wprintf(L"Adjusted light to %x\n", lightSetting);
             else
-                _tprintf(_T("Problem occured while adjusting light: %x\n"), GetLastError());
+                wprintf(L"Problem occured while adjusting light: %x\n", GetLastError());
             Sleep(1000); // 1 sec
         } else {
             int k=0;
@@ -54,7 +54,7 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
                 j = (i*9/100);
                 Sleep(i);
                 if(!luminous->Set(ToColor(k))) {
-                    _tprintf(_T("Set operation on Luminous failed.\n"));
+                    wprintf(L"Set operation on Luminous failed.\n");
                     return 0;
                 }
                 k=1-k;
@@ -63,14 +63,14 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
                 j = (i*9/100);
                 Sleep(i);
                 if(!luminous->Set(ToColor(k))) {
-                    _tprintf(_T("Set operation on Luminous failed.\n"));
+                    wprintf(L"Set operation on Luminous failed.\n");
                     return 0;
                 }
                 k=1-k;
             }
             if (k) {
                 if(!luminous->Set(ToColor(k)))
-                    _tprintf(_T("Set operation on Luminous failed.\n"));
+                    wprintf(L"Set operation on Luminous failed.\n");
             }
         }
     }
