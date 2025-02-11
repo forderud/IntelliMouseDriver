@@ -55,7 +55,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
 }
 
 // The function returns an interface pointer to the instance given its list-index.
-CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _In_ const wchar_t* lpClassName) {
+CComPtr<IWbemClassObject> GetFirstInstance(IWbemServices& pIWbemServices, const wchar_t* lpClassName) {
     CComPtr<IEnumWbemClassObject> enumInst;
     HRESULT hr = pIWbemServices.CreateInstanceEnum(
         CComBSTR(lpClassName),  // Name of the root class.
@@ -74,7 +74,7 @@ CComPtr<IWbemClassObject> GetInstanceReference(IWbemServices& pIWbemServices, _I
         ULONG count = 0;
         CComPtr<IWbemClassObject> inst;
         hr = enumInst->Next(
-            2000,      // two seconds timeout
+            1000,      // one second timeout
             1,         // return just one instance.
             &inst,    // pointer to instance.
             &count); // Number of instances returned.
@@ -102,7 +102,7 @@ Luminous::Luminous() {
         throw std::runtime_error("ConnectToNamespace failure");
     }
 
-    m_wbemClassObject = GetInstanceReference(*m_wbemServices, CLASS_NAME);
+    m_wbemClassObject = GetFirstInstance(*m_wbemServices, CLASS_NAME);
      if ( !m_wbemClassObject) {
         wprintf(L"Could not find the instance.\n");
         throw std::runtime_error("GetInstanceReference failure");
