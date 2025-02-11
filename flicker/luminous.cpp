@@ -126,7 +126,7 @@ bool Luminous::Get(COLORREF* Color) {
     CIMTYPE  type = 0;
     HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &type, NULL);
     if (hr != WBEM_S_NO_ERROR) {
-        wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
+        wprintf(L"ERROR %lX: Failed to read %s property value.\n", hr, PROPERTY_NAME);
         return false;
     } 
     assert(type == CIM_UINT32);
@@ -141,7 +141,7 @@ bool Luminous::Set(COLORREF Color) {
     CIMTYPE     type = 0;
     HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &type, NULL);
     if (hr != WBEM_S_NO_ERROR ) {
-        wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
+        wprintf(L"ERROR %lX: Failed to read %s property value.\n", hr, PROPERTY_NAME);
         return false;
     }
     assert(type == CIM_UINT32);
@@ -151,13 +151,13 @@ bool Luminous::Set(COLORREF Color) {
     // Set the property value
     hr = m_instance->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, type);
     if (hr != WBEM_S_NO_ERROR) {
-        wprintf(L"Error %lX: Failed to set property value of %s.\n", hr, PROPERTY_NAME);
+        wprintf(L"ERROR: %lX: Failed to set %s property value.\n", hr, PROPERTY_NAME);
         return false;
     }
 
     hr = m_wbem->PutInstance(m_instance, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
     if (hr != WBEM_S_NO_ERROR) {
-        wprintf(L"Failed to save the instance, %s will not be updated.\n", PROPERTY_NAME);
+        wprintf(L"ERROR: Failed to save the instance, %s will not be updated.\n", PROPERTY_NAME);
         return false;
     }
     
