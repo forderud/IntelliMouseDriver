@@ -3,12 +3,6 @@
 #include <Shlobj.h>
 #include <memory>
 
-#define USAGE  \
-_T("Usage: Flicker <-0 | -1 | -2>\n\
-    \t\t-0 turns off light \n\
-    \t\t-1 turns on light \n\
-    \t\t-2 flashes light ")
-
 
 COLORREF ToColor(bool val) {
     if (val)
@@ -31,7 +25,10 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
      }
 
     if  (!bAdjustLight) {
-        _tprintf(USAGE);
+        wprintf(L"Usage: Flicker <-0 | -1 | -2>\n"
+                L"     - 0 turns off light\n"
+                L"     - 1 turns on light\n"
+                L"     - 2 flashes light");
         exit(0);
     }
 
