@@ -1,7 +1,6 @@
 #include "luminous.hpp"
 #include <dontuse.h>
 #include <Shlobj.h>
-#include <memory>
 
 
 COLORREF ToColor(bool val) {
@@ -32,16 +31,11 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
         exit(0);
     }
 
-    auto luminous = std::make_unique<Luminous>();
-
-    if (luminous == NULL) {
-        wprintf(L"Problem creating Luminous\n");
-        return 0;
-    }
+    Luminous luminous;
 
     if (bAdjustLight) {
         if (lightSetting < 2) {
-            bool ok = luminous->Set(ToColor(lightSetting));
+            bool ok = luminous.Set(ToColor(lightSetting));
             if (ok)
                 wprintf(L"Adjusted light to %x\n", lightSetting);
             else
@@ -53,7 +47,7 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
             for(int i = 500; (i>0)&&(j>0); i-=j) {
                 j = (i*9/100);
                 Sleep(i);
-                if(!luminous->Set(ToColor(k))) {
+                if(!luminous.Set(ToColor(k))) {
                     wprintf(L"Set operation on Luminous failed.\n");
                     return 0;
                 }
@@ -62,21 +56,21 @@ int main(_In_ ULONG argc, _In_reads_(argc) PCHAR argv[]) {
             for(int i = 12; i<500; i+=j) {
                 j = (i*9/100);
                 Sleep(i);
-                if(!luminous->Set(ToColor(k))) {
+                if(!luminous.Set(ToColor(k))) {
                     wprintf(L"Set operation on Luminous failed.\n");
                     return 0;
                 }
                 k=1-k;
             }
             if (k) {
-                if(!luminous->Set(ToColor(k)))
+                if(!luminous.Set(ToColor(k)))
                     wprintf(L"Set operation on Luminous failed.\n");
             }
         }
     }
 
     // set color back to black
-    luminous->Set(RGB(0, 0, 0));
+    luminous.Set(RGB(0, 0, 0));
 
     return 0;
 }
