@@ -1,5 +1,6 @@
-#include "luminous.hpp"
+#include <cassert>
 #include <stdexcept>
+#include "luminous.hpp"
 
 #pragma comment(lib, "wbemuuid.lib")
 
@@ -122,16 +123,13 @@ bool Luminous::Get(COLORREF* Color) {
 
     // Get the property value.
     CComVariant varPropVal;
-    CIMTYPE  cimType = 0;
-    HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
+    CIMTYPE  type = 0;
+    HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &type, NULL);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     } 
-    
-    if ((varPropVal.vt != VT_I4) && (varPropVal.vt != VT_UI4)) {
-        return false; // variant type mismatch
-    }
+    assert(type == CIM_UINT32);
 
     *Color = varPropVal.uintVal;
     return true;
@@ -140,21 +138,18 @@ bool Luminous::Get(COLORREF* Color) {
 bool Luminous::Set(COLORREF Color) {
     // Get the property value.
     CComVariant  varPropVal;
-    CIMTYPE     cimType = 0;
-    HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
+    CIMTYPE     type = 0;
+    HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &type, NULL);
     if (hr != WBEM_S_NO_ERROR ) {
         wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     }
-
-    if ((varPropVal.vt != VT_I4) && (varPropVal.vt != VT_UI4)) {
-        return false; // variant type mismatch
-    }
+    assert(type == CIM_UINT32);
 
     varPropVal.uintVal = Color;
 
     // Set the property value
-    hr = m_instance->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
+    hr = m_instance->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, type);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to set property value of %s.\n", hr, PROPERTY_NAME);
         return false;
