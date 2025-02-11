@@ -28,7 +28,7 @@ CComPtr<IWbemServices> ConnectToNamespace(_In_ const wchar_t* chNamespace) {
         0L,     // securityFlags
         NULL,   // authority (domain for NTLM)
         NULL,   // context
-        &wbemServices); // Returned IWbemServices.
+        &wbemServices);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to connect to namespace %s.\n", hr, chNamespace);
         return nullptr;
