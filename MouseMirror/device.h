@@ -3,7 +3,6 @@
 
 /** Driver-specific struct for storing instance-specific data. */
 struct DEVICE_CONTEXT {
-    UNICODE_STRING PdoName;
     WDFWMIINSTANCE WmiInstance;
     CONNECT_DATA   UpperConnectData; // callback to intercept mouse packets
 };
