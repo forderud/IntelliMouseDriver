@@ -14,5 +14,5 @@ public:
 
 private:
     CComPtr<IWbemServices>    m_wbem;
-    CComPtr<IWbemClassObject> m_wbemClassObject;
+    CComPtr<IWbemClassObject> m_instance;
 };

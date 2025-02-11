@@ -102,16 +102,16 @@ Luminous::Luminous() {
         throw std::runtime_error("ConnectToNamespace failure");
     }
 
-    m_wbemClassObject = GetFirstInstance(*m_wbem, CLASS_NAME);
-     if ( !m_wbemClassObject) {
+    m_instance = GetFirstInstance(*m_wbem, CLASS_NAME);
+     if (!m_instance) {
         wprintf(L"Could not find the instance.\n");
         throw std::runtime_error("GetInstanceReference failure");
     }
 }
 
 Luminous::~Luminous() {
+    m_instance.Release();
     m_wbem.Release();
-    m_wbemClassObject.Release();
 
     CoUninitialize();
 }
@@ -124,7 +124,7 @@ bool Luminous::Get(COLORREF* Color) {
     // Get the property value.
     CComVariant varPropVal;
     CIMTYPE  cimType = 0;
-    HRESULT hr = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
+    HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
@@ -142,7 +142,7 @@ bool Luminous::Set(COLORREF Color) {
     // Get the property value.
     CComVariant  varPropVal;
     CIMTYPE     cimType = 0;
-    HRESULT hr = m_wbemClassObject->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
+    HRESULT hr = m_instance->Get(CComBSTR(PROPERTY_NAME), 0, &varPropVal, &cimType, NULL);
     if (hr != WBEM_S_NO_ERROR ) {
         wprintf(L"Error %lX: Failed to read property value of %s.\n", hr, PROPERTY_NAME);
         return false;
@@ -155,13 +155,13 @@ bool Luminous::Set(COLORREF Color) {
     varPropVal.uintVal = Color;
 
     // Set the property value
-    hr = m_wbemClassObject->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
+    hr = m_instance->Put(CComBSTR(PROPERTY_NAME), 0, &varPropVal, cimType);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Error %lX: Failed to set property value of %s.\n", hr, PROPERTY_NAME);
         return false;
     }
 
-    hr = m_wbem->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
+    hr = m_wbem->PutInstance(m_instance, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Failed to save the instance, %s will not be updated.\n", PROPERTY_NAME);
         return false;
