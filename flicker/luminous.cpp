@@ -96,13 +96,13 @@ Luminous::Luminous() {
 
     }
 
-    m_wbemServices = ConnectToNamespace(L"root\\WMI"); // namespace for hardware drivers (https://learn.microsoft.com/en-us/windows/win32/wmicoreprov/wdm-provider));
-    if (!m_wbemServices) {
-        wprintf(L"Could not connect name.\n");
+    m_wbem = ConnectToNamespace(L"root\\WMI"); // namespace for hardware drivers (https://learn.microsoft.com/en-us/windows/win32/wmicoreprov/wdm-provider));
+    if (!m_wbem) {
+        wprintf(L"Could not connect to namespace.\n");
         throw std::runtime_error("ConnectToNamespace failure");
     }
 
-    m_wbemClassObject = GetFirstInstance(*m_wbemServices, CLASS_NAME);
+    m_wbemClassObject = GetFirstInstance(*m_wbem, CLASS_NAME);
      if ( !m_wbemClassObject) {
         wprintf(L"Could not find the instance.\n");
         throw std::runtime_error("GetInstanceReference failure");
@@ -110,7 +110,7 @@ Luminous::Luminous() {
 }
 
 Luminous::~Luminous() {
-    m_wbemServices.Release();
+    m_wbem.Release();
     m_wbemClassObject.Release();
 
     CoUninitialize();
@@ -161,7 +161,7 @@ bool Luminous::Set(COLORREF Color) {
         return false;
     }
 
-    hr = m_wbemServices->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
+    hr = m_wbem->PutInstance(m_wbemClassObject, WBEM_FLAG_UPDATE_ONLY, NULL, NULL);
     if (hr != WBEM_S_NO_ERROR) {
         wprintf(L"Failed to save the instance, %s will not be updated.\n", PROPERTY_NAME);
         return false;
