@@ -7,15 +7,21 @@
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
 
-VOID EvtSetBlackTimer(_In_ WDFTIMER  Timer) {
+VOID PollInputReportsTimer(_In_ WDFTIMER  Timer) {
     DebugEnter();
 
     WDFDEVICE Device = (WDFDEVICE)WdfTimerGetParentObject(Timer);
-    NT_ASSERTMSG("EvtSetBlackTimer Device NULL\n", Device);
+    NT_ASSERTMSG("PollInputReports Device NULL\n", Device);
 
     NTSTATUS status = SetFeatureColor(Device, 0);
     if (!NT_SUCCESS(status)) {
-        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: EvtSetBlackTimer failure 0x%x"), status);
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: SetFeatureColor failure 0x%x"), status);
+        return;
+    }
+
+    status = PollInputReports(Device);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: PollInputReports failure NTSTATUS=0x%x"), status);
         return;
     }
 
@@ -25,7 +31,7 @@ VOID EvtSetBlackTimer(_In_ WDFTIMER  Timer) {
 NTSTATUS EvtSelfManagedIoInit(WDFDEVICE Device) {
     // Initialize tail-light to black to have control over HW state
     WDF_TIMER_CONFIG timerCfg = {};
-    WDF_TIMER_CONFIG_INIT(&timerCfg, EvtSetBlackTimer);
+    WDF_TIMER_CONFIG_INIT(&timerCfg, PollInputReportsTimer);
 
     WDF_OBJECT_ATTRIBUTES attribs = {};
     WDF_OBJECT_ATTRIBUTES_INIT(&attribs);
