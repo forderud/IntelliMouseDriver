@@ -87,9 +87,6 @@ Arguments:
 {
     UNREFERENCED_PARAMETER(Driver);
 
-    // Configure the device as a filter driver
-    WdfFdoInitSetFilter(DeviceInit);
-
     {
         // register PnP callbacks (must be done before WdfDeviceCreate)
         WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
@@ -97,6 +94,9 @@ Arguments:
         PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = EvtSelfManagedIoInit;
         WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &PnpPowerCallbacks);
     }
+
+    // configure buffered IO
+    WdfDeviceInitSetIoType(DeviceInit, WdfDeviceIoBuffered);
 
     WDFDEVICE Device = 0;
     {
