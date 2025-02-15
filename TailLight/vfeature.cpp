@@ -41,9 +41,8 @@ NTSTATUS SetFeatureColor (
     DebugEnter();
     UNREFERENCED_PARAMETER(Color);
 
-#if 0
     WDFIOTARGET localTarget = WdfDeviceGetIoTarget(Device);
-#endif
+
     WDFIOTARGET_Wrap pdoTarget;
     {
         // Use PDO for HID commands instead of local IO target to avoid 0xc0000061 (STATUS_PRIVILEGE_NOT_HELD) on IOCTL_HID_SET_FEATURE
@@ -73,7 +72,7 @@ NTSTATUS SetFeatureColor (
         WDF_MEMORY_DESCRIPTOR outputDesc = {};
         WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDesc, &collectionInfo, sizeof(HID_COLLECTION_INFORMATION));
 
-        NTSTATUS status = WdfIoTargetSendIoctlSynchronously(pdoTarget, NULL,
+        NTSTATUS status = WdfIoTargetSendIoctlSynchronously(localTarget, NULL,
             IOCTL_HID_GET_COLLECTION_INFORMATION,
             NULL, // input
             &outputDesc, // output
@@ -96,7 +95,7 @@ NTSTATUS SetFeatureColor (
         WDF_MEMORY_DESCRIPTOR outputDesc = {};
         WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDesc, static_cast<PHIDP_PREPARSED_DATA>(preparsedData), collectionInfo.DescriptorSize);
 
-        NTSTATUS status = WdfIoTargetSendIoctlSynchronously(pdoTarget, NULL,
+        NTSTATUS status = WdfIoTargetSendIoctlSynchronously(localTarget, NULL,
             IOCTL_HID_GET_COLLECTION_DESCRIPTOR, // same as HidD_GetPreparsedData in user-mode
             NULL, // input
             &outputDesc, // output
@@ -136,6 +135,9 @@ NTSTATUS SetFeatureColor (
             &outputDesc, // output
             NULL, NULL);
         if (!NT_SUCCESS(status)) {
+            // Fails with 0xc0000010 (STATUS_INVALID_DEVICE_REQUEST) if using PDO
+            // Fails with 0xC0000061 (STATUS_PRIVILEGE_NOT_HELD) if using the local target
+            // Fails with 0xc0000010 (STATUS_INVALID_DEVICE_REQUEST) if performing internal IOCL against either the local or PDO target
             DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: IOCTL_HID_GET_FEATURE failed 0x%x"), status);
             return status;
         }
