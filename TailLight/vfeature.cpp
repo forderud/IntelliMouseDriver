@@ -27,6 +27,68 @@ private:
 };
 
 
+
+void SetFeatureCompletion (_In_  WDFREQUEST Request, _In_  WDFIOTARGET Target, _In_  PWDF_REQUEST_COMPLETION_PARAMS Params, _In_  WDFCONTEXT Context) {
+    UNREFERENCED_PARAMETER(Target);
+    UNREFERENCED_PARAMETER(Context);
+
+    NTSTATUS status = Params->IoStatus.Status;
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("ERROR: TailLight: IOCTL_HID_SET_FEATURE failed status=0x%x"), status);
+        return;
+    }
+
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: IOCTL_HID_SET_FEATURE request completed\n");
+
+    WdfObjectDelete(Request);
+}
+
+NTSTATUS SubmitSetFeatureRequest(WDFIOTARGET Target, const TailLightReport & report) {
+    WDF_OBJECT_ATTRIBUTES reqAttr = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&reqAttr);
+    reqAttr.ParentObject = Target;
+    WDFREQUEST Request = 0;
+    NTSTATUS status = WdfRequestCreate(&reqAttr, Target, &Request);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestCreate error. 0x%x"), status);
+        return status;
+    }
+
+    WDF_OBJECT_ATTRIBUTES  memAttr = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&memAttr);
+    memAttr.ParentObject = Request;
+    WDFMEMORY inputMem = 0;
+    TailLightReport* inReport = nullptr;
+    status = WdfMemoryCreate(&memAttr, NonPagedPool, POOL_TAG, sizeof(TailLightReport), &inputMem, (void**)&inReport);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfMemoryCreate error. 0x%x"), status);
+        return status;
+    }
+    // copy report to memory object
+    memcpy(inReport, &report, sizeof(TailLightReport));
+
+    status = WdfIoTargetFormatRequestForIoctl(Target, Request, IOCTL_HID_SET_FEATURE, inputMem, NULL, nullptr, NULL);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfIoTargetFormatRequestForIoctl error. 0x%x"), status);
+        return status;
+    }
+
+    WdfRequestSetCompletionRoutine(Request, SetFeatureCompletion, nullptr);
+
+    if (WdfRequestSend(Request, Target, WDF_NO_SEND_OPTIONS) == FALSE) {
+        status = WdfRequestGetStatus(Request);
+        if (!NT_SUCCESS(status))
+            WdfObjectDelete(Request);
+
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestSend error. 0x%x"), status);
+        return status;
+    }
+
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: IOCTL_HID_SET_FEATURE request submitted\n");
+    return status;
+}
+
+
 NTSTATUS SetFeatureColor (
     _In_ WDFDEVICE Device,
     _In_ ULONG     Color
@@ -149,20 +211,10 @@ NTSTATUS SetFeatureColor (
         TailLightReport report;
         report.SetColor(Color);
 
-        // send TailLightReport to device
-        WDF_MEMORY_DESCRIPTOR inputDesc = {};
-        WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&inputDesc, &report, sizeof(report));
 
-        NTSTATUS status = WdfIoTargetSendIoctlSynchronously(pdoTarget, NULL,
-            IOCTL_HID_SET_FEATURE,
-            &inputDesc, // input
-            NULL, // output
-            NULL, NULL);
-        if (!NT_SUCCESS(status)) {
-            // IOCTL_HID_SET_FEATURE fails with 0xc0000061 (STATUS_PRIVILEGE_NOT_HELD) if using the local IO target (WdfDeviceGetIoTarget)
-            DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: IOCTL_HID_SET_FEATURE failed 0x%x"), status);
+        NTSTATUS status = SubmitSetFeatureRequest(pdoTarget, report);
+        if (!NT_SUCCESS(status))
             return status;
-        }
 
         report.Print("New color");
     }
