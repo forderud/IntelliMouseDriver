@@ -27,6 +27,79 @@ private:
 };
 
 
+void GetFeatureCompletion(_In_  WDFREQUEST Request, _In_  WDFIOTARGET Target, _In_  PWDF_REQUEST_COMPLETION_PARAMS Params, _In_  WDFCONTEXT Context) {
+    UNREFERENCED_PARAMETER(Target);
+    UNREFERENCED_PARAMETER(Context);
+
+    NTSTATUS status = Params->IoStatus.Status;
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("ERROR: TailLight: IoctlrequestCompletion status=0x%x"), status);
+        return;
+    }
+
+    size_t OutputLength = Params->Parameters.Ioctl.Output.Length;
+    if (OutputLength < sizeof(TailLightReport)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("ERROR: TailLight: IoctlrequestCompletion OutputLength=%u"), OutputLength);
+        return;
+    }
+    //DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: IoctlrequestCompletion OutputLength=%u\n", OutputLength);
+
+    WDFMEMORY outMem = Params->Parameters.Ioctl.Output.Buffer;
+
+    size_t memSize = 0;
+    auto* report = (TailLightReport*)WdfMemoryGetBuffer(outMem, &memSize);
+
+
+    report->Print("IOCTL_HID_GET_FEATURE completed with");
+
+    //WdfRequestComplete(Request, status); // seem to trigger a crash
+    WdfObjectDelete(Request);
+}
+
+NTSTATUS SubmitGetFeatureRequest(WDFIOTARGET Target, BYTE reportId) {
+    WDF_OBJECT_ATTRIBUTES reqAttr = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&reqAttr);
+    reqAttr.ParentObject = Target;
+    WDFREQUEST Request = 0;
+    NTSTATUS status = WdfRequestCreate(&reqAttr, Target, &Request);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestCreate error. 0x%x"), status);
+        return status;
+    }
+
+    WDF_OBJECT_ATTRIBUTES  memAttr = {};
+    WDF_OBJECT_ATTRIBUTES_INIT(&memAttr);
+    memAttr.ParentObject = Request;
+    WDFMEMORY outputMem = 0;
+    TailLightReport* report = nullptr;
+    status = WdfMemoryCreate(&memAttr, NonPagedPool, POOL_TAG, sizeof(TailLightReport), &outputMem, (void**)&report);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfMemoryCreate error. 0x%x"), status);
+        return status;
+    }
+    report->ReportId = reportId;
+
+    status = WdfIoTargetFormatRequestForIoctl(Target, Request, IOCTL_HID_GET_FEATURE, nullptr, NULL, outputMem, NULL);
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfIoTargetFormatRequestForIoctl error. 0x%x"), status);
+        return status;
+    }
+
+    WdfRequestSetCompletionRoutine(Request, GetFeatureCompletion, nullptr);
+
+    if (WdfRequestSend(Request, Target, WDF_NO_SEND_OPTIONS) == FALSE) {
+        status = WdfRequestGetStatus(Request);
+        if (!NT_SUCCESS(status))
+            WdfObjectDelete(Request);
+
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestSend error. 0x%x"), status);
+        return status;
+    }
+
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: IOCTL_HID_GET_FEATURE request submitted\n");
+    return status;
+}
+
 
 void SetFeatureCompletion (_In_  WDFREQUEST Request, _In_  WDFIOTARGET Target, _In_  PWDF_REQUEST_COMPLETION_PARAMS Params, _In_  WDFCONTEXT Context) {
     UNREFERENCED_PARAMETER(Target);
@@ -184,26 +257,11 @@ NTSTATUS SetFeatureColor (
     }
 
     {
-#if 0
         // Get TailLightReport from device.
         TailLightReport report;
-
-        // WARNING: Call succeeds but doesn't update the report due to a IntelliMouse HW issue
-        WDF_MEMORY_DESCRIPTOR outputDesc = {};
-        WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&outputDesc, &report, sizeof(report));
-
-        NTSTATUS status = WdfIoTargetSendIoctlSynchronously(pdoTarget, NULL,
-            IOCTL_HID_GET_FEATURE,
-            NULL, // input
-            &outputDesc, // output
-            NULL, NULL);
-        if (!NT_SUCCESS(status)) {
-            DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: IOCTL_HID_GET_FEATURE failed 0x%x"), status);
+        NTSTATUS status = SubmitGetFeatureRequest(pdoTarget, report.ReportId);
+        if (!NT_SUCCESS(status))
             return status;
-        }
-
-        report.Print("Previous color");
-#endif
     }
 
     {
