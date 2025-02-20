@@ -91,7 +91,6 @@
     </DriverSign>
     <PostBuildEvent>
       <Command>copy *.bat $(PackageDir)
-copy ..\TailLight.ps1 $(OutDir)
 copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -104,7 +103,6 @@ copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </DriverSign>
     <PostBuildEvent>
       <Command>copy *.bat $(PackageDir)
-copy ..\TailLight.ps1 $(OutDir)
 copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -117,7 +115,6 @@ copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </DriverSign>
     <PostBuildEvent>
       <Command>copy *.bat $(PackageDir)
-copy ..\TailLight.ps1 $(OutDir)
 copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -130,7 +127,6 @@ copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </DriverSign>
     <PostBuildEvent>
       <Command>copy *.bat $(PackageDir)
-copy ..\TailLight.ps1 $(OutDir)
 copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
