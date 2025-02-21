@@ -7,7 +7,7 @@ static void UpdateBatteryInformation(BATTERY_INFORMATION& bi, SharedState& state
 
     auto lock = state.Lock();
     bi.CycleCount = state.CycleCount;
-    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: UpdateBatteryInformation CycleCount before=%u, after=%u\n", CycleCountBefore, bi.CycleCount);
+    DebugPrint(DPFLTR_INFO_LEVEL, "EvtIoDeviceControlBattFilterCompletion: UpdateBatteryInformation CycleCount before=%u, after=%u\n", CycleCountBefore, bi.CycleCount);
 }
 
 static void UpdateBatteryTemperature(ULONG& temp, SharedState& state) {
@@ -16,7 +16,7 @@ static void UpdateBatteryTemperature(ULONG& temp, SharedState& state) {
     auto lock = state.Lock();
     temp = state.Temperature;
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: UpdateBatteryTemperature before=%u, after=%u\n", TempBefore, temp);
+    DebugPrint(DPFLTR_INFO_LEVEL, "EvtIoDeviceControlBattFilterCompletion: UpdateBatteryTemperature before=%u, after=%u\n", TempBefore, temp);
 }
 
 
@@ -24,26 +24,41 @@ void EvtIoDeviceControlBattFilterCompletion (_In_  WDFREQUEST Request, _In_  WDF
     UNREFERENCED_PARAMETER(Target);
     UNREFERENCED_PARAMETER(Context);
 
+    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: EvtIoDeviceControlBattFilterCompletion\n");
+
     NTSTATUS status = Params->IoStatus.Status;
     if (!NT_SUCCESS(status)) {
-        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("ERROR: TailLight: IoctlrequestCompletion status=0x%x"), status);
+        // status 0xc0000002 (STATUS_NOT_IMPLEMENTED)
+        // status 0xc00002b6 (STATUS_DEVICE_REMOVED)
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("ERROR: EvtIoDeviceControlBattFilterCompletion: status=0x%x\n"), status);
         WdfRequestComplete(Request, status);
+        //WdfRequestCompleteWithInformation(Request, status, Params->IoStatus.Information);
+        return;
+    }
+
+    if (Params->Type != WdfRequestTypeDeviceControl) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("ERROR: EvtIoDeviceControlBattFilterCompletion: Invalid request type 0x%x\n"), Params->Type);
+        WdfRequestComplete(Request, status);
+        //WdfRequestCompleteWithInformation(Request, status, Params->IoStatus.Information);
         return;
     }
 
     const ULONG IoControlCode = Params->Parameters.Ioctl.IoControlCode;
     if (IoControlCode != IOCTL_BATTERY_QUERY_INFORMATION) {
+        DebugPrint(DPFLTR_INFO_LEVEL,"EvtIoDeviceControlBattFilterCompletion: Unsupported IOCTL code 0x%x\n", IoControlCode);
         WdfRequestComplete(Request, status);
+        //WdfRequestCompleteWithInformation(Request, status, Params->IoStatus.Information);
         return;
     }
 
+    DebugPrint(DPFLTR_INFO_LEVEL, "EvtIoDeviceControlBattFilterCompletion: Modifying IOCTL_BATTERY_QUERY_INFORMATION...\n");
     WDFDEVICE Device = WdfIoTargetGetDevice(Target);
     DEVICE_CONTEXT* context = WdfObjectGet_DEVICE_CONTEXT(Device);
 
     WDFMEMORY OutputMem = Params->Parameters.Ioctl.Output.Buffer;
     size_t OutputLength = Params->Parameters.Ioctl.Output.Length;
 
-    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: IOCTL_BATTERY_QUERY_INFORMATION (OutputBufferLength=%Iu)\n", OutputLength);
+    DebugPrint(DPFLTR_INFO_LEVEL, "EvtIoDeviceControlBattFilterCompletion: IOCTL_BATTERY_QUERY_INFORMATION (OutputBufferLength=%Iu)\n", OutputLength);
     size_t inputSize = 0;
     auto* inputPtr = (BATTERY_QUERY_INFORMATION*)WdfMemoryGetBuffer(Params->Parameters.Ioctl.Input.Buffer, &inputSize);
 
@@ -63,6 +78,7 @@ void EvtIoDeviceControlBattFilterCompletion (_In_  WDFREQUEST Request, _In_  WDF
     }
 
     WdfRequestComplete(Request, status);
+    //WdfRequestCompleteWithInformation(Request, status, Params->IoStatus.Information);
 }
 
 VOID EvtIoDeviceControlBattFilter(
@@ -94,8 +110,11 @@ Arguments:
 
     WDFDEVICE Device = WdfIoQueueGetDevice(Queue);
 
-#if 0
-    WdfRequestSetCompletionRoutine(Request, EvtIoDeviceControlBattFilterCompletion, nullptr);
+#if 1
+    // Copy the content of the current stack location of the underlying IRP to the next one. 
+    WdfRequestFormatRequestUsingCurrentType(Request);
+    // set completion callback
+    WdfRequestSetCompletionRoutine(Request, EvtIoDeviceControlBattFilterCompletion, WDF_NO_CONTEXT);
 
     // Forward the request down the driver stack
     BOOLEAN ret = WdfRequestSend(Request, WdfDeviceGetIoTarget(Device), WDF_NO_SEND_OPTIONS);
