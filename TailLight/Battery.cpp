@@ -90,14 +90,20 @@ Arguments:
     IoControlCode - The driver or system defined IOCTL associated with the request
 --*/
 {
-    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: EvtIoDeviceControl (IoControlCode=0x%x, InputBufferLength=%Iu, OutputBufferLength=%Iu)\n", IoControlCode, InputBufferLength, OutputBufferLength);
+    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: EvtIoDeviceControlBattFilter (IoControlCode=0x%x, InputBufferLength=%Iu, OutputBufferLength=%Iu)\n", IoControlCode, InputBufferLength, OutputBufferLength);
 
     WDFDEVICE Device = WdfIoQueueGetDevice(Queue);
 
+#if 0
     WdfRequestSetCompletionRoutine(Request, EvtIoDeviceControlBattFilterCompletion, nullptr);
 
     // Forward the request down the driver stack
     BOOLEAN ret = WdfRequestSend(Request, WdfDeviceGetIoTarget(Device), WDF_NO_SEND_OPTIONS);
+#else
+    WDF_REQUEST_SEND_OPTIONS options = {};
+    WDF_REQUEST_SEND_OPTIONS_INIT(&options, WDF_REQUEST_SEND_OPTION_SEND_AND_FORGET);
+    BOOLEAN ret = WdfRequestSend(Request, WdfDeviceGetIoTarget(Device), &options);
+#endif
     if (ret == FALSE) {
         NTSTATUS status = WdfRequestGetStatus(Request);
         DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("HidBattExt: WdfRequestSend failed with status: 0x%x"), status);
