@@ -2,14 +2,22 @@
 #include "driver.h"
 
 
-static void UpdateBatteryInformation(BATTERY_INFORMATION& bi) {
-    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: UpdateBatteryInformation DesignedCapacity=%u, CycleCount=%u\n", bi.DesignedCapacity, bi.CycleCount);
+static void UpdateBatteryInformation(BATTERY_INFORMATION& bi, SharedState& state) {
+    auto CycleCountBefore = bi.CycleCount;
+
+    auto lock = state.Lock();
+    bi.CycleCount = state.CycleCount;
+    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: UpdateBatteryInformation CycleCount before=%u, after=%u\n", CycleCountBefore, bi.CycleCount);
 }
 
-static void UpdateBatteryTemperature(ULONG& temp) {
-    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: UpdateBatteryTemperature Temperature=%u\n", temp);
-}
+static void UpdateBatteryTemperature(ULONG& temp, SharedState& state) {
+    auto TempBefore = temp;
 
+    auto lock = state.Lock();
+    temp = state.Temperature;
+
+    DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: UpdateBatteryTemperature before=%u, after=%u\n", TempBefore, temp);
+}
 
 
 void EvtIoDeviceControlBattFilterCompletion (_In_  WDFREQUEST Request, _In_  WDFIOTARGET Target, _In_  PWDF_REQUEST_COMPLETION_PARAMS Params, _In_  WDFCONTEXT Context) {
@@ -29,6 +37,9 @@ void EvtIoDeviceControlBattFilterCompletion (_In_  WDFREQUEST Request, _In_  WDF
         return;
     }
 
+    WDFDEVICE Device = WdfIoTargetGetDevice(Target);
+    DEVICE_CONTEXT* context = WdfObjectGet_DEVICE_CONTEXT(Device);
+
     WDFMEMORY OutputMem = Params->Parameters.Ioctl.Output.Buffer;
     size_t OutputLength = Params->Parameters.Ioctl.Output.Length;
 
@@ -41,13 +52,13 @@ void EvtIoDeviceControlBattFilterCompletion (_In_  WDFREQUEST Request, _In_  WDF
             size_t memSize = 0;
             auto* report = (BATTERY_INFORMATION*)WdfMemoryGetBuffer(OutputMem, &memSize);
             NT_ASSERTMSG("BatteryInformation buffer size mismatch", memSize == OutputLength);
-            UpdateBatteryInformation(*report);
+            UpdateBatteryInformation(*report, *context->Interface.State);
         }
         if ((inputPtr->InformationLevel == BatteryTemperature) && (OutputLength == sizeof(ULONG))) {
             size_t memSize = 0;
             auto* temp = (ULONG*)WdfMemoryGetBuffer(OutputMem, &memSize);
             NT_ASSERTMSG("BatteryTemperature buffer size mismatch", memSize == OutputLength);
-            UpdateBatteryTemperature(*temp);
+            UpdateBatteryTemperature(*temp, *context->Interface.State);
         }
     }
 
