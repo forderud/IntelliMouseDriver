@@ -2,10 +2,11 @@
 
 
 bool SetTailLightRGB(hid::Device& dev, COLORREF color) {
+    wprintf(L"Updating TailLight color:\n");
     {
         // query current color (doesn't work)
         auto report = dev.GetReport<TailLightReport>(HidP_Feature);
-        wprintf(L"Current color: %u\n", report.GetColor());
+        report.Print(L"  Previous color (doesn't work):");
     }
 
     {
@@ -18,7 +19,8 @@ bool SetTailLightRGB(hid::Device& dev, COLORREF color) {
             assert(ok);
             return false;
         }
-        wprintf(L"SUCCESS: Tail-light color updated.\n");
+        wprintf(L"SUCCESS:\n");
+        report.Print(L"  New color:");
     }
 
     return true;
