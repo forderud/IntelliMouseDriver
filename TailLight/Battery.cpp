@@ -114,7 +114,24 @@ Arguments:
 
     WDFDEVICE Device = WdfIoQueueGetDevice(Queue);
 
-#if 1
+    if (IoControlCode == IOCTL_BATTERY_QUERY_INFORMATION) {
+        if (InputBufferLength == sizeof(BATTERY_QUERY_INFORMATION)) {
+            BATTERY_QUERY_INFORMATION* bqi = nullptr;
+            size_t inLen = 0;
+            NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(BATTERY_QUERY_INFORMATION), (void**)&bqi, &inLen);
+            NT_ASSERTMSG("WdfRequestRetrieveInputBuffer failed", NT_SUCCESS(status));
+            if (bqi->InformationLevel == BatteryInformation) {
+                BATTERY_INFORMATION* bi = nullptr;
+                size_t outLen = 0;
+                status = WdfRequestRetrieveOutputBuffer(Request, sizeof(BATTERY_QUERY_INFORMATION), (void**)&bi, &outLen);
+                NT_ASSERTMSG("WdfRequestRetrieveOutputBuffer failed", NT_SUCCESS(status));
+                DebugPrint(DPFLTR_INFO_LEVEL, "HidBattExt: DesignedCapacity=%u\n", bi->DesignedCapacity);                
+            }
+        }
+    }
+
+
+#if 0
     // Copy the content of the current stack location of the underlying IRP to the next one. 
     WdfRequestFormatRequestUsingCurrentType(Request);
     // set completion callback
