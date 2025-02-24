@@ -47,7 +47,6 @@
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>31</KMDF_VERSION_MINOR>
-    <KMDF_MINIMUM_VERSION_REQUIRED>31</KMDF_MINIMUM_VERSION_REQUIRED>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -58,7 +57,6 @@
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>31</KMDF_VERSION_MINOR>
-    <KMDF_MINIMUM_VERSION_REQUIRED>31</KMDF_MINIMUM_VERSION_REQUIRED>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -69,7 +67,6 @@
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>31</KMDF_VERSION_MINOR>
-    <KMDF_MINIMUM_VERSION_REQUIRED>31</KMDF_MINIMUM_VERSION_REQUIRED>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -80,7 +77,6 @@
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>31</KMDF_VERSION_MINOR>
-    <KMDF_MINIMUM_VERSION_REQUIRED>31</KMDF_MINIMUM_VERSION_REQUIRED>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
