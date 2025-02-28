@@ -197,32 +197,32 @@ Arguments:
         return STATUS_BUFFER_TOO_SMALL;
     }
 
-    TailLightReport* packet = nullptr;
-    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(TailLightReport), (void**)&packet, NULL);
-    if (!NT_SUCCESS(status) || !packet) {
-        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestRetrieveInputBuffer failed 0x%x, packet=0x%p"), status, packet);
+    TailLightReport* report = nullptr;
+    NTSTATUS status = WdfRequestRetrieveInputBuffer(Request, sizeof(TailLightReport), (void**)&report, NULL);
+    if (!NT_SUCCESS(status) || !report) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestRetrieveInputBuffer failed 0x%x, report=0x%p"), status, report);
         return status;
     }
 
-    if (!packet->IsValid()) {
+    if (!report->IsValid()) {
         // If collection ID is not for control collection then handle
         // this request just as you would for a regular collection.
         return STATUS_INVALID_PARAMETER;
     }
 
     // capture color before safety adjustments
-    UCHAR r = packet->Red;
-    UCHAR g = packet->Green;
-    UCHAR b = packet->Blue;
-    packet->Print("Requested color");
+    UCHAR r = report->Red;
+    UCHAR g = report->Green;
+    UCHAR b = report->Blue;
+    report->Print("Requested color");
 
     // Enforce safety limits (sets color to RED on failure)
-    if (!packet->SafetyCheck()) {
+    if (!report->SafetyCheck()) {
         // log safety violation to Windows Event Viewer "System" log
         WCHAR color_requested[16] = {};
         swprintf_s(color_requested, L"%u,%u,%u", r, g, b);
         WCHAR color_adjusted[16] = {};
-        swprintf_s(color_adjusted, L"%u,%u,%u", packet->Red, packet->Green, packet->Blue);
+        swprintf_s(color_adjusted, L"%u,%u,%u", report->Red, report->Green, report->Blue);
 
         WriteToSystemLog(Device, TailLight_SAFETY, color_requested, color_adjusted);
         status =  STATUS_CONTENT_BLOCKED;
@@ -230,7 +230,7 @@ Arguments:
 
     // update last written color
     TailLightDeviceInformation* pInfo = WdfObjectGet_TailLightDeviceInformation(deviceContext->WmiInstance);
-    pInfo->TailLight = packet->GetColor();
+    pInfo->TailLight = report->GetColor();
 
     DebugExitStatus(status);
     return status;
