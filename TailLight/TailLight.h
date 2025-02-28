@@ -45,7 +45,7 @@ struct TailLightReport {
     }
 
     void Print(const char* prefix) const {
-        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight %s: Red=%u, Green=%u, Blue=%u\n", prefix, Red, Green, Blue);
+        DebugPrint(DPFLTR_INFO_LEVEL, "TailLight %s: Red=%u, Green=%u, Blue=%u\n", prefix, Red, Green, Blue); prefix;
 
     }
 #else
