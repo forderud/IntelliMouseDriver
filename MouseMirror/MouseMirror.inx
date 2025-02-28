@@ -24,12 +24,12 @@ MouseMirror.sys = 1
 
 ; Manufacturer Section
 [Manufacturer]
-"IntelliMouse sample project"=IntelliMouseSampleMfg,NT$ARCH$
+"IntelliMouse sample project"=IntelliMouseSampleMfg,NT$ARCH$.10.0...16299
 
 ; Models section
 ; Change the "HID\VID_vvvv&PID_dddd" hardware ID to "HID_DEVICE_SYSTEM_MOUSE" to make the driver compatible with all non-composite mice
 ; https://learn.microsoft.com/en-us/windows-hardware/drivers/install/inf-models-section
-[IntelliMouseSampleMfg.NT$ARCH$]
+[IntelliMouseSampleMfg.NT$ARCH$.10.0...16299]
 "IntelliMouse MouseMirror filter driver"=MouseMirror_Inst, HID\VID_045E&PID_082A&MI_00&Col01
 
 ; Install Section

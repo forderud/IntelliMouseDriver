@@ -21,11 +21,11 @@ TailLight.sys = 1
 
 ; Manufacturer Section
 [Manufacturer]
-%Provider%=IntelliMouseSampleMfg,NT$ARCH$
+%Provider%=IntelliMouseSampleMfg,NT$ARCH$.10.0...16299
 
 ; Models section
 ; https://learn.microsoft.com/en-us/windows-hardware/drivers/install/inf-models-section
-[IntelliMouseSampleMfg.NT$ARCH$]
+[IntelliMouseSampleMfg.NT$ARCH$.10.0...16299]
 "Pro IntelliMouse TailLight"=TailLight_Inst, HID\VID_045E&PID_082A&MI_01&Col05
 
 ; Install Section
