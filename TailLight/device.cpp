@@ -1,4 +1,4 @@
-#include "driver.hpp"
+#include "device.hpp"
 #include <Hidport.h>
 #include "vfeature.hpp"
 #include "wmi.hpp"

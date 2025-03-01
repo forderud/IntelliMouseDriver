@@ -1,4 +1,4 @@
-#include "driver.hpp"
+#include "device.hpp"
 #include <hidpddi.h> // for PHIDP_PREPARSED_DATA
 #include <hidclass.h> // for HID_COLLECTION_INFORMATION
 #include "eventlog.hpp"

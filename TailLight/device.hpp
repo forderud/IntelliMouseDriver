@@ -1,4 +1,6 @@
 #pragma once
+#include "driver.hpp"
+
 
 /** Driver-specific struct for storing instance-specific data. */
 struct DEVICE_CONTEXT {
