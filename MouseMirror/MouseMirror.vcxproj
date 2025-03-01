@@ -149,7 +149,7 @@ copy $(OutDir)\MouseMirror.cer $(PackageDir)</Command>
   <ItemGroup>
     <ClInclude Include="device.hpp" />
     <ClInclude Include="driver.hpp" />
-    <ClInclude Include="wmi.h" />
+    <ClInclude Include="wmi.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

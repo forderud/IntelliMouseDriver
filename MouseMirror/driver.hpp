@@ -9,7 +9,7 @@
 #include "MouseMirrormof.h"
 
 #include "device.hpp"
-#include "wmi.h"
+#include "wmi.hpp"
 
 #if DBG
 /** Print debugger message.
