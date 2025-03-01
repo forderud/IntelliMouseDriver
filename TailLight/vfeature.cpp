@@ -3,6 +3,7 @@
 #include <hidclass.h> // for HID_COLLECTION_INFORMATION
 #include "eventlog.hpp"
 #include "CppAllocator.hpp"
+#include "vfeature.hpp"
 
 
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */

@@ -1,5 +1,6 @@
 #include "driver.hpp"
 #include <stdlib.h>
+#include "vfeature.hpp"
 
 
 /** Fake self-test that gradually dims the tail-light color. */

@@ -1,5 +1,7 @@
 #include "driver.hpp"
 #include <Hidport.h>
+#include "vfeature.hpp"
+
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
