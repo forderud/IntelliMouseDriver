@@ -1,7 +1,7 @@
 #include "driver.hpp"
 #include <hidpddi.h> // for PHIDP_PREPARSED_DATA
 #include <hidclass.h> // for HID_COLLECTION_INFORMATION
-#include "eventlog.h"
+#include "eventlog.hpp"
 #include "CppAllocator.hpp"
 
 

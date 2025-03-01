@@ -152,10 +152,10 @@ copy $(OutDir)\TailLight.cer $(PackageDir)</Command>
     <ClInclude Include="CppAllocator.hpp" />
     <ClInclude Include="device.hpp" />
     <ClInclude Include="driver.hpp" />
-    <ClInclude Include="eventlog.h" />
+    <ClInclude Include="eventlog.hpp" />
     <ClInclude Include="TailLight.h" />
-    <ClInclude Include="vfeature.h" />
-    <ClInclude Include="wmi.h" />
+    <ClInclude Include="vfeature.hpp" />
+    <ClInclude Include="wmi.hpp" />
   </ItemGroup>
   <ItemGroup>
     <MessageCompile Include="messages.mc" />

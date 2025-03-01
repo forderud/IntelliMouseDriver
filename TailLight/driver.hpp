@@ -45,8 +45,8 @@ inline void DebugPrint(ULONG Level, PCSTR Format, ...) {
 #endif
 
 #include "device.hpp"
-#include "wmi.h"
-#include "vfeature.h"
+#include "wmi.hpp"
+#include "vfeature.hpp"
 
 
 /** Memory allocation tag name (for debugging leaks). */
