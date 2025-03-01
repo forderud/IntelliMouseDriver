@@ -45,7 +45,6 @@ inline void DebugPrint(ULONG Level, PCSTR Format, ...) {
 #endif
 
 #include "device.hpp"
-#include "wmi.hpp"
 
 /** Memory allocation tag name (for debugging leaks). */
 static constexpr ULONG POOL_TAG = 'iLaT'; // displayed as "TaLi"
