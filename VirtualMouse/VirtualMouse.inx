@@ -1,6 +1,8 @@
-;
+;/*++
 ; VirtualMouse.inf
 ;
+; Require Windows 10 build 16299 (1709) or newer due to DefaultDestDir=13 usage.
+;--*/
 
 [Version]
 Signature="$WINDOWS NT$"

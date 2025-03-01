@@ -2,6 +2,7 @@
 ; MouseMirror driver setup information (INF) file.
 ;
 ; Require Windows 10 version 1903 or newer
+; Require Windows 10 build 16299 (1709) or newer due to DefaultDestDir=13 usage.
 ;--*/
 
 [Version]

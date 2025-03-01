@@ -1,6 +1,9 @@
 ;/*++
 ; Pro Intellimouse TailLight filter driver setup information (INF) file.
+;
+; Require Windows 10 build 16299 or newer due to DefaultDestDir=13 usage.
 ;--*/
+
 [Version]
 Signature="$Windows NT$"
 Class=HIDClass
