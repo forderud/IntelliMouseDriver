@@ -1,7 +1,6 @@
 #pragma once
 #include <ntddk.h>
 #include <wdf.h>
-#include "trace.h"
 
 
 /** C++ spin lock RAII wrapper. */
