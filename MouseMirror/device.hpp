@@ -1,5 +1,7 @@
 #pragma once
 #include <kbdmou.h>
+#include "driver.hpp"
+
 
 /** Driver-specific struct for storing instance-specific data. */
 struct DEVICE_CONTEXT {
