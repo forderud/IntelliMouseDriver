@@ -1,7 +1,7 @@
 ;/*++
 ; MouseMirror driver setup information (INF) file.
 ;
-; Require Windows 10 version 1903 or newer
+; Require Windows 10 build 18362 (1903) or newer due to AddFilter usage.
 ; Require Windows 10 build 16299 (1709) or newer due to DefaultDestDir=13 usage.
 ;--*/
 
@@ -25,12 +25,12 @@ MouseMirror.sys = 1
 
 ; Manufacturer Section
 [Manufacturer]
-"IntelliMouse sample project"=IntelliMouseSampleMfg,NT$ARCH$.10.0...16299
+"IntelliMouse sample project"=IntelliMouseSampleMfg,NT$ARCH$.10.0...18362
 
 ; Models section
 ; Change the "HID\VID_vvvv&PID_dddd" hardware ID to "HID_DEVICE_SYSTEM_MOUSE" to make the driver compatible with all non-composite mice
 ; https://learn.microsoft.com/en-us/windows-hardware/drivers/install/inf-models-section
-[IntelliMouseSampleMfg.NT$ARCH$.10.0...16299]
+[IntelliMouseSampleMfg.NT$ARCH$.10.0...18362]
 "IntelliMouse MouseMirror filter driver"=MouseMirror_Inst, HID\VID_045E&PID_082A&MI_00&Col01
 
 ; Install Section

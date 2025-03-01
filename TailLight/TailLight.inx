@@ -1,6 +1,7 @@
 ;/*++
 ; Pro Intellimouse TailLight filter driver setup information (INF) file.
 ;
+; Require Windows 10 build 18362 (1903) or newer due to AddFilter usage.
 ; Require Windows 10 build 16299 (1709) or newer due to DefaultDestDir=13 usage.
 ;--*/
 
@@ -24,11 +25,11 @@ TailLight.sys = 1
 
 ; Manufacturer Section
 [Manufacturer]
-%Provider%=IntelliMouseSampleMfg,NT$ARCH$.10.0...16299
+%Provider%=IntelliMouseSampleMfg,NT$ARCH$.10.0...18362
 
 ; Models section
 ; https://learn.microsoft.com/en-us/windows-hardware/drivers/install/inf-models-section
-[IntelliMouseSampleMfg.NT$ARCH$.10.0...16299]
+[IntelliMouseSampleMfg.NT$ARCH$.10.0...18362]
 "Pro IntelliMouse TailLight"=TailLight_Inst, HID\VID_045E&PID_082A&MI_01&Col05
 
 ; Install Section
