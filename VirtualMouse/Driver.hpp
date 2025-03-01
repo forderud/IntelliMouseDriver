@@ -11,7 +11,7 @@
 #include <initguid.h>
 #include <usbioctl.h>
 
-#include "device.h"
+#include "device.hpp"
 #include "trace.h"
 
 

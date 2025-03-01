@@ -5,7 +5,7 @@ Abstract:
    This file contains the device entry points and callbacks.
 --*/
 
-#include "driver.h"
+#include "driver.hpp"
 #include "usbdevice.h"
 #include "Misc.h"
 #include "USBCom.h"

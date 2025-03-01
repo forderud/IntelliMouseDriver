@@ -25,8 +25,8 @@
     <ClCompile Include="usbdevice.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Device.h" />
-    <ClInclude Include="Driver.h" />
+    <ClInclude Include="Device.hpp" />
+    <ClInclude Include="Driver.hpp" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Trace.h" />

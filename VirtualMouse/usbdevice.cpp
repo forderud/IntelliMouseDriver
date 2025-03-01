@@ -1,6 +1,6 @@
 #include "Misc.h"
-#include "Driver.h"
-#include "Device.h"
+#include "Driver.hpp"
+#include "Device.hpp"
 #include "usbdevice.h"
 #include "USBCom.h"
 #include "ucx/1.4/ucxobjects.h"
