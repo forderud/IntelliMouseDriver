@@ -7,7 +7,6 @@ Abstract:
 
 #include "driver.hpp"
 #include "usbdevice.hpp"
-#include "Misc.h"
 #include "USBCom.hpp"
 
 #include <ntstrsafe.h>

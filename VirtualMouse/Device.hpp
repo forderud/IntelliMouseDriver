@@ -3,7 +3,6 @@
 --*/
 #pragma once
 #include "public.h"
-#include "Misc.h"
 
 
 #define USB_HOST_DEVINTERFACE_REF_STRING L"GUID_DEVINTERFACE_USB_HOST_CONTROLLER"

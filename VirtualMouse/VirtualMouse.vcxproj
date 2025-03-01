@@ -27,7 +27,7 @@
   <ItemGroup>
     <ClInclude Include="Device.hpp" />
     <ClInclude Include="Driver.hpp" />
-    <ClInclude Include="Misc.h" />
+    <ClInclude Include="Misc.hpp" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="USBCom.hpp" />
