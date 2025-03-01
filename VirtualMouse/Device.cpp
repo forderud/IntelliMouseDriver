@@ -6,9 +6,9 @@ Abstract:
 --*/
 
 #include "driver.hpp"
-#include "usbdevice.h"
+#include "usbdevice.hpp"
 #include "Misc.h"
-#include "USBCom.h"
+#include "USBCom.hpp"
 
 #include <ntstrsafe.h>
 #include "device.tmh"

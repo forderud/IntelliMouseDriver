@@ -1,8 +1,8 @@
 #include "Misc.h"
 #include "Driver.hpp"
 #include "Device.hpp"
-#include "usbdevice.h"
-#include "USBCom.h"
+#include "usbdevice.hpp"
+#include "USBCom.hpp"
 #include "ucx/1.4/ucxobjects.h"
 #include <Hidport.h>
 #include "usbdevice.tmh"

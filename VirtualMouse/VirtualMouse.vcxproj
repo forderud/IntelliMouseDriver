@@ -30,8 +30,8 @@
     <ClInclude Include="Misc.h" />
     <ClInclude Include="Public.h" />
     <ClInclude Include="Trace.h" />
-    <ClInclude Include="USBCom.h" />
-    <ClInclude Include="usbdevice.h" />
+    <ClInclude Include="USBCom.hpp" />
+    <ClInclude Include="usbdevice.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{474444F1-1628-494C-BBDB-1BD7096B1118}</ProjectGuid>
