@@ -44,7 +44,7 @@ inline void DebugPrint(ULONG Level, PCSTR Format, ...) {
 #define DebugExitStatus(_status_)
 #endif
 
-#include "device.h"
+#include "device.hpp"
 #include "wmi.h"
 #include "vfeature.h"
 

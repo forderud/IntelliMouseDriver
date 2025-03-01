@@ -1,4 +1,4 @@
-#include "driver.h"
+#include "driver.hpp"
 #include <Hidport.h>
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
