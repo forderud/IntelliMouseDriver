@@ -2,7 +2,6 @@
     This file contains the device definitions.
 --*/
 #pragma once
-
 #include "public.h"
 #include "Misc.h"
 
