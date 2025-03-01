@@ -1,4 +1,5 @@
 #include "driver.hpp"
+#include "wmi.hpp"
 
 
 // Register our GUID and Datablock generated from the MouseMirror.mof file.
