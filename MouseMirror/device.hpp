@@ -1,6 +1,6 @@
 #pragma once
-#include <kbdmou.h>
 #include "driver.hpp"
+#include <kbdmou.h>
 
 
 /** Driver-specific struct for storing instance-specific data. */
