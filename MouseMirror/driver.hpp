@@ -9,8 +9,6 @@
 // Generated WMI class definitions (from MouseMirror.mof)
 #include "MouseMirrormof.h"
 
-#include "device.hpp"
-
 #if DBG
 /** Print debugger message.
 Arguments:
