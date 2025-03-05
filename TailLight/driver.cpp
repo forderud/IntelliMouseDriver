@@ -7,7 +7,7 @@ NTSTATUS DriverEntry(
     _In_ PUNICODE_STRING RegistryPath
     )
 {
-    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: DriverEntry - WDF version built on %s %s\n", __DATE__, __TIME__);
+    DebugPrint(DPFLTR_INFO_LEVEL, "TailLight: DriverEntry\n");
 
     WDF_DRIVER_CONFIG params = {};
     WDF_DRIVER_CONFIG_INIT(/*out*/&params, EvtDriverDeviceAdd);
