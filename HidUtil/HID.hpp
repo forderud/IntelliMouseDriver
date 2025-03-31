@@ -270,10 +270,10 @@ public:
     }
 
     /** Get list of all usages set to ON. */
-    std::vector<USAGE> GetUsages(HIDP_REPORT_TYPE type, USAGE usagePage, const std::vector<BYTE>& report) const {
-        ULONG usage_count = HidP_MaxUsageListLength(type, usagePage, m_preparsed);
+    std::vector<USAGE> GetUsages(HIDP_REPORT_TYPE type, HIDP_BUTTON_CAPS caps, const std::vector<BYTE>& report) const {
+        ULONG usage_count = HidP_MaxUsageListLength(type, caps.UsagePage, m_preparsed);
         std::vector<USAGE> usages(usage_count, 0);
-        NTSTATUS res = HidP_GetUsages(type, usagePage, NULL, usages.data(), &usage_count, m_preparsed, (CHAR*)report.data(), (ULONG)report.size());
+        NTSTATUS res = HidP_GetUsages(type, caps.UsagePage, caps.LinkCollection, usages.data(), &usage_count, m_preparsed, (CHAR*)report.data(), (ULONG)report.size());
         assert(res == HIDP_STATUS_SUCCESS);
         usages.resize(usage_count);
         return usages;
