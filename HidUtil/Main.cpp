@@ -60,6 +60,13 @@ int main(int argc, char* argv[]) {
             // Pro IntelliMouse detected
             SetTailLightRGB(dev, RGB(red, green, blue));
         }
+
+        for (;;) {
+            // ReadFile will fail if HidBatt driver is already continuously obtaining HID input reports
+            std::vector<BYTE> inBuf = dev.Read();
+            if (inBuf.size())
+                wprintf(L"INPUT report %u\n", inBuf[0]);
+        }
     }
 
     return 0;
