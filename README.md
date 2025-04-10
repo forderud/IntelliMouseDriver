@@ -11,8 +11,7 @@ Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and 
 
 ### Prerequisites
 * Optional: Microsoft [Pro IntelliMouse](https://www.microsoft.com/en/accessories/products/mice/microsoft-pro-intellimouse) for testing of the `TailLight` driver.
-* Separate computer for driver testing. Needed to avoid crashing or corrupting your main computer in case of driver problems.
-* USB 3 A/A crossover cable or network connection for for kernel debugging.
+* Separate computer or VirtualBox VM for driver testing. Needed to avoid crashing or corrupting your main computer in case of driver problems.
 
 **Getting started information for [driver testing](../../wiki/Driver-testing)**.
 
