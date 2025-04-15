@@ -26,12 +26,12 @@ Filter drivers for Microsoft Pro IntelliMouse that implements safety checks and 
         <tr>
             <!-- <td></td> -->
             <!-- <td></td> -->
-            <td><tt>HidUtil</tt>`: Command-line utility for querying and communicating with HID devices.</td>
+            <td><tt>HidUtil</tt>: Command-line utility for querying and communicating with HID devices.</td>
         </tr>
         <tr>
             <!-- <td></td> -->
             <!-- <td></td> -->
-            <td><tt>flicker</tt>`: Application for causing the mouse to blink by sending commands through the WMI interface.</td>
+            <td><tt>flicker</tt>: Application for causing the mouse to blink by sending commands through the WMI interface.</td>
         </tr>
         <tr>
             <td><b>VirtualMouse</b></td>
