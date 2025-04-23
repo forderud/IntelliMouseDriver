@@ -22,6 +22,87 @@ private:
 };
 
 
+/** Alternaive WdfIoTargetSendIoctlSynchronously implementation that can also propagates FileObject permissions after formatting the request. */
+NTSTATUS SendIoctlSynchronouslyExt(WDFIOTARGET target, WDFREQUEST request, ULONG IoctlCode,
+                                   WDF_MEMORY_DESCRIPTOR* inputDesc, WDF_MEMORY_DESCRIPTOR* outputDesc,
+                                   WDF_REQUEST_SEND_OPTIONS* RequestOptions, ULONG_PTR* BytesReturned) {
+    WDFMEMORY input = 0;
+    if (inputDesc) {
+        ASSERTMSG("Input buffer type not WdfMemoryDescriptorTypeBuffer", inputDesc->Type == WdfMemoryDescriptorTypeBuffer);
+        void* inputPtr = inputDesc->u.BufferType.Buffer;
+        size_t inputLength = inputDesc->u.BufferType.Length;
+
+        NTSTATUS status = WdfMemoryCreatePreallocated(WDF_NO_OBJECT_ATTRIBUTES, inputPtr, inputLength, &input);
+        if (!NT_SUCCESS(status)) {
+            DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfMemoryCreatePreallocated input failed 0x%x"), status);
+            return status;
+        }
+    }
+
+    WDFMEMORY output = 0;
+    if (outputDesc) {
+        ASSERTMSG("Output buffer type not WdfMemoryDescriptorTypeBuffer", outputDesc->Type == WdfMemoryDescriptorTypeBuffer);
+        void* outputPtr = outputDesc->u.BufferType.Buffer;
+        size_t outputLength = outputDesc->u.BufferType.Length;
+
+        NTSTATUS status = WdfMemoryCreatePreallocated(WDF_NO_OBJECT_ATTRIBUTES, outputPtr, outputLength, &output);
+        if (!NT_SUCCESS(status)) {
+            DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfMemoryCreatePreallocated output failed 0x%x"), status);
+            return status;
+        }
+    }
+
+    bool requestCreated = false;
+    if (!request) {
+        NTSTATUS status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, target, &request);
+        if (!NT_SUCCESS(status))
+            DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestCreate failed 0x%x"), status);
+        ASSERTMSG("TailLight: WdfRequestCreate failed", NT_SUCCESS(status));
+        requestCreated = true;
+    }
+
+    NTSTATUS status = WdfIoTargetFormatRequestForIoctl(target, request, IoctlCode, input, NULL, output, NULL);
+    if (!NT_SUCCESS(status))
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfIoTargetFormatRequestForIoctl failed 0x%x"), status);
+    ASSERTMSG("TailLight: WdfIoTargetFormatRequestForIoctl failed", NT_SUCCESS(status));
+
+#if 0
+    // WIP: propagate FileObject permissions
+    IRP* irp = WdfRequestWdmGetIrp(request);
+    ASSERTMSG("TailLight: FileObject null", IoGetCurrentIrpStackLocation(irp)->FileObject);
+    IoGetNextIrpStackLocation(irp)->FileObject = IoGetCurrentIrpStackLocation(irp)->FileObject;
+#endif
+
+    if (RequestOptions) {
+        RequestOptions->Flags |= WDF_REQUEST_SEND_OPTION_SYNCHRONOUS; // force synchronous behavior
+
+        status = WdfRequestSend(request, target, RequestOptions);
+    } else {
+        WDF_REQUEST_SEND_OPTIONS defaultOptions{};
+        WDF_REQUEST_SEND_OPTIONS_INIT(&defaultOptions, WDF_REQUEST_SEND_OPTION_SYNCHRONOUS);
+
+        status = WdfRequestSend(request, target, &defaultOptions);
+    }
+    if (!NT_SUCCESS(status)) {
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: IOCTL_HID_GET_COLLECTION_INFORMATION failed 0x%x"), status);
+        return status;
+    }
+
+    if (BytesReturned)
+        *BytesReturned = WdfRequestGetInformation(request);
+
+    // delete objects in reverse order
+    if (requestCreated)
+        WdfObjectDelete(request);
+    if (output)
+        WdfObjectDelete(output);
+    if (input)
+        WdfObjectDelete(input);
+
+    return STATUS_SUCCESS;
+}
+
+
 NTSTATUS SetFeatureColor (
     _In_ WDFDEVICE Device,
     _In_ ULONG     Color
