@@ -73,18 +73,20 @@ NTSTATUS SendIoctlSynchronouslyExt(WDFIOTARGET target, WDFREQUEST request, ULONG
     IoGetNextIrpStackLocation(irp)->FileObject = IoGetCurrentIrpStackLocation(irp)->FileObject;
 #endif
 
+    BOOLEAN ret = FALSE;
     if (RequestOptions) {
         RequestOptions->Flags |= WDF_REQUEST_SEND_OPTION_SYNCHRONOUS; // force synchronous behavior
 
-        status = WdfRequestSend(request, target, RequestOptions);
+        ret = WdfRequestSend(request, target, RequestOptions);
     } else {
         WDF_REQUEST_SEND_OPTIONS defaultOptions{};
         WDF_REQUEST_SEND_OPTIONS_INIT(&defaultOptions, WDF_REQUEST_SEND_OPTION_SYNCHRONOUS);
 
-        status = WdfRequestSend(request, target, &defaultOptions);
+        ret = WdfRequestSend(request, target, &defaultOptions);
     }
-    if (!NT_SUCCESS(status)) {
-        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: IOCTL_HID_GET_COLLECTION_INFORMATION failed 0x%x"), status);
+    if (ret == FALSE) {
+        status = WdfRequestGetStatus(request);
+        DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestSend failed 0x%x"), status);
         return status;
     }
 
