@@ -94,6 +94,7 @@ NTSTATUS SendIoctlSynchronouslyExt(WDFIOTARGET target, WDFREQUEST request, ULONG
         *BytesReturned = WdfRequestGetInformation(request);
 
     // delete objects in reverse order
+    // TODO: Protect against leaks on early returns
     if (requestCreated)
         WdfObjectDelete(request);
     if (output)
