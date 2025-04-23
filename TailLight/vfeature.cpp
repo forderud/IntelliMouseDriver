@@ -9,22 +9,16 @@
 /** RAII wrapper of PHIDP_PREPARSED_DATA. */
 class PHIDP_PREPARSED_DATA_Wrap {
 public:
-    PHIDP_PREPARSED_DATA_Wrap(size_t size) {
-        m_ptr = new BYTE[size];
-    }
-    ~PHIDP_PREPARSED_DATA_Wrap() {
-        if (m_ptr) {
-            delete[] m_ptr;
-            m_ptr = nullptr;
-        }
+    PHIDP_PREPARSED_DATA_Wrap(ULONG size) : m_buf(size) {
     }
 
-    operator PHIDP_PREPARSED_DATA () const {
-        return (PHIDP_PREPARSED_DATA)m_ptr;
+    operator PHIDP_PREPARSED_DATA () {
+        BYTE* ptr = m_buf;
+        return (PHIDP_PREPARSED_DATA)ptr;
     }
 
 private:
-    BYTE* m_ptr = nullptr;
+    RamArray<BYTE> m_buf;
 };
 
 
