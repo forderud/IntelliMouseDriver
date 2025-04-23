@@ -55,15 +55,17 @@ NTSTATUS SendIoctlSynchronouslyExt(WDFIOTARGET target, WDFREQUEST request, ULONG
     bool requestCreated = false;
     if (!request) {
         NTSTATUS status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, target, &request);
-        if (!NT_SUCCESS(status))
+        if (!NT_SUCCESS(status)) {
             DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestCreate failed 0x%x"), status);
+        }
         ASSERTMSG("TailLight: WdfRequestCreate failed", NT_SUCCESS(status));
         requestCreated = true;
     }
 
     NTSTATUS status = WdfIoTargetFormatRequestForIoctl(target, request, IoctlCode, input, NULL, output, NULL);
-    if (!NT_SUCCESS(status))
+    if (!NT_SUCCESS(status)) {
         DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfIoTargetFormatRequestForIoctl failed 0x%x"), status);
+    }
     ASSERTMSG("TailLight: WdfIoTargetFormatRequestForIoctl failed", NT_SUCCESS(status));
 
 #if 0
