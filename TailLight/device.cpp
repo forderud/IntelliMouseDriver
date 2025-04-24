@@ -7,12 +7,6 @@
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL EvtIoDeviceControlFilter;
 
 
-NTSTATUS EvtSelfManagedIoInit(WDFDEVICE Device) {
-    UNREFERENCED_PARAMETER(Device);
-    return STATUS_SUCCESS;
-}
-
-
 UNICODE_STRING GetTargetPropertyString(WDFIOTARGET target, DEVICE_REGISTRY_PROPERTY DeviceProperty) {
     WDF_OBJECT_ATTRIBUTES attributes = {};
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
@@ -110,14 +104,6 @@ Arguments:
 
     // Configure the device as a filter driver
     WdfFdoInitSetFilter(DeviceInit);
-
-    {
-        // register PnP callbacks (must be done before WdfDeviceCreate)
-        WDF_PNPPOWER_EVENT_CALLBACKS PnpPowerCallbacks;
-        WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&PnpPowerCallbacks);
-        PnpPowerCallbacks.EvtDeviceSelfManagedIoInit = EvtSelfManagedIoInit;
-        WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &PnpPowerCallbacks);
-    }
 
     WDFDEVICE Device = 0;
     {
