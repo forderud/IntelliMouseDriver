@@ -86,8 +86,8 @@ NTSTATUS SendIoctlSynchronouslyExt(WDFIOTARGET target, WDFREQUEST request, ULONG
 
         ret = WdfRequestSend(request, target, &defaultOptions);
     }
-    if (ret == FALSE) {
-        status = WdfRequestGetStatus(request);
+    status = WdfRequestGetStatus(request); // can check status immediately when WDF_REQUEST_SEND_OPTION_SYNCHRONOUS is set
+    if ((ret == FALSE) || !NT_SUCCESS(status)) {
         DebugPrint(DPFLTR_ERROR_LEVEL, DML_ERR("TailLight: WdfRequestSend failed 0x%x"), status);
         return status;
     }
